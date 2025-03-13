@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'views/MainScreen.dart';
+//import 'views/MainScreen.dart';
+import 'views/sign_in.dart';
 
 void main() {
   runApp(MyApp());
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: '/',
       routes: {
-        '/': (context) => const MainScreen(),
+        '/': (context) => const LoginScreen(),
 
       },
     );
