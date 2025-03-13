@@ -1,3 +1,4 @@
+import 'package:dart_g12/views/SeeallScreen.dart';
 import 'package:flutter/material.dart';
 import '../views/pagina1.dart';
 import '../views/pagina2.dart';
@@ -16,6 +17,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _pages = [
     const Pagina1(),
     const Pagina2(),
+    const SeeallScreen(),
   ];
 
   @override
