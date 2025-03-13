@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 const users = {
   'dribbble@gmail.com': '12345',
   'hunter@gmail.com': 'hunter',
+  'lauracarretero12@gmail.com': '04052004',
 };
 
 class LoginScreen extends StatelessWidget {
@@ -28,7 +29,9 @@ class LoginScreen extends StatelessWidget {
 
   Future<String?> _signupUser(SignupData data) {
     debugPrint('Signup Name: \${data.name}, Password: \${data.password}');
-    return Future.delayed(loginTime).then((_) => null);
+    return Future.delayed(loginTime).then((_) {
+      return null;
+    });
   }
 
   Future<String?> _recoverPassword(String name) {
@@ -44,74 +47,117 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/andes.jpg'),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: Center(
-          child: Container(
-            padding: EdgeInsets.all(16.0),
-            margin: EdgeInsets.symmetric(horizontal: 60.0, vertical: 50.0),
-            decoration: BoxDecoration(
-              color: Color(0xFF050F2C),
-              borderRadius: BorderRadius.circular(20.0),
+      body: Stack(
+        children: [
+          // Imagen de fondo
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/andes.jpg', // Ruta de la imagen
+              fit: BoxFit.cover,
             ),
-            
+          ),
+          // Pantalla de login
+          
+          Center(
             child: FlutterLogin(
-              onLogin: _authUser,
-              onSignup: _signupUser,
-              onRecoverPassword: _recoverPassword,
-              title: 'Find Your Way Around',
-              
               theme: LoginTheme(
-                primaryColor:Color(0xFF050F2C),
-                accentColor: Colors.white,
-                errorColor: Colors.red,
-                titleStyle: TextStyle(
-                  color: Color(0xFFEA1D5D),
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+                pageColorLight: Colors.transparent,
+                pageColorDark: Colors.transparent,
+                errorColor: Color(0xFFEA1D5D),
+                titleStyle: const TextStyle(
+                  color: Colors.greenAccent,
+                  fontFamily: 'Quicksand',
+                  letterSpacing: 4,
                 ),
-                bodyStyle: TextStyle(
+                bodyStyle: const TextStyle(
+                  fontStyle: FontStyle.normal,
                   color: Colors.white,
-                  fontSize: 14,
                 ),
-                textFieldStyle: TextStyle(
+                textFieldStyle: const TextStyle(
+                  color: Color(0xFFEA1D5D),
+                  shadows: [Shadow(color: Colors.yellow, blurRadius: 2)],
+                ),
+                buttonStyle: const TextStyle(
+                  fontWeight: FontWeight.w800,
                   color: Colors.white,
                 ),
                 cardTheme: CardTheme(
-                  color: Colors.transparent,
-                  elevation: 0,
+                  color: Color(0xFF050F2C),
+                  elevation: 5,
+                  shape: ContinuousRectangleBorder(
+                      borderRadius: BorderRadius.circular(40)),
                 ),
                 inputTheme: InputDecorationTheme(
                   filled: true,
                   fillColor: Colors.white,
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  labelStyle: TextStyle(color: Color(0xFF6C757D)),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                    borderRadius: BorderRadius.circular(10.0),
+                  contentPadding: EdgeInsets.zero,
+                  errorStyle: const TextStyle(
+                    backgroundColor: Color(0xFFEA1D5D),
+                    color: Colors.white,
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFEA1D5D), width: 2),
-                    borderRadius: BorderRadius.circular(10.0),
+                  labelStyle: const TextStyle(fontSize: 12),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Color(0xFF2E1F54), width: 2),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Color(0xFFEA1D5D), width: 5),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  errorBorder: UnderlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Color(0xFFEA1D5D), width: 7),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  focusedErrorBorder: UnderlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Color(0xFFEA1D5D), width: 8),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  disabledBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey, width: 5),
+                    borderRadius: BorderRadius.zero,
                   ),
                 ),
                 buttonTheme: LoginButtonTheme(
-                  splashColor: Color(0xFFEA1D5D),
+                  splashColor: Colors.purple,
                   backgroundColor: Color(0xFFEA1D5D),
-                  highlightColor: Colors.white,
-                  elevation: 5.0,
-                  highlightElevation: 3.0,
+                  highlightColor: Colors.lightGreen,
+                  elevation: 9.0,
+                  highlightElevation: 6.0,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                 ),
               ),
+              headerWidget: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    "Find Your Way Around",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFEA1D5D),
+                    ),
+                  ),
+                  const SizedBox(height: 5), // Espaciado opcional
+                  const Text(
+                    "Your interactive campus map at a glance",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
+              onLogin: _authUser,
+              onSignup: _signupUser,
+              onRecoverPassword: _recoverPassword,
               loginProviders: <LoginProvider>[
                 LoginProvider(
                   icon: FontAwesomeIcons.google,
@@ -153,13 +199,13 @@ class LoginScreen extends StatelessWidget {
                 ),
               ],
               onSubmitAnimationCompleted: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => const MainScreen()),
-                );
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  builder: (context) => const MainScreen(),
+                ));
               },
             ),
-          ),
-        ),
+          )
+        ],
       ),
     );
   }
