@@ -57,7 +57,55 @@ class LoginScreen extends StatelessWidget {
             ),
           ),
           // Pantalla de login
-          
+          // Encabezado flotante detrás del login
+          Positioned(
+            top: MediaQuery.of(context).size.height * 0.2, // Baja o sube la posición
+            left: MediaQuery.of(context).size.width * 0.12,
+            right: MediaQuery.of(context).size.width * 0.12,
+            child: Container(
+              width: MediaQuery.of(context).size.width *
+                  0.8, // Mismo ancho que login
+              height: MediaQuery.of(context).size.height *
+                  0.25, // Más alto para extenderlo
+              padding: const EdgeInsets.symmetric(
+                  vertical: 20, horizontal: 30), // Espaciado
+              decoration: BoxDecoration(
+                color: const Color(0xFF050F2C), // Mismo color que el login
+                borderRadius: BorderRadius.circular(20), // Misma curvatura
+                boxShadow: [
+                  BoxShadow(
+                    blurRadius: 5,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment
+                    .start, // Texto alineado arriba a la izquierda
+                children: const [
+                  Text(
+                    "Find Your Way Around",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFEA1D5D),
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                  Text(
+                    "Your interactive campus map at a glance",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Spacer(), // Empuja todo el contenido hacia arriba
+                ],
+              ),
+            ),
+          ),
+
           Center(
             child: FlutterLogin(
               theme: LoginTheme(
@@ -97,23 +145,19 @@ class LoginScreen extends StatelessWidget {
                   ),
                   labelStyle: const TextStyle(fontSize: 12),
                   enabledBorder: UnderlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Color(0xFF2E1F54), width: 2),
+                    borderSide: BorderSide(color: Color(0xFF2E1F54), width: 2),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   focusedBorder: UnderlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Color(0xFFEA1D5D), width: 5),
+                    borderSide: BorderSide(color: Color(0xFFEA1D5D), width: 5),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   errorBorder: UnderlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Color(0xFFEA1D5D), width: 7),
+                    borderSide: BorderSide(color: Color(0xFFEA1D5D), width: 7),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   focusedErrorBorder: UnderlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Color(0xFFEA1D5D), width: 8),
+                    borderSide: BorderSide(color: Color(0xFFEA1D5D), width: 8),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   disabledBorder: const UnderlineInputBorder(
@@ -131,29 +175,6 @@ class LoginScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-              ),
-              headerWidget: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    "Find Your Way Around",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFFEA1D5D),
-                    ),
-                  ),
-                  const SizedBox(height: 5), // Espaciado opcional
-                  const Text(
-                    "Your interactive campus map at a glance",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                ],
               ),
               onLogin: _authUser,
               onSignup: _signupUser,
