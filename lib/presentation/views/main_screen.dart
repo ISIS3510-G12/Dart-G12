@@ -1,8 +1,8 @@
-import 'package:dart_g12/views/profile_page.dart';
+import 'package:dart_g12/presentation/views/profile_page.dart';
 import 'package:flutter/material.dart';
 import '../views/pagina1.dart';
 import '../views/pagina2.dart';
-import '../widgets/BottomNavbar.dart';
+import '../widgets/bottom_navbar.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});

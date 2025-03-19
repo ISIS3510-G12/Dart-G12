@@ -3,11 +3,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../widgets/costum_app_bar.dart';
-import '../widgets/dropdown_container.dart';
 import '../widgets/distance_card.dart';
-import '../widgets/steps_card.dart';
+import '../widgets/dropdown_container.dart';
 import '../widgets/location_dropdown.dart';
 import '../widgets/map_view.dart';
+import '../widgets/steps_card.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});

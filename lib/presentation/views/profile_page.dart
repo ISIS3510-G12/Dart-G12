@@ -1,6 +1,6 @@
-import 'package:dart_g12/widgets/OvalsPainter.dart';
 import 'package:flutter/material.dart';
 import 'package:dart_g12/data/services/auth_service.dart';
+import '../widgets/OvalsPainter.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
