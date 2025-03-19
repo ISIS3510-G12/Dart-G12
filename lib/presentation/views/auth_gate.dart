@@ -1,5 +1,5 @@
-import 'package:dart_g12/views/main_screen.dart';
-import 'package:dart_g12/views/login_page.dart';
+import 'package:dart_g12/presentation/views/main_screen.dart';
+import 'package:dart_g12/presentation/views/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 

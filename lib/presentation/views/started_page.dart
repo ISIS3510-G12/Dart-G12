@@ -1,4 +1,4 @@
-import 'package:dart_g12/views/login_page.dart';
+import 'package:dart_g12/presentation/views/login_page.dart';
 import 'package:flutter/material.dart';
 
 class WelcomePage extends StatelessWidget {
