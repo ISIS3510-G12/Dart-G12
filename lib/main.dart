@@ -1,21 +1,17 @@
-import 'package:dart_g12/views/login_page.dart';
+import 'package:dart_g12/views/auth_gate.dart';
 import 'package:flutter/material.dart';
-//import 'views/MainScreen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-     
 
-void main() async{
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Necesario para inicialización asíncrona
 
-  // supabase setup
+  // Supabase setup
   await Supabase.initialize(
     url: 'https://cdvdebibeggycjaeypck.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkdmRlYmliZWdneWNqYWV5cGNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIzMzYxNTEsImV4cCI6MjA1NzkxMjE1MX0.bUhJdVbWwo018EzJfEdkHuK6ZqaTrXlys07Kb6CTTFM',
-
   );
-    
 
-void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -29,10 +25,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: '/',
       routes: {
-        '/': (context) => const LoginPage(),
-
-      
-      
+        '/': (context) => const AuthGate(),
+      },
     );
   }
-  }
+}

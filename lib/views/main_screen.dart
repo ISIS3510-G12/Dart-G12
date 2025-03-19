@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../views/pagina1.dart';
 import '../views/pagina2.dart';
 import '../widgets/BottomNavbar.dart';
-import '../views/map_page.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
