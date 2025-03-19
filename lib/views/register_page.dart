@@ -1,5 +1,5 @@
-import 'package:dart_g12/data/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:dart_g12/data/services/auth_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -9,36 +9,24 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  // get auth service
   final authService = AuthService();
-
-  // text controllers
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  //sign up botton pressed
-
   void signUp() async {
-    //prepare data
     final email = _emailController.text;
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
-    //check that passwords match
-
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Password don't match")));
+          .showSnackBar(const SnackBar(content: Text("Passwords don't match")));
       return;
     }
 
-    // attempt sign up
-
     try {
       await authService.signUpWithEmailPassword(email, password);
-
-      // pop register page
       Navigator.pop(context);
     } catch (e) {
       if (mounted) {
@@ -48,37 +36,127 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  //BUILD UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Sign Up"),
-      ),
-      body: ListView(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 50),
+      body: Stack(
         children: [
-          //Email
-          TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: "Email")),
-
-          //Password
-          TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: "Password"),
-              obscureText: true),
-
-          // Confirm Password
-          TextField(
-              controller: _confirmPasswordController,
-              decoration: const InputDecoration(labelText: "Confirm Password"),
-              obscureText: true),
-
-          //Button
-          ElevatedButton(onPressed: signUp, child: const Text("Sign Up")),
-
-          const SizedBox(height: 12),
+          Positioned.fill(
+            child: Image.asset(
+              "assets/images/andes.jpg",
+              fit: BoxFit.cover,
+            ),
+          ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF050F2C),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      "Create Your Account",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFEA1D5D),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      "Unlock your campus experience",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    TextField(
+                      controller: _emailController,
+                      style: const TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: "Email",
+                        hintStyle: const TextStyle(color: Color(0xFF6C757D)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      style: const TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: "Password",
+                        hintStyle: const TextStyle(color: Color(0xFF6C757D)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _confirmPasswordController,
+                      obscureText: true,
+                      style: const TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: "Confirm Password",
+                        hintStyle: const TextStyle(color: Color(0xFF6C757D)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 60),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: signUp,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFEA1D5D),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(56),
+                          ),
+                        ),
+                        child: const Text("Sign Up",
+                            style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Already have an account?",
+                            style: TextStyle(color: Colors.white)),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("Sign In",
+                              style: TextStyle(color: Color(0xFFEA1D5D))),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

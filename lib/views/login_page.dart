@@ -91,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
                         hintText: "Email",
                         hintStyle: TextStyle(color: Color(0xFF6C757D)),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide.none,
                         ),
                       ),
@@ -109,7 +109,7 @@ class _LoginPageState extends State<LoginPage> {
                         hintText: "Password",
                         hintStyle: TextStyle(color: Color(0xFF6C757D)),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide.none,
                         ),
                       ),
@@ -135,7 +135,7 @@ class _LoginPageState extends State<LoginPage> {
                           backgroundColor: Color(0xFFEA1D5D),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(56),
                           ),
                         ),
                         child: const Text("Sign In",

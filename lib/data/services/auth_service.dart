@@ -31,5 +31,5 @@ class AuthService {
     final user = session?.user;
     return user?.email;
   }
-  
+
 }
