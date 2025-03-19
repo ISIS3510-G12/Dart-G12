@@ -14,6 +14,8 @@ class _RegisterPageState extends State<RegisterPage> {
   final _passwordController = TextEditingController();
   final _displayNameController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  bool _isObscure1 = true;
+  bool _isObscure2 = true;
 
   void signUp() async {
     final email = _emailController.text;
@@ -111,12 +113,19 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(height: 12),
                     TextField(
                       controller: _passwordController,
-                      obscureText: true,
+                      obscureText: _isObscure1,
                       style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
                         hintText: "Password",
+                        suffixIcon: IconButton(
+                          icon: Icon(_isObscure1
+                              ? Icons.visibility_off
+                              : Icons.visibility),
+                          onPressed: () =>
+                              setState(() => _isObscure1 = !_isObscure1),
+                        ),
                         hintStyle: const TextStyle(color: Color(0xFF6C757D)),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -127,12 +136,19 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(height: 12),
                     TextField(
                       controller: _confirmPasswordController,
-                      obscureText: true,
+                      obscureText: _isObscure2,
                       style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
                         hintText: "Confirm Password",
+                        suffixIcon: IconButton(
+                          icon: Icon(_isObscure2
+                              ? Icons.visibility_off
+                              : Icons.visibility),
+                          onPressed: () =>
+                              setState(() => _isObscure2 = !_isObscure2),
+                        ),
                         hintStyle: const TextStyle(color: Color(0xFF6C757D)),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),

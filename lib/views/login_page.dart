@@ -16,6 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   // Controllers
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _isObscure = true;
 
   // Login
   void login() async {
@@ -45,8 +46,6 @@ class _LoginPageState extends State<LoginPage> {
               fit: BoxFit.cover,
             ),
           ),
-
-
 
           // Contenedor del formulario
           Center(
@@ -101,12 +100,19 @@ class _LoginPageState extends State<LoginPage> {
                     // Campo de Password
                     TextField(
                       controller: _passwordController,
-                      obscureText: true,
+                      obscureText: _isObscure,
                       style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
                         hintText: "Password",
+                        suffixIcon: IconButton(
+                          icon: Icon(_isObscure
+                              ? Icons.visibility_off
+                              : Icons.visibility),
+                          onPressed: () =>
+                              setState(() => _isObscure = !_isObscure),
+                        ),
                         hintStyle: TextStyle(color: Color(0xFF6C757D)),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
