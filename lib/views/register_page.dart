@@ -1,4 +1,4 @@
-import 'package:dart_g12/data/model/auth_service.dart';
+import 'package:dart_g12/data/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -66,18 +66,19 @@ class _RegisterPageState extends State<RegisterPage> {
           //Password
           TextField(
               controller: _passwordController,
-              decoration: const InputDecoration(labelText: "Password")),
+              decoration: const InputDecoration(labelText: "Password"),
+              obscureText: true),
 
           // Confirm Password
           TextField(
               controller: _confirmPasswordController,
-              decoration: const InputDecoration(labelText: "Confirm Password")),
+              decoration: const InputDecoration(labelText: "Confirm Password"),
+              obscureText: true),
 
           //Button
           ElevatedButton(onPressed: signUp, child: const Text("Sign Up")),
 
           const SizedBox(height: 12),
-
         ],
       ),
     );
