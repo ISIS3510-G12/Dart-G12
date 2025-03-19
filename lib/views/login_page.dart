@@ -152,14 +152,6 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 12),
 
                     // Botones de redes sociales
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _socialButton("assets/images/google.png"),
-                        const SizedBox(width: 16),
-                        _socialButton("assets/images/facebook.png"),
-                      ],
-                    ),
 
                     const SizedBox(height: 16),
 
