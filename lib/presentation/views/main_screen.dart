@@ -1,8 +1,10 @@
+import 'package:dart_g12/presentation/views/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:dart_g12/presentation/views/Pagina1.dart';
 import 'package:dart_g12/presentation/views/Pagina2.dart';
 import 'package:dart_g12/presentation/widgets/bottom_navbar.dart';
 import 'map_page.dart';
+
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -17,7 +19,10 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _pages = [
     const Pagina1(),
     const Pagina2(),
-    const MapPage(),
+    const Pagina1(),
+    const Pagina2(),
+    const ProfilePage(),
+
   ];
 
   @override
