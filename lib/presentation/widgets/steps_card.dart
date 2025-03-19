@@ -6,6 +6,7 @@ class StepsCard extends StatelessWidget {
   const StepsCard({
     super.key,
     required this.onClose,
+    required this.nodes,
   });
 
   @override
