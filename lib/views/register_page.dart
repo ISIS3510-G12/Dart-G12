@@ -12,11 +12,13 @@ class _RegisterPageState extends State<RegisterPage> {
   final authService = AuthService();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _displayNameController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
   void signUp() async {
     final email = _emailController.text;
     final password = _passwordController.text;
+    final displayName = _displayNameController.text;
     final confirmPassword = _confirmPasswordController.text;
 
     if (password != confirmPassword) {
@@ -26,7 +28,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     try {
-      await authService.signUpWithEmailPassword(email, password);
+      await authService.signUpWithEmailPassword(email, password, displayName);
       Navigator.pop(context);
     } catch (e) {
       if (mounted) {
@@ -77,6 +79,21 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                     const SizedBox(height: 24),
+                    TextField(
+                      controller: _displayNameController,
+                      style: const TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: "Full Name",
+                        hintStyle: TextStyle(color: Color(0xFF6C757D)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     TextField(
                       controller: _emailController,
                       style: const TextStyle(color: Colors.black),
