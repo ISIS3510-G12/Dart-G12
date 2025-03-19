@@ -1,7 +1,7 @@
 import '../views/see_all_screen.dart';
 import 'package:flutter/material.dart';
-import '../../views/pagina1.dart';
-import '../../views/pagina2.dart';
+import '../views/pagina1.dart';
+import '../views/pagina2.dart';
 import '../widgets/BottomNavbar.dart';
 
 class MainScreen extends StatefulWidget {
