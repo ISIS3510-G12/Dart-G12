@@ -1,3 +1,4 @@
+import 'package:dart_g12/views/login_page.dart';
 import 'package:flutter/material.dart';
 
 class WelcomePage extends StatelessWidget {
@@ -84,7 +85,13 @@ class WelcomePage extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const LoginPage()),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFEA1D5D),
                         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -92,12 +99,14 @@ class WelcomePage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(54),
                         ),
                       ),
-                      child: const Text("Start Exploring",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          )),
+                      child: const Text(
+                        "Start Exploring",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ],
