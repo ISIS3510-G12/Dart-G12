@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/OvalsPainter.dart';
+import '../widgets/card.dart';
 
 class SeeAllScreen extends StatelessWidget {
   const SeeAllScreen({super.key});
@@ -19,7 +20,7 @@ class SeeAllScreen extends StatelessWidget {
           // Título "Buildings" sobre el fondo
           Positioned(
             top: 50,  // Ajusta la distancia desde la parte superior si es necesario
-            left: MediaQuery.of(context).size.width / 2 - 90,  // Centra el texto
+            left: MediaQuery.of(context).size.width / 2 - 65,  // Centra el texto
             child: Text(
               "Buildings",
               style: TextStyle(
@@ -107,26 +108,6 @@ class SeeAllScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// Placeholder CardScreen to navigate to when tapping on a building
-class CardScreen extends StatelessWidget {
-  final int buildingIndex;
-
-  const CardScreen({super.key, required this.buildingIndex});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Building Details')),
-      body: Center(
-        child: Text(
-          'Details for Building ${['ML', 'W', 'SD', 'O', 'C'][buildingIndex]}',
-          style: TextStyle(fontSize: 24),
-        ),
       ),
     );
   }
