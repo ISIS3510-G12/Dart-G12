@@ -6,9 +6,11 @@ import '../widgets/costum_app_bar.dart';
 import '../widgets/dropdown_container.dart';
 import '../widgets/distance_card.dart';
 import '../widgets/steps_card.dart';
+import '../widgets/location_dropdown.dart';
+import '../widgets/map_view.dart';
 
 class MapPage extends StatefulWidget {
-  const MapPage({Key? key}) : super(key: key);
+  const MapPage({super.key});
 
   @override
   State<MapPage> createState() => _MapPageState();
@@ -80,8 +82,8 @@ class _MapPageState extends State<MapPage> {
         _polylines.clear();
         _circles.clear();
 
-        if (_fromLocation == _locations["Edificio ML"] && _toLocation == _locations["Edificio W"]) {
-          // Línea punteada de la ruta
+        if (_fromLocation == _locations["Edificio ML"] &&
+            _toLocation == _locations["Edificio W"]) {
           _polylines = {
             Polyline(
               polylineId: const PolylineId("ml_to_w"),
@@ -92,7 +94,6 @@ class _MapPageState extends State<MapPage> {
             ),
           };
 
-          // Dibujar los círculos en cada nodo con mayor tamaño
           _circles = _mlToWNodes.asMap().entries.map((entry) {
             final index = entry.key;
             final point = entry.value;
@@ -107,7 +108,7 @@ class _MapPageState extends State<MapPage> {
             return Circle(
               circleId: CircleId('node_$index'),
               center: point,
-              radius: 5.5, // Círculo un poco más grande
+              radius: 5.5,
               fillColor: fillColor,
               strokeColor: Colors.white,
               strokeWidth: 1,
@@ -124,54 +125,38 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
-  Widget _buildDropdownContainer({required Widget child}) {
-    return DropdownContainer(child: child);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        dropdownFrom: _buildDropdownContainer(
-          child: DropdownButton<String>(
+        dropdownFrom: DropdownContainer(
+          child: LocationDropdown(
             value: _fromLocation != null
                 ? _locations.keys.firstWhere(
                     (k) => _locations[k] == _fromLocation,
                     orElse: () => "Edificio ML",
                   )
                 : null,
-            hint: const Text("Your Location"),
-            isExpanded: true,
-            onChanged: (String? newValue) {
+            hint: "Your Location",
+            locations: _locations,
+            onChanged: (newValue) {
               if (newValue != null) _updateLocation(true, newValue);
             },
-            items: _locations.keys
-                .map((String key) => DropdownMenuItem<String>(
-                      value: key,
-                      child: Text(key),
-                    ))
-                .toList(),
           ),
         ),
-        dropdownTo: _buildDropdownContainer(
-          child: DropdownButton<String>(
+        dropdownTo: DropdownContainer(
+          child: LocationDropdown(
             value: _toLocation != null
                 ? _locations.keys.firstWhere(
                     (k) => _locations[k] == _toLocation,
                     orElse: () => "Edificio W",
                   )
                 : null,
-            hint: const Text("Destination"),
-            isExpanded: true,
-            onChanged: (String? newValue) {
+            hint: "Destination",
+            locations: _locations,
+            onChanged: (newValue) {
               if (newValue != null) _updateLocation(false, newValue);
             },
-            items: _locations.keys
-                .map((String key) => DropdownMenuItem<String>(
-                      value: key,
-                      child: Text(key),
-                    ))
-                .toList(),
           ),
         ),
         onSwap: _swapLocations,
@@ -179,17 +164,16 @@ class _MapPageState extends State<MapPage> {
       ),
       body: Stack(
         children: [
-          GoogleMap(
-            mapType: MapType.satellite,
+          MapView(
             initialCameraPosition: CameraPosition(
               target: _locations["Edificio ML"]!,
               zoom: 17,
             ),
-            zoomControlsEnabled: false,
-            markers: {},
             polylines: _polylines,
             circles: _circles,
-            onMapCreated: (controller) => _mapController = controller,
+            onMapCreated: (controller) {
+              _mapController = controller;
+            },
           ),
           if (_fromLocation != null && _toLocation != null)
             Positioned(

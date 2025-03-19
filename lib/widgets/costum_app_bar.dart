@@ -7,12 +7,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onMoreOptions;
 
   const CustomAppBar({
-    Key? key,
+    super.key,
     required this.dropdownFrom,
     required this.dropdownTo,
     required this.onSwap,
     required this.onMoreOptions,
-  }) : super(key: key);
+  });
 
   // Widget para la línea punteada
   Widget _buildDottedLine(double height) {

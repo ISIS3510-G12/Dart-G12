@@ -5,10 +5,10 @@ class DistanceCard extends StatelessWidget {
   final VoidCallback onStepsPressed;
 
   const DistanceCard({
-    Key? key,
+    super.key,
     required this.distance,
     required this.onStepsPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

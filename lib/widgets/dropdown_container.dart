@@ -5,10 +5,10 @@ class DropdownContainer extends StatelessWidget {
   final EdgeInsetsGeometry? margin;
 
   const DropdownContainer({
-    Key? key,
+    super.key,
     required this.child,
     this.margin,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
