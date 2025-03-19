@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../widgets/OvalsPainter.dart';
+import 'OvalsPainter.dart';
 
 class CardScreen extends StatelessWidget {
   final int buildingIndex;
@@ -52,7 +52,7 @@ class CardScreen extends StatelessWidget {
           // Título "Bloque XX" centrado en el eje X
           Positioned(
             top: 50,  // Ajusta la distancia desde la parte superior si es necesario
-            left: MediaQuery.of(context).size.width / 2 - 90,  // Centra el texto
+            left: MediaQuery.of(context).size.width / 2 - 65,  // Centra el texto
             child: Text(
               'Bloque $buildingName',
               style: TextStyle(
