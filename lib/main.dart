@@ -1,4 +1,4 @@
-import 'package:dart_g12/presentation/views/auth_gate.dart';
+import 'package:dart_g12/presentation/view_models/auth_gate.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
