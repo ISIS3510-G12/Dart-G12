@@ -1,4 +1,4 @@
-import 'package:dart_g12/views/auth_gate.dart';
+import 'package:dart_g12/views/login_page.dart';
 import 'package:flutter/material.dart';
 //import 'views/MainScreen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -13,6 +13,8 @@ void main() async{
 
   );
     
+
+void main() {
   runApp(MyApp());
 }
 
@@ -21,8 +23,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: AuthGate(),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Mi App',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const LoginPage(),
 
       
       
