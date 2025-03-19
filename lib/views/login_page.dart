@@ -184,24 +184,4 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // Widget para los botones de redes sociales
-  Widget _socialButton(String imagePath) {
-    return Container(
-      width: 50,
-      height: 50,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 6,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Center(
-        child: Image.asset(imagePath, width: 30, height: 30),
-      ),
-    );
-  }
 }

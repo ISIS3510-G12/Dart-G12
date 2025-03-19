@@ -10,6 +10,7 @@ aunthenticated - Home Page
 */
 
 import 'package:dart_g12/views/MainScreen.dart';
+import 'package:dart_g12/views/login_page.dart';
 import 'package:dart_g12/views/started_page.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -42,7 +43,7 @@ class AuthGate extends StatelessWidget {
         if (session != null) {
           return const MainScreen();
         } else {
-          return const WelcomePage();
+          return const LoginPage();
         }
       },
     );
