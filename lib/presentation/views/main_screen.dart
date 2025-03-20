@@ -4,6 +4,7 @@ import 'package:dart_g12/presentation/views/Pagina1.dart';
 import 'package:dart_g12/presentation/views/Pagina2.dart';
 import 'package:dart_g12/presentation/widgets/bottom_navbar.dart';
 import 'package:dart_g12/presentation/views/map_page.dart';
+import '../views/home_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -16,7 +17,7 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    const Pagina1(),
+    const HomeScreen(),
     const Pagina2(),
     const MapPage(),
     const Pagina2(),

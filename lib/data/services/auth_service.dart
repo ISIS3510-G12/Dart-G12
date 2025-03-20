@@ -35,4 +35,12 @@ class AuthService {
     final user = session?.user;
     return user?.userMetadata?['display_name'];
   }
+
+  // Get user avatar URL
+  String? getUserAvatar() {
+    final session = _supabase.auth.currentSession;
+    final user = session?.user;
+    return user?.userMetadata?['avatar_url'];
+  }
+
 }
