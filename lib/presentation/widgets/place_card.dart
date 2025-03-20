@@ -23,18 +23,51 @@ class PlaceCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Imagen
               ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(12)),
-                child: Image.asset(imagePath, fit: BoxFit.cover, height: 100, width: 150),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                child: Image.network(
+                  imagePath, // Usamos Image.network para cargar desde una URL
+                  fit: BoxFit.cover, 
+                  height: 100, 
+                  width: 150,
+                  loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                    if (loadingProgress == null) {
+                      return child;
+                    } else {
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                              : null,
+                        ),
+                      );
+                    }
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Center(child: Icon(Icons.error)); // Muestra un icono de error si la imagen no se carga
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                    // Título
+                    Text(
+                      title,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      maxLines: 1, // Limitar a una línea
+                      overflow: TextOverflow.ellipsis, // El texto se corta con puntos suspensivos
+                    ),
+                    // Subtítulo
+                    Text(
+                      subtitle,
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      maxLines: 2, // Limitar a dos líneas
+                      overflow: TextOverflow.ellipsis, // El texto se corta con puntos suspensivos
+                    ),
                   ],
                 ),
               ),
