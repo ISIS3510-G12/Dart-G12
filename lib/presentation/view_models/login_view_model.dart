@@ -22,8 +22,24 @@ class LoginViewModel extends ChangeNotifier {
 
   // Método para iniciar sesión
   Future<void> login(BuildContext context) async {
-    final email = emailController.text;
-    final password = passwordController.text;
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    // Validaciones antes de llamar a Supabase
+    if (email.isEmpty && password.isEmpty) {
+      _showSnackBar(context, "All fields are required.");
+      return;
+    }
+
+    if (email.isEmpty) {
+      _showSnackBar(context, "Email cannot be empty.");
+      return;
+    }
+
+    if (password.isEmpty) {
+      _showSnackBar(context, "Password cannot be empty.");
+      return;
+    }
 
     _isLoading = true;
     notifyListeners();
@@ -32,14 +48,31 @@ class LoginViewModel extends ChangeNotifier {
       await _authService.signInWithEmailPassword(email, password);
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        String errorMessage = _handleAuthError(e.toString());
+        _showSnackBar(context, errorMessage);
       }
     } finally {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  // Manejo de errores de Supabase
+  String _handleAuthError(String error) {
+    if (error.contains("invalid_credentials")) {
+      return "Invalid email or password. Please try again.";
+    } else {
+      return "An unexpected error occurred. Please try again.";
+    }
+  }
+
+  // Mostrar mensajes en pantalla
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+          content: Text(message, style: const TextStyle(color: Colors.white)),
+          backgroundColor: Color(0xFFEA1D5D)),
+    );
   }
 
   // Liberar controladores
