@@ -84,7 +84,7 @@ class _SeeAllScreenState extends State<SeeAllScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => CardScreen(buildingIndex: index),
+                                builder: (context) => CardScreen(buildingId: building['id']),
                               ),
                             );
                           },
