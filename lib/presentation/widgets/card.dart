@@ -19,11 +19,11 @@ class CardScreen extends StatelessWidget {
       'Facultad de Diseño'
     ];
     final buildingImages = [
-      'assets/ml_image.jpg', // Asegúrate de tener las imágenes en los assets
-      'assets/w_image.jpg',
-      'assets/sd_image.jpg',
-      'assets/o_image.jpg',
-      'assets/c_image.jpg'
+      'assets/images/ml_image.jpg',
+      'assets/images/w_image.jpg',
+      'assets/images/sd_image.jpg',
+      'assets/images/o_image.jpg',
+      'assets/images/c_image.jpg'
     ];
 
     // Datos de lugares populares (genéricos)
@@ -42,20 +42,6 @@ class CardScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Imagen del edificio
-          Container(
-            height: 250,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              image: DecorationImage(
-                image: AssetImage(buildingImage),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
           // Fondo con los círculos superpuestos
           Positioned.fill(
             child: CustomPaint(
@@ -66,23 +52,39 @@ class CardScreen extends StatelessWidget {
           // Título "Bloque XX" centrado en el eje X
           Positioned(
             top: 50,  // Ajusta la distancia desde la parte superior si es necesario
-            left: MediaQuery.of(context).size.width / 2 - 90,  // Centra el texto
+            left: MediaQuery.of(context).size.width / 2 - 65,  // Centra el texto
             child: Text(
               'Bloque $buildingName',
               style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  backgroundColor: Colors.transparent,
-                  color: Colors.white
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                backgroundColor: Colors.transparent,
+                color: Colors.white,
               ),
             ),
           ),
-          const SizedBox(height: 8),
 
-          // Contenido principal
+          // Imagen del edificio justo después de que termina el OvalPainter
+          Positioned(
+            top: 120,  // Ajustamos para que esté justo después del oval
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 250, // Ajusta la altura de la imagen según sea necesario
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+                image: DecorationImage(
+                  image: AssetImage(buildingImage),
+                  fit: BoxFit.cover, // Asegura que la imagen cubra todo el espacio disponible
+                ),
+              ),
+            ),
+          ),
+
+          // Contenido principal con desplazamiento para evitar superposición
           SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.only(top: 120.0), // Ajustar para no sobreponer el título
+              padding: const EdgeInsets.only(top: 380.0), // Ajustamos para que no sobreponga la imagen
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -97,18 +99,20 @@ class CardScreen extends StatelessWidget {
                           icon: Icon(Icons.directions),
                           label: Text('Indicaciones'),
                           style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFFEA1D5D),
-                              foregroundColor: Colors.white,
-                              iconColor: Colors.white),
+                            backgroundColor: Color(0xFFEA1D5D),
+                            foregroundColor: Colors.white,
+                            iconColor: Colors.white,
+                          ),
                         ),
                         ElevatedButton.icon(
                           onPressed: () {},
                           icon: Icon(Icons.favorite_border),
                           label: Text('Añadir a Favoritos'),
                           style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFFEA1D5D),
-                              foregroundColor: Colors.white,
-                              iconColor: Colors.white),
+                            backgroundColor: Color(0xFFEA1D5D),
+                            foregroundColor: Colors.white,
+                            iconColor: Colors.white,
+                          ),
                         ),
                       ],
                     ),
