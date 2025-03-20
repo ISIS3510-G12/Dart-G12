@@ -21,7 +21,7 @@ Make sure you have the following installed:
 ### Installation
 1. Clone the repository:
    ```sh
-   git clone https://github.com/your-repository-link.git
+   git clone https://github.com/ISIS3510-G12/Dart-G12.git
    ```
 2. Navigate to the project directory:
    ```sh
