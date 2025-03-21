@@ -1,9 +1,9 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LocationRepository {
-  final SupabaseClient supabase;
+  final SupabaseClient supabase = Supabase.instance.client;
 
-  LocationRepository({required this.supabase});
+  LocationRepository();
 
   /// 🔹 Obtener todas las ubicaciones (excluyendo latitude y longitude)
   Future<List<Map<String, dynamic>>> fetchLocations() async {

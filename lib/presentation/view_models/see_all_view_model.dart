@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import '../../data/repositories/location_repository.dart';
 
 class SeeAllViewModel extends ChangeNotifier {
-  final LocationRepository repository;
+  final LocationRepository repository = LocationRepository();
   List<Map<String, dynamic>> _buildings = [];
   bool _isLoading = false;
   String? _error;
 
-  SeeAllViewModel({required this.repository});
+  SeeAllViewModel();
 
   /// Getters
   List<Map<String, dynamic>> get buildings => _buildings;
