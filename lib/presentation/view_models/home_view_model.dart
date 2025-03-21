@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/services/auth_service.dart';
 import '../../data/repositories/home_repository.dart';
+import '../../data/services/analytics_service.dart';
 
 class HomeViewModel extends ChangeNotifier {
   late final AuthService _authService;
@@ -61,4 +62,14 @@ class HomeViewModel extends ChangeNotifier {
       print('Error al cargar las recomendaciones: $error');
     }
   }
+
+  void onRecommendationTap(Map<String, dynamic> recommendation) {
+    AnalyticsService.logUserAction(
+      actionType: 'consult_event',
+      eventId: recommendation['id'],
+      eventType: recommendation['type'] ?? 'other',
+    );
+  }
+  
+
 }

@@ -139,6 +139,10 @@ class HomeScreen extends StatelessWidget {
                                 imagePath: recommendation['image_url'], // Asegúrate de que `image_url` esté correcto
                                 title: recommendation['title'],
                                 subtitle: recommendation['description'],
+                                onTap: () {
+                                  // Agrega la acción al tocar la tarjeta
+                                  viewModel.onRecommendationTap(recommendation);
+                                },
                               );
                             }).toList(),
                           );

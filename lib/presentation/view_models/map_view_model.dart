@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../data/repositories/map_repository.dart';
+import '../../data/services/analytics_service.dart';
 
 class MapViewModel extends ChangeNotifier {
   final MapRepository repository = MapRepository();
@@ -141,6 +142,15 @@ class MapViewModel extends ChangeNotifier {
     } else {
       toLocation = locations[locationName];
       toLocationName = locationName;
+
+      // Registrar búsqueda de ubicación de destino
+      final int? locId = locationIds[locationName];
+      if (locId != null) {
+        AnalyticsService.logLocationSearch(
+          locationId: locId,
+          locationName: locationName,
+        );
+      }
     }
     calculateDistance();
     fetchRoute();
