@@ -1,11 +1,11 @@
-import 'package:dart_g12/presentation/views/see_all_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../widgets/ovals_painter.dart';
 import '../view_models/home_view_model.dart';
-import '../widgets/place_card.dart'; // Asegúrate de que el widget PlaceCard esté importado
-import '../widgets/section_header.dart'; // Asegúrate de que el widget SectionHeader esté importado
-import '../widgets/category_icon.dart'; // Asegúrate de que el widget CategoryIcon esté importado
+import '../widgets/ovals_painter.dart';
+import '../widgets/section_header.dart';
+import '../widgets/place_card.dart'; 
+import '../widgets/category_list.dart'; // Asegúrate de importar el nuevo widget
+import 'see_all_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -78,19 +78,8 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 16),
 
                     // Categorías
-                    SizedBox(
-                      height: 60,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: const [
-                          CategoryIcon(icon: Icons.business, label: "Buildings"),
-                          CategoryIcon(icon: Icons.event, label: "Events"),
-                          CategoryIcon(icon: Icons.restaurant, label: "Food & Rest"),
-                          CategoryIcon(icon: Icons.school, label: "Study Spaces"),
-                          CategoryIcon(icon: Icons.build, label: "Services"),
-                        ],
-                      ),
-                    ),
+                    const CategoryList(),  // Usando el widget CategoryList
+
                     const SizedBox(height: 16), // Espacio entre categorías y la sección "Buildings"
 
                     // Sección de "Buildings"
