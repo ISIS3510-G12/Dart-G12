@@ -68,6 +68,7 @@ class HomeViewModel extends ChangeNotifier {
       actionType: 'consult_event',
       eventId: recommendation['id'],
       eventType: recommendation['type'] ?? 'other',
+      locationId: recommendation['location_id'],
     );
   }
   
