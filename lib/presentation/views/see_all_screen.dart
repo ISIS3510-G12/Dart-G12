@@ -1,28 +1,55 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../widgets/OvalsPainter.dart';
-import '../widgets/card.dart';
 import '../view_models/see_all_view_model.dart';
+import '../widgets/ovals_painter.dart';
 import '../widgets/place_card.dart';
+import '../widgets/bottom_navbar.dart';
+import '../views/main_screen.dart';
+import '../widgets/card.dart';
 
 class SeeAllScreen extends StatefulWidget {
-  const SeeAllScreen({super.key});
+  final int initialIndex;
+
+  const SeeAllScreen({super.key, this.initialIndex = 0});
 
   @override
   _SeeAllScreenState createState() => _SeeAllScreenState();
 }
 
 class _SeeAllScreenState extends State<SeeAllScreen> {
+  late SeeAllViewModel _viewModel;
+
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => Provider.of<SeeAllViewModel>(context, listen: false).fetchBuildings());
+    _viewModel = SeeAllViewModel();
+    _viewModel.fetchBuildings();
+    _viewModel.addListener(_updateState);
+  }
+
+  @override
+  void dispose() {
+    _viewModel.removeListener(_updateState);
+    super.dispose();
+  }
+
+  void _updateState() {
+    setState(() {});
+  }
+
+  void _onItemTapped(int index) {
+    if (index == _viewModel.selectedIndex) return;
+
+    Navigator.popUntil(context, (route) => route.isFirst);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MainScreen(initialIndex: index),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = Provider.of<SeeAllViewModel>(context);
-
     return Scaffold(
       body: Stack(
         children: [
@@ -43,8 +70,7 @@ class _SeeAllScreenState extends State<SeeAllScreen> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: // Barra de búsqueda
-                    TextField(
+                    child: TextField(
                       decoration: InputDecoration(
                         hintText: "Where to go?",
                         filled: true,
@@ -60,49 +86,49 @@ class _SeeAllScreenState extends State<SeeAllScreen> {
                   ),
                   const SizedBox(height: 20),
                   Expanded(
-                    child: viewModel.isLoading
+                    child: _viewModel.isLoading
                         ? const Center(child: CircularProgressIndicator())
-                        : viewModel.error != null
-                        ? Center(child: Text(viewModel.error!))
-                        : viewModel.buildings.isEmpty
+                        : _viewModel.error != null
+                        ? Center(child: Text(_viewModel.error!))
+                        : _viewModel.buildings.isEmpty
                         ? const Center(child: Text("No hay edificios disponibles"))
                         : GridView.builder(
-                      padding: const EdgeInsets.all(16.0),
-                      shrinkWrap: true,
-                      physics: const BouncingScrollPhysics(),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 16.0,
-                        mainAxisSpacing: 16.0,
-                      ),
-                      itemCount: viewModel.buildings.length,
-                      itemBuilder: (context, index) {
-                        final building = viewModel.buildings[index];
-
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => CardScreen(buildingId: building['id']),
-                              ),
-                            );
-                          },
-                          child: PlaceCard(
-                            imagePath: building['image_url'] ?? '', // URL de la imagen o vacío si no tiene
-                            title: building['name'],
-                            subtitle: building['description'] ?? 'Sin descripción',
+                            padding: const EdgeInsets.all(16.0),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 16.0,
+                              mainAxisSpacing: 16.0,
+                            ),
+                            itemCount: _viewModel.buildings.length,
+                            itemBuilder: (context, index) {
+                              final building = _viewModel.buildings[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => CardScreen(buildingId: building['id']),
+                                    ),
+                                  );
+                                },
+                                child: PlaceCard(
+                                  imagePath: building['image_url'] ?? '',
+                                  title: building['name'],
+                                  subtitle: building['description'] ?? 'Sin descripción',
+                                ),
+                              );
+                            },
                           ),
-
-                        );
-                      },
-                    ),
                   ),
                 ],
               ),
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: BottomNavbar(
+        currentIndex: _viewModel.selectedIndex,
+        onTap: _onItemTapped,
       ),
     );
   }

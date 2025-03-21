@@ -1,6 +1,7 @@
+import 'package:dart_g12/presentation/views/see_all_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../widgets/OvalsPainter.dart';
+import '../widgets/ovals_painter.dart';
 import '../view_models/home_view_model.dart';
 import '../widgets/place_card.dart'; // Asegúrate de que el widget PlaceCard esté importado
 import '../widgets/section_header.dart'; // Asegúrate de que el widget SectionHeader esté importado
@@ -93,7 +94,7 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 16), // Espacio entre categorías y la sección "Buildings"
 
                     // Sección de "Buildings"
-                    const SectionHeader(title: "Buildings"),
+                    const SectionHeader(title: "Buildings", destinationScreen: SeeAllScreen()),
                     SizedBox(
                       height: 180, // Evitar el desbordamiento
                       child: Consumer<HomeViewModel>(
@@ -121,7 +122,7 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 16), // Espacio entre las secciones
 
                     // Sección de "Recommendations"
-                    const SectionHeader(title: "Recommendations"),
+                    const SectionHeader(title: "Recommendations", destinationScreen: SeeAllScreen()),
                     SizedBox(
                       height: 180, // Evitar el desbordamiento
                       child: Consumer<HomeViewModel>(

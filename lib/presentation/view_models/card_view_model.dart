@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import '../../data/repositories/location_repository.dart';
+import '../views/main_screen.dart';
 
 class CardViewModel extends ChangeNotifier {
-  final LocationRepository repository;
+  final LocationRepository repository = LocationRepository();
   Map<String, dynamic>? _building;
   List<Map<String, dynamic>> _places = [];
   bool _isLoading = false;
   String? _error;
+  int _selectedIndex = 0;
 
-  CardViewModel({required this.repository});
+  CardViewModel();
 
   // Getters
   Map<String, dynamic>? get building => _building;
   List<Map<String, dynamic>> get places => _places;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  int get selectedIndex => _selectedIndex;
 
   /// 🔹 Cargar datos del edificio y sus lugares
   Future<void> fetchBuildingDetails(int buildingId) async {
@@ -37,5 +40,19 @@ class CardViewModel extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  /// 🔹 Actualizar el índice seleccionado
+  void updateSelectedIndex(int index) {
+    _selectedIndex = index;
+    notifyListeners();
+  }
+
+  void goToMapPage(BuildContext context) {
+    updateSelectedIndex(2);  // Índice 2 es para la página del mapa
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const MainScreen(initialIndex: 2)),
+    );
   }
 }

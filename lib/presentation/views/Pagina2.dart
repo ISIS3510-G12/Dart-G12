@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../widgets/OvalsPainter.dart';
+import '../widgets/ovals_painter.dart';
 
 class Pagina2 extends StatelessWidget {
   const Pagina2({super.key});
