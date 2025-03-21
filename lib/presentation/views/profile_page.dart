@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dart_g12/presentation/view_models/profile_view_model.dart';
-import '../widgets/OvalsPainter.dart';
+import '../widgets/ovals_painter.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});

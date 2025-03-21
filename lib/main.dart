@@ -1,6 +1,7 @@
-import 'package:dart_g12/presentation/view_models/auth_gate.dart';
+import 'package:dart_g12/presentation/views/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:dart_g12/presentation/view_models/auth_gate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,8 +25,8 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const AuthGate(),
+        '/home': (context) => const MainScreen(),
       },
     );
   }
 }
-
