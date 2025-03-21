@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/card_view_model.dart';
-import '../widgets/OvalsPainter.dart';
+import '../widgets/transparent_ovals_painter.dart';
 import '../widgets/place_card.dart';
 
 class CardScreen extends StatefulWidget {
@@ -30,10 +30,26 @@ class _CardScreenState extends State<CardScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // **1️⃣ Fondo con OvalsPainter**
-          Positioned.fill(child: CustomPaint(painter: OvalsPainter())),
+          // ** Imagen del edificio**
+          Positioned(
+            top: 0, // 🔹 Ajusta la posición para que la imagen empiece más arriba
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 260,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage(viewModel.building?['image_url'] ?? ''),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
 
-          // **2️⃣ Nombre del Bloque (centrado y encima del oval)**
+          // Fondo con OvalsPainter Transparente (Encima de la Imagen)
+          Positioned.fill(child: CustomPaint(painter: TransparentOvalsPainter())),
+
+          // **Nombre del Bloque (centrado y encima del oval)**
           Positioned(
             top: 50,
             left: MediaQuery.of(context).size.width / 2 - 80,
@@ -47,7 +63,7 @@ class _CardScreenState extends State<CardScreen> {
             ),
           ),
 
-          // **3️⃣ Contenido principal**
+          // **Contenido principal**
           if (viewModel.isLoading)
             const Center(child: CircularProgressIndicator())
           else if (viewModel.error != null)
@@ -57,28 +73,13 @@ class _CardScreenState extends State<CardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 185), // 🔹 Espacio adicional para que la imagen no toque el oval
+                    const SizedBox(height: 270), // 🔹 Espacio extra para que la imagen no se superponga con los elementos
 
-                    // **4️⃣ Imagen del edificio (sin bordes redondeados)**
-                    Container(
-                      height: 250,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage(viewModel.building!['image_url']),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // **5️⃣ Botones: Indicaciones y Añadir a Favoritos**
+                    // ** Botones: Indicaciones y Añadir a Favoritos**
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Row(
                         children: [
-                          // Botón de Indicaciones
                           ElevatedButton.icon(
                             onPressed: () {},
                             icon: const Icon(Icons.directions, size: 20),
@@ -91,8 +92,7 @@ class _CardScreenState extends State<CardScreen> {
                               textStyle: const TextStyle(fontSize: 14),
                             ),
                           ),
-                          const SizedBox(width: 12), // Espacio entre botones
-                          // Botón de Añadir a Favoritos
+                          const SizedBox(width: 12),
                           ElevatedButton.icon(
                             onPressed: () {},
                             icon: const Icon(Icons.favorite_border, size: 20),
@@ -111,7 +111,7 @@ class _CardScreenState extends State<CardScreen> {
 
                     const SizedBox(height: 16),
 
-                    // **6️⃣ Barra de búsqueda**
+                    // ** Barra de búsqueda**
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: TextField(
@@ -130,7 +130,7 @@ class _CardScreenState extends State<CardScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // **7️⃣ Lugares Populares**
+                    // ** Lugares Populares**
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16.0),
                       child: Text(
@@ -140,7 +140,7 @@ class _CardScreenState extends State<CardScreen> {
                     ),
                     const SizedBox(height: 8),
 
-                    // **8️⃣ Lista de Lugares**
+                    // ** Lista de Lugares**
                     SizedBox(
                       height: 150,
                       child: viewModel.places.isNotEmpty
