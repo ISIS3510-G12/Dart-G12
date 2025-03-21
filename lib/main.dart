@@ -1,7 +1,7 @@
 import 'package:dart_g12/presentation/views/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:dart_g12/presentation/view_models/auth_gate.dart';
+import 'package:dart_g12/presentation/views/started_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: '/',
       routes: {
-        '/': (context) => const AuthGate(),
+        '/': (context) => const WelcomePage(),
         '/home': (context) => const MainScreen(),
       },
     );
