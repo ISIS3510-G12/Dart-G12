@@ -19,6 +19,7 @@ class HomeScreen extends StatelessWidget {
         viewModel.loadUserAvatar(); 
         viewModel.loadLocations(); // Cargar ubicaciones
         viewModel.loadRecommendations(); // Cargar recomendaciones
+        viewModel.loadMostSearchedLocation(); // Cargar el lugar más buscado
         return viewModel;
       },
       child: Scaffold(
@@ -80,7 +81,29 @@ class HomeScreen extends StatelessWidget {
                     // Categorías
                     const CategoryList(),  // Usando el widget CategoryList
 
-                    const SizedBox(height: 16), // Espacio entre categorías y la sección "Buildings"
+                    const SizedBox(height: 16),
+
+                    // Sección del lugar más buscado
+                    Consumer<HomeViewModel>(
+                      builder: (context, viewModel, child) {
+                        final location = viewModel.mostSearchedLocation;
+                        if (location == null) {
+                          return const SizedBox(); // No mostrar nada si no hay datos
+                        }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            PlaceCard(
+                              imagePath: location['image_url'],
+                              title: location['name'],
+                              subtitle: location['description'],
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
 
                     // Sección de "Buildings"
                     const SectionHeader(title: "Buildings", destinationScreen: SeeAllScreen()),
@@ -93,12 +116,11 @@ class HomeScreen extends StatelessWidget {
                               child: CircularProgressIndicator(),
                             );
                           }
-
                           return ListView(
                             scrollDirection: Axis.horizontal,
                             children: viewModel.locations.map((location) {
                               return PlaceCard(
-                                imagePath: location['image_url'], // Asegúrate de que `image_url` esté correcto
+                                imagePath: location['image_url'],
                                 title: location['name'],
                                 subtitle: location['description'],
                               );
@@ -108,12 +130,12 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 16), // Espacio entre las secciones
+                    const SizedBox(height: 16),
 
                     // Sección de "Recommendations"
                     const SectionHeader(title: "Recommendations", destinationScreen: SeeAllScreen()),
                     SizedBox(
-                      height: 180, // Evitar el desbordamiento
+                      height: 180,
                       child: Consumer<HomeViewModel>(
                         builder: (context, viewModel, child) {
                           if (viewModel.recommendations.isEmpty) {
@@ -121,16 +143,14 @@ class HomeScreen extends StatelessWidget {
                               child: CircularProgressIndicator(),
                             );
                           }
-
                           return ListView(
                             scrollDirection: Axis.horizontal,
                             children: viewModel.recommendations.map((recommendation) {
                               return PlaceCard(
-                                imagePath: recommendation['image_url'], // Asegúrate de que `image_url` esté correcto
+                                imagePath: recommendation['image_url'],
                                 title: recommendation['title'],
                                 subtitle: recommendation['description'],
                                 onTap: () {
-                                  // Agrega la acción al tocar la tarjeta
                                   viewModel.onRecommendationTap(recommendation);
                                 },
                               );

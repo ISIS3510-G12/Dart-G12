@@ -18,7 +18,7 @@ class HomeViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> get recommendations => _recommendations;
 
   HomeViewModel() {
-    _authService = AuthService(); 
+    _authService = AuthService();
     _homeRepository = HomeRepository();
     _initialize();
   }
@@ -71,6 +71,17 @@ class HomeViewModel extends ChangeNotifier {
       locationId: recommendation['location_id'],
     );
   }
-  
 
+  Map<String, dynamic>? _mostSearchedLocation;
+
+  Map<String, dynamic>? get mostSearchedLocation => _mostSearchedLocation;
+
+  Future<void> loadMostSearchedLocation() async {
+    try {
+      _mostSearchedLocation = await _homeRepository.fetchMostSearchedLocation();
+      notifyListeners();
+    } catch (error) {
+      print('Error al cargar el lugar más buscado: $error');
+    }
+  }
 }
