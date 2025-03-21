@@ -73,12 +73,12 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   Map<String, dynamic>? _mostSearchedLocation;
-
   Map<String, dynamic>? get mostSearchedLocation => _mostSearchedLocation;
 
   Future<void> loadMostSearchedLocation() async {
     try {
       _mostSearchedLocation = await _homeRepository.fetchMostSearchedLocation();
+      print('Loaded Most Searched Location: $_mostSearchedLocation'); // Debugging
       notifyListeners();
     } catch (error) {
       print('Error al cargar el lugar más buscado: $error');

@@ -40,31 +40,12 @@ class HomeRepository {
   }
 
   Future<Map<String, dynamic>?> fetchMostSearchedLocation() async {
-    try {
-      final response = await supabase
-          .from('user_actions')
-          .select(
-              'location_id, count:count(*)') // Contar búsquedas por location_id
-          .eq('action_type', 'search') // Filtrar solo búsquedas
-          .order('count', ascending: false) // Ordenar por más buscados
-          .limit(1)
-          .maybeSingle(); // Obtener un solo resultado o null
+    final response = await Supabase.instance.client
+        .from('pl_locations_view')
+        .select('*')
+        .limit(1)
+        .single();
 
-      if (response == null || response['location_id'] == null) {
-        return null;
-      }
-
-      // Ahora obtenemos los datos del lugar más buscado
-      final locationResponse = await supabase
-          .from('locations')
-          .select()
-          .eq('id', response['location_id'])
-          .maybeSingle(); // Obtener datos del lugar
-
-      return locationResponse;
-    } catch (error) {
-      print('Error fetching most searched location: $error');
-      return null;
-    }
+    return response;
   }
 }
