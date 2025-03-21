@@ -25,6 +25,7 @@ class MapView extends StatelessWidget {
       polylines: polylines,
       circles: circles,
       onMapCreated: onMapCreated,
+      myLocationEnabled: true,
     );
   }
 }
