@@ -1,109 +1,104 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../widgets/OvalsPainter.dart';
 import '../widgets/card.dart';
+import '../view_models/see_all_view_model.dart';
+import '../widgets/place_card.dart';
 
-class SeeAllScreen extends StatelessWidget {
+class SeeAllScreen extends StatefulWidget {
   const SeeAllScreen({super.key});
 
   @override
+  _SeeAllScreenState createState() => _SeeAllScreenState();
+}
+
+class _SeeAllScreenState extends State<SeeAllScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => Provider.of<SeeAllViewModel>(context, listen: false).fetchBuildings());
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final viewModel = Provider.of<SeeAllViewModel>(context);
+
     return Scaffold(
       body: Stack(
         children: [
-          // Fondo con los círculos superpuestos
-          Positioned.fill(
-            child: CustomPaint(
-              painter: OvalsPainter(),
-            ),
-          ),
-
-          // Título "Buildings" sobre el fondo
+          Positioned.fill(child: CustomPaint(painter: OvalsPainter())),
           Positioned(
-            top: 50,  // Ajusta la distancia desde la parte superior si es necesario
-            left: MediaQuery.of(context).size.width / 2 - 65,  // Centra el texto
+            top: 50,
+            left: MediaQuery.of(context).size.width / 2 - 65,
             child: Text(
               "Buildings",
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ),
-
-          // Contenido principal con desplazamiento para evitar overflow
-          Expanded(  // Asegura que el contenido restante ocupe el espacio disponible
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 120), // Espacio ajustado para no sobreponer el título
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Campo de búsqueda con fondo blanco y texto negro
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          labelText: "Where to go?",
-                          labelStyle: TextStyle(color: Colors.black),
-                          filled: true,
-                          fillColor: Colors.white, // Fondo blanco
-                          border: OutlineInputBorder(),
-                          suffixIcon: Icon(Icons.filter_alt_outlined),
+          Positioned.fill(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 120),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: // Barra de búsqueda
+                    TextField(
+                      decoration: InputDecoration(
+                        hintText: "Where to go?",
+                        filled: true,
+                        fillColor: Colors.white,
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: const Icon(Icons.filter_list),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25),
+                          borderSide: BorderSide.none,
                         ),
                       ),
                     ),
-
-                    // Espacio entre la búsqueda y la cuadrícula
-                    const SizedBox(height: 20),
-
-                    // Cuadrícula de edificios
-                    GridView.count(
-                      crossAxisCount: 2, // Dos columnas para la cuadrícula
-                      crossAxisSpacing: 16.0, // Espaciado entre columnas
-                      mainAxisSpacing: 16.0, // Espaciado entre filas
+                  ),
+                  const SizedBox(height: 20),
+                  Expanded(
+                    child: viewModel.isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : viewModel.error != null
+                        ? Center(child: Text(viewModel.error!))
+                        : viewModel.buildings.isEmpty
+                        ? const Center(child: Text("No hay edificios disponibles"))
+                        : GridView.builder(
                       padding: const EdgeInsets.all(16.0),
-                      shrinkWrap: true, // Evitar el error de overflow
-                      //physics: NeverScrollableScrollPhysics(),  Deshabilitar el desplazamiento de la cuadrícula
-                      children: List.generate(5, (index) {
+                      shrinkWrap: true,
+                      physics: const BouncingScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16.0,
+                        mainAxisSpacing: 16.0,
+                      ),
+                      itemCount: viewModel.buildings.length,
+                      itemBuilder: (context, index) {
+                        final building = viewModel.buildings[index];
+
                         return GestureDetector(
                           onTap: () {
-                            // Aquí se manejaría la navegación a la pantalla de detalles
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => CardScreen(buildingIndex: index),
+                                builder: (context) => CardScreen(buildingId: building['id']),
                               ),
                             );
                           },
-                          child: Card(
-                            elevation: 4,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            child: Column(
-                              children: [
-                                // Aquí se agregarán las imágenes cuando tengas los assets
-                                Container(
-                                  height: 120,
-                                  color: Colors.grey[300], // Usado como placeholder por ahora
-                                  child: Icon(Icons.image, size: 50), // Placeholder
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Bloque ${['ML', 'W', 'SD', 'O', 'C'][index]}',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                Text(
-                                  'Edificio ${['Mario Laserna', 'Facultad de Economía', 'Julián Mario Santo Domingo', 'Henri Yeri', 'Facultad de Diseño'][index]}',
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
+                          child: PlaceCard(
+                            imagePath: building['image_url'] ?? '', // URL de la imagen o vacío si no tiene
+                            title: building['name'],
+                            subtitle: building['description'] ?? 'Sin descripción',
                           ),
+
                         );
-                      }),
+                      },
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

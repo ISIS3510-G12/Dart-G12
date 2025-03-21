@@ -1,177 +1,167 @@
 import 'package:flutter/material.dart';
-import 'OvalsPainter.dart';
+import 'package:provider/provider.dart';
+import '../view_models/card_view_model.dart';
+import '../widgets/transparent_ovals_painter.dart';
+import '../widgets/place_card.dart';
 
-class CardScreen extends StatelessWidget {
-  final int buildingIndex;
+class CardScreen extends StatefulWidget {
+  final int buildingId;
 
-  // Recibimos el índice del edificio
-  const CardScreen({super.key, required this.buildingIndex});
+  const CardScreen({super.key, required this.buildingId});
+
+  @override
+  _CardScreenState createState() => _CardScreenState();
+}
+
+class _CardScreenState extends State<CardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      Provider.of<CardViewModel>(context, listen: false)
+          .fetchBuildingDetails(widget.buildingId);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Datos de los edificios
-    final buildingNames = ['ML', 'W', 'SD', 'O', 'C'];
-    final buildingDetails = [
-      'Mario Laserna',
-      'Facultad de Economía',
-      'Julián Mario Santo Domingo',
-      'Henri Yeri',
-      'Facultad de Diseño'
-    ];
-    final buildingImages = [
-      'assets/images/ml_image.jpg',
-      'assets/images/w_image.jpg',
-      'assets/images/sd_image.jpg',
-      'assets/images/o_image.jpg',
-      'assets/images/c_image.jpg'
-    ];
-
-    // Datos de lugares populares (genéricos)
-    final popularPlaces = [
-      {'name': 'Lugar 1', 'location': 'Ubicación 1'},
-      {'name': 'Lugar 2', 'location': 'Ubicación 2'},
-      {'name': 'Lugar 3', 'location': 'Ubicación 3'},
-      {'name': 'Lugar 4', 'location': 'Ubicación 4'},
-    ];
-
-    // Obtén los detalles del edificio seleccionado
-    String buildingName = buildingNames[buildingIndex];
-    String buildingDetail = buildingDetails[buildingIndex];
-    String buildingImage = buildingImages[buildingIndex];
+    final viewModel = Provider.of<CardViewModel>(context);
 
     return Scaffold(
       body: Stack(
         children: [
-          // Fondo con los círculos superpuestos
-          Positioned.fill(
-            child: CustomPaint(
-              painter: OvalsPainter(),
-            ),
-          ),
-
-          // Título "Bloque XX" centrado en el eje X
+          // ** Imagen del edificio**
           Positioned(
-            top: 50,  // Ajusta la distancia desde la parte superior si es necesario
-            left: MediaQuery.of(context).size.width / 2 - 65,  // Centra el texto
-            child: Text(
-              'Bloque $buildingName',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                backgroundColor: Colors.transparent,
-                color: Colors.white,
-              ),
-            ),
-          ),
-
-          // Imagen del edificio justo después de que termina el OvalPainter
-          Positioned(
-            top: 120,  // Ajustamos para que esté justo después del oval
+            top: 0, // 🔹 Ajusta la posición para que la imagen empiece más arriba
             left: 0,
             right: 0,
             child: Container(
-              height: 250, // Ajusta la altura de la imagen según sea necesario
+              height: 260,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
                 image: DecorationImage(
-                  image: AssetImage(buildingImage),
-                  fit: BoxFit.cover, // Asegura que la imagen cubra todo el espacio disponible
+                  image: NetworkImage(viewModel.building?['image_url'] ?? ''),
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
           ),
 
-          // Contenido principal con desplazamiento para evitar superposición
-          SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 380.0), // Ajustamos para que no sobreponga la imagen
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Botones: Indicaciones y Añadir a Favoritos
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: () {},
-                          icon: Icon(Icons.directions),
-                          label: Text('Indicaciones'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFFEA1D5D),
-                            foregroundColor: Colors.white,
-                            iconColor: Colors.white,
-                          ),
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: () {},
-                          icon: Icon(Icons.favorite_border),
-                          label: Text('Añadir a Favoritos'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFFEA1D5D),
-                            foregroundColor: Colors.white,
-                            iconColor: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+          // Fondo con OvalsPainter Transparente (Encima de la Imagen)
+          Positioned.fill(child: CustomPaint(painter: TransparentOvalsPainter())),
 
-                  // Lugares Populares con scroll lateral
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text(
-                      'Lugares Populares',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    height: 150,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: popularPlaces.length,
-                      itemBuilder: (context, index) {
-                        var place = popularPlaces[index];
-                        return Card(
-                          elevation: 4,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          margin: const EdgeInsets.only(right: 16.0),
-                          child: Container(
-                            width: 120,
-                            padding: const EdgeInsets.all(8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  height: 80,
-                                  color: Colors.grey[300], // Placeholder for image
-                                  child: Icon(Icons.place, size: 50), // Placeholder icon
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  place['name']!,
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                Text(place['location']!),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
+          // **Nombre del Bloque (centrado y encima del oval)**
+          Positioned(
+            top: 50,
+            left: MediaQuery.of(context).size.width / 2 - 80,
+            child: Text(
+              '${viewModel.building?['name'] ?? ''}',
+              style: const TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
           ),
+
+          // **Contenido principal**
+          if (viewModel.isLoading)
+            const Center(child: CircularProgressIndicator())
+          else if (viewModel.error != null)
+            Center(child: Text(viewModel.error!))
+          else if (viewModel.building != null) ...[
+              SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 270), // 🔹 Espacio extra para que la imagen no se superponga con los elementos
+
+                    // ** Botones: Indicaciones y Añadir a Favoritos**
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: () {},
+                            icon: const Icon(Icons.directions, size: 20),
+                            label: const Text('Cómo llegar', style: TextStyle(fontSize: 14)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFEA1D5D),
+                              foregroundColor: Colors.white,
+                              iconColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              textStyle: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          ElevatedButton.icon(
+                            onPressed: () {},
+                            icon: const Icon(Icons.favorite_border, size: 20),
+                            label: const Text('Favoritos', style: TextStyle(fontSize: 14)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFEA1D5D),
+                              foregroundColor: Colors.white,
+                              iconColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              textStyle: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // ** Barra de búsqueda**
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: "Where to go?",
+                          filled: true,
+                          fillColor: Colors.white,
+                          prefixIcon: const Icon(Icons.search),
+                          suffixIcon: const Icon(Icons.filter_list),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // ** Lugares Populares**
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text(
+                        'Lugares Populares',
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // ** Lista de Lugares**
+                    SizedBox(
+                      height: 150,
+                      child: viewModel.places.isNotEmpty
+                          ? ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: viewModel.places.length,
+                        itemBuilder: (context, index) {
+                          final place = viewModel.places[index];
+                          return PlaceCard(
+                            imagePath: place['url_image'] ?? '',
+                            title: place['name'],
+                            subtitle: 'Piso: ${place['floor']}',
+                          );
+                        },
+                      )
+                          : const Center(child: Text("No hay lugares disponibles")),
+                    ),
+                  ],
+                ),
+              ),
+            ]
         ],
       ),
     );
