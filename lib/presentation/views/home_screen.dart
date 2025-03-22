@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import '../view_models/home_view_model.dart';
 import '../widgets/ovals_painter.dart';
 import '../widgets/section_header.dart';
-import '../widgets/place_card.dart'; 
-import '../widgets/category_list.dart'; // Asegúrate de importar el nuevo widget
+import '../widgets/place_card.dart';
+import '../widgets/category_list.dart'; 
 import 'see_all_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -15,10 +15,11 @@ class HomeScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) {
         final viewModel = HomeViewModel();
-        viewModel.loadUserName();  
-        viewModel.loadUserAvatar(); 
-        viewModel.loadLocations(); // Cargar ubicaciones
-        viewModel.loadRecommendations(); // Cargar recomendaciones
+        viewModel.loadUserName();
+        viewModel.loadUserAvatar();
+        viewModel.loadLocations();
+        viewModel.loadRecommendations();
+        viewModel.loadMostSearchedLocation();
         return viewModel;
       },
       child: Scaffold(
@@ -53,7 +54,8 @@ class HomeScreen extends StatelessWidget {
                               radius: 24,
                               backgroundImage: viewModel.avatarUrl != null
                                   ? NetworkImage(viewModel.avatarUrl!)
-                                  : const AssetImage('assets/profile.jpg') as ImageProvider,
+                                  : const AssetImage('assets/profile.jpg')
+                                      as ImageProvider,
                             ),
                           ],
                         );
@@ -78,65 +80,107 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 16),
 
                     // Categorías
-                    const CategoryList(),  // Usando el widget CategoryList
+                    const CategoryList(),
+                    const SizedBox(height: 16),
 
-                    const SizedBox(height: 16), // Espacio entre categorías y la sección "Buildings"
+                    // ScrollView
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Sección Most Popular
+                            const SectionHeader(
+                                title: "Most Popular",
+                                destinationScreen: SeeAllScreen()),
+                            SizedBox(
+                              height: 180,
+                              child: Consumer<HomeViewModel>(
+                                builder: (context, viewModel, child) {
+                                  final location =
+                                      viewModel.mostSearchedLocation;
 
-                    // Sección de "Buildings"
-                    const SectionHeader(title: "Buildings", destinationScreen: SeeAllScreen()),
-                    SizedBox(
-                      height: 180, // Evitar el desbordamiento
-                      child: Consumer<HomeViewModel>(
-                        builder: (context, viewModel, child) {
-                          if (viewModel.locations.isEmpty) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
+                                  if (location == null) {
+                                    return const SizedBox();
+                                  }
 
-                          return ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: viewModel.locations.map((location) {
-                              return PlaceCard(
-                                imagePath: location['image_url'], // Asegúrate de que `image_url` esté correcto
-                                title: location['name'],
-                                subtitle: location['description'],
-                              );
-                            }).toList(),
-                          );
-                        },
-                      ),
-                    ),
-
-                    const SizedBox(height: 16), // Espacio entre las secciones
-
-                    // Sección de "Recommendations"
-                    const SectionHeader(title: "Recommendations", destinationScreen: SeeAllScreen()),
-                    SizedBox(
-                      height: 180, // Evitar el desbordamiento
-                      child: Consumer<HomeViewModel>(
-                        builder: (context, viewModel, child) {
-                          if (viewModel.recommendations.isEmpty) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-
-                          return ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: viewModel.recommendations.map((recommendation) {
-                              return PlaceCard(
-                                imagePath: recommendation['image_url'], // Asegúrate de que `image_url` esté correcto
-                                title: recommendation['title'],
-                                subtitle: recommendation['description'],
-                                onTap: () {
-                                  // Agrega la acción al tocar la tarjeta
-                                  viewModel.onRecommendationTap(recommendation);
+                                  return PlaceCard(
+                                    imagePath: location['image_url'] ??
+                                        'assets/default_image.png',
+                                    title: location['location_name'] ??
+                                        'Unknown Location',
+                                    subtitle: location['description'] ??
+                                        'No description available',
+                                  );
                                 },
-                              );
-                            }).toList(),
-                          );
-                        },
+                              ),
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            // Sección Buildings
+                            const SectionHeader(
+                                title: "Buildings",
+                                destinationScreen: SeeAllScreen()),
+                            SizedBox(
+                              height: 180,
+                              child: Consumer<HomeViewModel>(
+                                builder: (context, viewModel, child) {
+                                  if (viewModel.locations.isEmpty) {
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                  return ListView(
+                                    scrollDirection: Axis.horizontal,
+                                    children:
+                                        viewModel.locations.map((location) {
+                                      return PlaceCard(
+                                        imagePath: location['image_url'],
+                                        title: location['name'],
+                                        subtitle: location['description'],
+                                      );
+                                    }).toList(),
+                                  );
+                                },
+                              ),
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            // Sección Recommendations
+                            const SectionHeader(
+                                title: "Recommendations",
+                                destinationScreen: SeeAllScreen()),
+                            SizedBox(
+                              height: 180,
+                              child: Consumer<HomeViewModel>(
+                                builder: (context, viewModel, child) {
+                                  if (viewModel.recommendations.isEmpty) {
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                  return ListView(
+                                    scrollDirection: Axis.horizontal,
+                                    children: viewModel.recommendations
+                                        .map((recommendation) {
+                                      return PlaceCard(
+                                        imagePath: recommendation['image_url'],
+                                        title: recommendation['title'],
+                                        subtitle: recommendation['description'],
+                                        onTap: () {
+                                          viewModel.onRecommendationTap(
+                                              recommendation);
+                                        },
+                                      );
+                                    }).toList(),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
