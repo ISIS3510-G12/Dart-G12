@@ -57,10 +57,6 @@ class DistanceCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            "Cl. 19A #1e-37, Bogotá",
-            style: TextStyle(color: Colors.grey, fontSize: 16),
-          ),
           const SizedBox(height: 8),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
