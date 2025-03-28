@@ -27,6 +27,7 @@ class AnalyticsService {
             'event_id': eventId ?? 0,
             'event_type': eventType ?? 0,
             'location_id': locationId ?? 0,
+            'created_at': DateTime.now().toIso8601String(),
           },
         );
       }
@@ -57,6 +58,7 @@ class AnalyticsService {
         properties: {
           'location_id': locationId,
           'location_name': locationName,
+          'created_at': DateTime.now().toIso8601String(),
         },
       );
 
