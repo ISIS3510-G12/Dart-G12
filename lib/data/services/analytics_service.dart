@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
 
 class AnalyticsService {
   static Future<void> logUserAction({
@@ -37,6 +38,16 @@ class AnalyticsService {
         'location_id': locationId,
         'created_at': DateTime.now().toIso8601String(),
       });
+
+      // Registrar evento en PostHog correctamente
+      await Posthog().capture(
+        eventName: 'location_searched', // Nombre del evento
+        properties: {
+          'location_id': locationId,
+          'location_name': locationName,
+        },
+      );
+
       print('Location search registered: $locationId, $locationName');
     } catch (error) {
       print('Error registering location search: $error');
