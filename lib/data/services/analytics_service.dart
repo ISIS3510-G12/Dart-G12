@@ -18,6 +18,18 @@ class AnalyticsService {
         'location_id': locationId,
         'created_at': DateTime.now().toIso8601String(),
       });
+
+      // Si el tipo de acción es 'consult_event', registramos el evento en PostHog
+      if (actionType == 'consult_event') {
+        await Posthog().capture(
+          eventName: 'consult_event', // Nombre del evento
+          properties: {
+            'event_id': eventId ?? 0,
+            'event_type': eventType ?? 0,
+            'location_id': locationId ?? 0,
+          },
+        );
+      }
       print('Evento registrado con éxito: $actionType, eventId: $eventId, locationId: $locationId');
     } catch (error) {
       print('Error al registrar evento: $error');
