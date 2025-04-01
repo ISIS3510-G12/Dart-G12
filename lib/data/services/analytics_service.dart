@@ -31,6 +31,18 @@ class AnalyticsService {
           },
         );
       }
+
+       // Evento genérico de engagement por zona
+      if (locationId != null) {
+        await Posthog().capture(
+          eventName: 'zone_engagement',
+          properties: {
+            'feature': actionType,
+            'location_id': locationId,
+            'created_at': DateTime.now().toIso8601String(),
+          },
+        );
+      }
       print('Evento registrado con éxito: $actionType, eventId: $eventId, locationId: $locationId');
     } catch (error) {
       print('Error al registrar evento: $error');
@@ -58,6 +70,16 @@ class AnalyticsService {
         properties: {
           'location_id': locationId,
           'location_name': locationName,
+          'created_at': DateTime.now().toIso8601String(),
+        },
+      );
+
+      // Evento de zona engagement
+      await Posthog().capture(
+        eventName: 'zone_engagement',
+        properties: {
+          'feature': 'location_search',
+          'location_id': locationId,
           'created_at': DateTime.now().toIso8601String(),
         },
       );
