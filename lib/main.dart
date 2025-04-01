@@ -12,7 +12,7 @@ void main() async {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkdmRlYmliZWdneWNqYWV5cGNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIzMzYxNTEsImV4cCI6MjA1NzkxMjE1MX0.bUhJdVbWwo018EzJfEdkHuK6ZqaTrXlys07Kb6CTTFM',
   );
 
-  final config = PostHogConfig('phx_doPSkw2mt705QFJg38ru3XsAh77ulHN0NMRnThadLkU5u91');
+  final config = PostHogConfig('phc_PCD1K67CWELcSvOkUlqlIyk84GhhhgK9hHBbXmfh8iP');
   config.debug = true;
   config.captureApplicationLifecycleEvents = true;
   config.host = 'https://us.i.posthog.com';
