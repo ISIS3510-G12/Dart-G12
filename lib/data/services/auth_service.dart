@@ -1,7 +1,8 @@
+import 'package:dart_g12/data/services/supabase_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthService {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  final _supabase = SupabaseService().client;
 
   // Sign in with email and password
 
