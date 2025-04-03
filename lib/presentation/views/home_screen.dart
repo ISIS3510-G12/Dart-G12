@@ -6,6 +6,7 @@ import '../widgets/section_header.dart';
 import '../widgets/place_card.dart';
 import '../widgets/category_list.dart'; 
 import 'see_all_screen.dart';
+import '../widgets/card.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -111,6 +112,17 @@ class HomeScreen extends StatelessWidget {
                                         'Unknown Location',
                                     subtitle: location['description'] ??
                                         'No description available',
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => CardScreen(
+                                            buildingId: location['location_id'],
+                                          ),
+                                        ),
+                                      );
+                                      
+                                    },
                                   );
                                 },
                               ),
@@ -139,6 +151,17 @@ class HomeScreen extends StatelessWidget {
                                         imagePath: location['image_url'],
                                         title: location['name'],
                                         subtitle: location['description'],
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  CardScreen(
+                                                buildingId: location['id'],
+                                              ),
+                                            ),
+                                          );
+                                        },
                                       );
                                     }).toList(),
                                   );
