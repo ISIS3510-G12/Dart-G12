@@ -3,7 +3,6 @@ import 'package:dart_g12/data/services/supabase_service.dart';
 class MapRepository {
   final supabase = SupabaseService().client;
 
-  /// Obtiene las ubicaciones desde la tabla 'locations'
   Future<List<Map<String, dynamic>>> fetchLocations() async {
     final response = await supabase.from('locations').select();
     return List<Map<String, dynamic>>.from(response);

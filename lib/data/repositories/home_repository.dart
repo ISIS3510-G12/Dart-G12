@@ -1,5 +1,6 @@
 import 'package:dart_g12/data/services/supabase_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:developer';
 
 class HomeRepository {
   final supabase = SupabaseService().client;
@@ -8,37 +9,31 @@ class HomeRepository {
 
   Future<List<Map<String, dynamic>>> fetchLocations() async {
     try {
-      final response = await supabase.from('locations').select();
-
-      if (response is List) {
-        return List<Map<String, dynamic>>.from(response);
-      } else {
-        return [];
-      }
+      final List<dynamic> response = await supabase.from('locations').select().limit(10);
+      return response.map((e) => Map<String, dynamic>.from(e)).toList();
     } catch (error) {
-      print('Error fetching locations: $error');
+      log('Error fetching locations: $error');
       return [];
     }
   }
+
 
   Future<List<Map<String, dynamic>>> fetchRecommendations() async {
     try {
-      final response = await supabase
+      final List<dynamic> response = await supabase
           .from('events')
-          .select('*, locations(name)') // Incluye el nombre del lugar
-          .gte('end_time',
-              DateTime.now().toIso8601String()); // Solo eventos futuros
+          .select('*, locations(name)') 
+          .gte('end_time', DateTime.now().toIso8601String()) 
+          .order('end_time', ascending: true)
+          .limit(10); 
 
-      if (response is List) {
-        return List<Map<String, dynamic>>.from(response);
-      } else {
-        return [];
-      }
+      return response.map((e) => Map<String, dynamic>.from(e)).toList();
     } catch (error) {
-      print('Error fetching recommendations: $error');
+      log('Error fetching recommendations: $error');
       return [];
     }
   }
+
 
   Future<Map<String, dynamic>?> fetchMostSearchedLocation() async {
     final response = await Supabase.instance.client

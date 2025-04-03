@@ -10,7 +10,8 @@ class LocationRepository {
   Future<List<Map<String, dynamic>>> fetchLocations() async {
     // Obtener la ubicación actual del usuario
     Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+      locationSettings: LocationSettings(accuracy: LocationAccuracy.best)
+    );
     final double userLat = position.latitude;
     final double userLon = position.longitude;
 
