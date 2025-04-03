@@ -25,7 +25,9 @@ class CardScreenState extends State<CardScreen> {
 
   Future<void> _fetchBuildingDetails() async {
     await viewModel.fetchBuildingDetails(widget.buildingId);
-    setState(() {}); // Actualizamos el estado después de obtener los datos
+    if (mounted) {
+      setState(() {}); 
+    }
   }
 
   @override
