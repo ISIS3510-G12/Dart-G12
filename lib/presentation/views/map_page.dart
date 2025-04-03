@@ -11,7 +11,7 @@ import '../widgets/distance_card.dart';
 import '../widgets/steps_card.dart';
 
 class MapPage extends StatefulWidget {
-  const MapPage({Key? key}) : super(key: key);
+  const MapPage({super.key});
 
   @override
   State<MapPage> createState() => _MapPageState();
@@ -19,13 +19,16 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   late final MapViewModel viewModel;
+  bool _isInitialized = false; // Para evitar múltiples inicializaciones
 
   @override
-  void initState() {
-    super.initState();
-    // Instanciar el ViewModel y solicitar la ubicación actual.
-    viewModel = MapViewModel();
-    viewModel.getCurrentLocation();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      viewModel = MapViewModel();
+      viewModel.getCurrentLocation();
+      _isInitialized = true; // Evita múltiples llamadas
+    }
   }
 
   @override
@@ -60,28 +63,23 @@ class _MapPageState extends State<MapPage> {
                   },
                 ),
               ),
-              onSwap: () {
-                viewModel.swapLocations();
-              },
+              onSwap: viewModel.swapLocations,
               onMoreOptions: () {},
             ),
             body: Stack(
               children: [
-                // Asumiendo que MapView internamente usa GoogleMap, se debe habilitar myLocationEnabled
-                MapView(
-                  initialCameraPosition: CameraPosition(
-                    // Puedes usar una posición fija o la última conocida (sin recenter)
-                    target: const LatLng(4.602196, -74.065816),
-                    zoom: 17,
+                if (_isInitialized) // Solo carga el mapa si ya se inicializó
+                  MapView(
+                    initialCameraPosition: CameraPosition(
+                      target: const LatLng(4.602196, -74.065816),
+                      zoom: 17,
+                    ),
+                    polylines: viewModel.polylines,
+                    circles: viewModel.circles,
+                    onMapCreated: (controller) {
+                      viewModel.mapController = controller;
+                    },
                   ),
-                  polylines: viewModel.polylines,
-                  circles: viewModel.circles,
-                  
-                  onMapCreated: (controller) {
-                    viewModel.mapController = controller;
-                    // Se elimina la animación de la cámara para que no recentre el mapa
-                  },
-                ),
                 if (viewModel.fromLocation != null &&
                     viewModel.toLocation != null)
                   Positioned(

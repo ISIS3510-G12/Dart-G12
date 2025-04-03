@@ -3,7 +3,6 @@ import '../view_models/see_all_view_model.dart';
 import '../widgets/ovals_painter.dart';
 import '../widgets/place_card.dart';
 import '../widgets/bottom_navbar.dart';
-import '../views/main_screen.dart';
 import '../widgets/card.dart';
 
 class SeeAllScreen extends StatefulWidget {
