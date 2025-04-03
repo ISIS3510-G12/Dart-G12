@@ -5,6 +5,7 @@ class ProfileViewModel extends ChangeNotifier {
   final AuthService _authService = AuthService();
   
   String? currentUsername;
+  String? avatarUrl;
 
   ProfileViewModel() {
     _loadUserData();
@@ -17,5 +18,13 @@ class ProfileViewModel extends ChangeNotifier {
 
   Future<void> logout() async {
     await _authService.signOut();
+  }
+
+  void loadUserAvatar() {
+    final avatar = _authService.getUserAvatar();
+    if (avatar != null && avatar.isNotEmpty) {
+      avatarUrl = avatar;
+      notifyListeners();
+    }
   }
 }

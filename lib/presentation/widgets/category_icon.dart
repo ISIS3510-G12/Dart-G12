@@ -14,8 +14,8 @@ class CategoryIcon extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundColor: Colors.grey.shade200,
-            child: Icon(icon, color: Colors.black),
+            backgroundColor: Color(0xFF2E1F54).withOpacity(0.3),
+            child: Icon(icon, color: Color(0xFF050F2C)),
           ),
           const SizedBox(height: 4),
           Text(label, style: const TextStyle(fontSize: 12)),

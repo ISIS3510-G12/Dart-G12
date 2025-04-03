@@ -31,11 +31,13 @@ class ProfilePage extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       child: Row(
                         children: [
-                          const CircleAvatar(
-                            radius: 40,
-                            backgroundImage:
-                                NetworkImage('https://placekitten.com/200/200'),
-                          ),
+                            CircleAvatar(
+                              radius: 24,
+                              backgroundImage: viewModel.avatarUrl != null
+                                  ? NetworkImage(viewModel.avatarUrl!)
+                                  : const AssetImage('assets/images/profile.jpg')
+                                      as ImageProvider,
+                            ),
                           const SizedBox(width: 15),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

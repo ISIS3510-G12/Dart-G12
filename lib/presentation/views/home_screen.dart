@@ -54,7 +54,7 @@ class HomeScreen extends StatelessWidget {
                               radius: 24,
                               backgroundImage: viewModel.avatarUrl != null
                                   ? NetworkImage(viewModel.avatarUrl!)
-                                  : const AssetImage('assets/profile.jpg')
+                                  : const AssetImage('assets/images/profile.jpg')
                                       as ImageProvider,
                             ),
                           ],
@@ -150,7 +150,7 @@ class HomeScreen extends StatelessWidget {
 
                             // Sección Recommendations
                             const SectionHeader(
-                                title: "Recommendations",
+                                title: "Events",
                                 destinationScreen: SeeAllScreen()),
                             SizedBox(
                               height: 180,
