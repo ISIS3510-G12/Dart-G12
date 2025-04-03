@@ -1,7 +1,8 @@
+import 'package:dart_g12/data/services/supabase_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomeRepository {
-  final SupabaseClient supabase = Supabase.instance.client;
+  final supabase = SupabaseService().client;
 
   HomeRepository();
 

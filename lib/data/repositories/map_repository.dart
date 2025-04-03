@@ -1,8 +1,7 @@
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:dart_g12/data/services/supabase_service.dart';
 
 class MapRepository {
-  final supabase = Supabase.instance.client;
+  final supabase = SupabaseService().client;
 
   /// Obtiene las ubicaciones desde la tabla 'locations'
   Future<List<Map<String, dynamic>>> fetchLocations() async {
