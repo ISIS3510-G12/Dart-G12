@@ -40,13 +40,21 @@ class HomeRepository {
     }
   }
 
-  Future<Map<String, dynamic>?> fetchMostSearchedLocation() async {
-    final response = await Supabase.instance.client
-        .from('pl_locations_view')
-        .select('*')
-        .limit(1)
-        .single();
+  Future<List<Map<String, dynamic>>> fetchMostSearchedLocations() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('pl_locations_view')
+          .select('*')
+          .limit(8); // Obtener los primeros 8 lugares más buscados
 
-    return response;
+      if (response is List) {
+        return List<Map<String, dynamic>>.from(response);
+      } else {
+        return [];
+      }
+    } catch (error) {
+      print('Error fetching most searched locations: $error');
+      return [];
+    }
   }
 }

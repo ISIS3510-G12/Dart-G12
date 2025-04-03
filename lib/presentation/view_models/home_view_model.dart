@@ -11,11 +11,14 @@ class HomeViewModel extends ChangeNotifier {
   String? _avatarUrl;
   List<Map<String, dynamic>> _locations = [];
   List<Map<String, dynamic>> _recommendations = [];
+  List<Map<String, dynamic>> _mostSearchedLocations = [];
 
   String get userName => _userName;
   String? get avatarUrl => _avatarUrl;
   List<Map<String, dynamic>> get locations => _locations;
   List<Map<String, dynamic>> get recommendations => _recommendations;
+  List<Map<String, dynamic>> get mostSearchedLocations =>
+      _mostSearchedLocations;
 
   HomeViewModel() {
     _authService = AuthService();
@@ -72,16 +75,13 @@ class HomeViewModel extends ChangeNotifier {
     );
   }
 
-  Map<String, dynamic>? _mostSearchedLocation;
-  Map<String, dynamic>? get mostSearchedLocation => _mostSearchedLocation;
-
-  Future<void> loadMostSearchedLocation() async {
+  Future<void> loadMostSearchedLocations() async {
     try {
-      _mostSearchedLocation = await _homeRepository.fetchMostSearchedLocation();
-      print('Loaded Most Searched Location: $_mostSearchedLocation'); // Debugging
+      _mostSearchedLocations =
+          await _homeRepository.fetchMostSearchedLocations();
       notifyListeners();
     } catch (error) {
-      print('Error al cargar el lugar más buscado: $error');
+      print('Error al cargar los lugares más buscados: $error');
     }
   }
 }

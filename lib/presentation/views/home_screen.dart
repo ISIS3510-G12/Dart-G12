@@ -4,7 +4,7 @@ import '../view_models/home_view_model.dart';
 import '../widgets/ovals_painter.dart';
 import '../widgets/section_header.dart';
 import '../widgets/place_card.dart';
-import '../widgets/category_list.dart'; 
+import '../widgets/category_list.dart';
 import 'see_all_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -19,7 +19,7 @@ class HomeScreen extends StatelessWidget {
         viewModel.loadUserAvatar();
         viewModel.loadLocations();
         viewModel.loadRecommendations();
-        viewModel.loadMostSearchedLocation();
+        viewModel.loadMostSearchedLocations();
         return viewModel;
       },
       child: Scaffold(
@@ -54,7 +54,8 @@ class HomeScreen extends StatelessWidget {
                               radius: 24,
                               backgroundImage: viewModel.avatarUrl != null
                                   ? NetworkImage(viewModel.avatarUrl!)
-                                  : const AssetImage('assets/images/profile.jpg')
+                                  : const AssetImage(
+                                          'assets/images/profile.jpg')
                                       as ImageProvider,
                             ),
                           ],
@@ -91,26 +92,31 @@ class HomeScreen extends StatelessWidget {
                           children: [
                             // Sección Most Popular
                             const SectionHeader(
-                                title: "Most Popular",
-                                destinationScreen: SeeAllScreen()),
+                              title: "Most Popular",
+                              destinationScreen: SeeAllScreen(),
+                            ),
                             SizedBox(
                               height: 180,
                               child: Consumer<HomeViewModel>(
                                 builder: (context, viewModel, child) {
-                                  final location =
-                                      viewModel.mostSearchedLocation;
-
-                                  if (location == null) {
-                                    return const SizedBox();
+                                  if (viewModel.mostSearchedLocations.isEmpty) {
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
                                   }
-
-                                  return PlaceCard(
-                                    imagePath: location['image_url'] ??
-                                        'assets/default_image.png',
-                                    title: location['location_name'] ??
-                                        'Unknown Location',
-                                    subtitle: location['description'] ??
-                                        'No description available',
+                                  return ListView(
+                                    scrollDirection: Axis.horizontal,
+                                    children: viewModel.mostSearchedLocations
+                                        .map((location) {
+                                      return PlaceCard(
+                                        imagePath: location['image_url'] ??
+                                            'assets/default_image.png',
+                                        title: location['location_name'] ??
+                                            'Unknown Location',
+                                        subtitle: location['description'] ??
+                                            'No description available',
+                                      );
+                                    }).toList(),
                                   );
                                 },
                               ),
