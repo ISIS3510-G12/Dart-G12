@@ -66,12 +66,7 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 16),
 
                     // Barra de búsqueda
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: ChatWidget(),
-                    ),
+                    const ChatWidget(),
                     const SizedBox(height: 16),
 
                     // Categorías

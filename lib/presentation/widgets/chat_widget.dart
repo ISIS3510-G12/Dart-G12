@@ -1,35 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:dart_g12/data/services/chat_service.dart';
+import 'package:dart_g12/presentation/view_models/chat_viewmodel.dart';
 
 class ChatWidget extends StatefulWidget {
   const ChatWidget({super.key});
-  
+
   @override
   ChatWidgetState createState() => ChatWidgetState();
 }
 
 class ChatWidgetState extends State<ChatWidget> {
-  final ChatService _chatService = ChatService();
+  final ChatViewModel _viewModel = ChatViewModel();
   final TextEditingController _controller = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
-  List<Map<String, String>> _messages = [];
   bool _isExpanded = false;
   OverlayEntry? _overlayEntry;
 
   void _sendMessage(String message) async {
-    String userMessage = message.trim();
-    if (userMessage.isEmpty) return;
+    String trimmedMessage = message.trim();
+    if (trimmedMessage.isEmpty) return;
 
-    setState(() {
-      _messages.add({"role": "user", "content": userMessage});
-    });
+    await _viewModel.sendMessage(trimmedMessage);
+
+    // Actualiza la UI para reflejar los cambios en el ViewModel.
+    setState(() {});
     _controller.clear();
     _searchController.clear();
-
-    String response = await _chatService.sendMessage(userMessage);
-    setState(() {
-      _messages.add({"role": "assistant", "content": response});
-    });
   }
 
   void _toggleChat() {
@@ -41,6 +36,12 @@ class ChatWidgetState extends State<ChatWidget> {
   }
 
   void _showOverlay() {
+    // Si ya existe el overlay, solo se llama markNeedsBuild para actualizarlo.
+    if (_overlayEntry != null) {
+      _overlayEntry!.markNeedsBuild();
+      return;
+    }
+
     _overlayEntry = OverlayEntry(
       builder: (context) => Positioned.fill(
         child: Material(
@@ -55,12 +56,20 @@ class ChatWidgetState extends State<ChatWidget> {
               ),
               AnimatedContainer(
                 duration: Duration(milliseconds: 300),
-                width: _isExpanded ? MediaQuery.of(context).size.width : 300,
-                height: _isExpanded ? MediaQuery.of(context).size.height * 0.75 : 400,
+                width: _isExpanded
+                    ? MediaQuery.of(context).size.width
+                    : 300,
+                height: _isExpanded
+                    ? MediaQuery.of(context).size.height * 0.75
+                    : 400,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: _isExpanded ? BorderRadius.zero : BorderRadius.circular(20),
-                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)],
+                  borderRadius: _isExpanded
+                      ? BorderRadius.zero
+                      : BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black26, blurRadius: 10)
+                  ],
                 ),
                 child: Column(
                   children: [
@@ -72,44 +81,57 @@ class ChatWidgetState extends State<ChatWidget> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text("ChatBot",
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold)),
                           Row(
                             children: [
                               IconButton(
-                                icon: Icon(_isExpanded ? Icons.fullscreen_exit : Icons.fullscreen),
+                                icon: Icon(_isExpanded
+                                    ? Icons.fullscreen_exit
+                                    : Icons.fullscreen),
                                 onPressed: () {
                                   setState(() {
                                     _isExpanded = !_isExpanded;
                                   });
-                                  _showOverlay(); // Re-renderiza el overlay
+                                  _overlayEntry?.markNeedsBuild();
                                 },
                               ),
-                              IconButton(icon: Icon(Icons.close), onPressed: _removeOverlay),
+                              IconButton(
+                                  icon: Icon(Icons.close),
+                                  onPressed: _removeOverlay),
                             ],
                           ),
                         ],
                       ),
                     ),
-                    // Mensajes
+                    // Lista de Mensajes
                     Expanded(
                       child: ListView.builder(
                         padding: EdgeInsets.all(10),
-                        itemCount: _messages.length,
+                        itemCount: _viewModel.messages.length,
                         itemBuilder: (context, index) {
-                          final message = _messages[index];
+                          final message = _viewModel.messages[index];
                           final isUser = message["role"] == "user";
                           return Align(
-                            alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                            alignment: isUser
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
                             child: Container(
                               margin: EdgeInsets.symmetric(vertical: 4),
                               padding: EdgeInsets.all(12),
-                              constraints:
-                                  BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.6),
+                              constraints: BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width *
+                                          0.6),
                               decoration: BoxDecoration(
-                                color: isUser ? Colors.blueAccent : Colors.grey[300],
+                                color: isUser
+                                    ? Colors.blueAccent
+                                    : Colors.grey[300],
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              child: Text(message["content"]!, style: TextStyle(fontSize: 16)),
+                              child: Text(message["content"]!,
+                                  style: TextStyle(fontSize: 16)),
                             ),
                           );
                         },
@@ -131,8 +153,8 @@ class ChatWidgetState extends State<ChatWidget> {
                                   borderRadius: BorderRadius.circular(30),
                                   borderSide: BorderSide.none,
                                 ),
-                                contentPadding:
-                                    EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 14),
                               ),
                             ),
                           ),
@@ -141,7 +163,8 @@ class ChatWidgetState extends State<ChatWidget> {
                             backgroundColor: Colors.blueAccent,
                             child: IconButton(
                               icon: Icon(Icons.send, color: Colors.white),
-                              onPressed: () => _sendMessage(_controller.text),
+                              onPressed: () =>
+                                  _sendMessage(_controller.text),
                             ),
                           ),
                         ],
@@ -156,7 +179,7 @@ class ChatWidgetState extends State<ChatWidget> {
       ),
     );
 
-    Overlay.of(context).insert(_overlayEntry!);
+    Overlay.of(context)!.insert(_overlayEntry!);
   }
 
   void _removeOverlay() {
