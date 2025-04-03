@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/repositories/event_repository.dart';
 import '../views/main_screen.dart';
+import '../../data/services/analytics_service.dart';
 
 class EventViewModel extends ChangeNotifier {
   final EventRepository repository = EventRepository();
@@ -44,6 +45,13 @@ class EventViewModel extends ChangeNotifier {
     try {
       // Usamos el repository para obtener los detalles de un evento específico
       _event = await repository.fetchEventById(eventId);
+
+      await AnalyticsService.logUserAction(
+          actionType: 'consult_event',
+          eventId: eventId,
+          eventType: _event?['type'],
+          title: _event?['title'],
+          locationId: _event?['location_id']);
     } catch (e) {
       _error = e.toString();
     }
