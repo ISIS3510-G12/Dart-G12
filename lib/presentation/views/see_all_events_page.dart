@@ -4,6 +4,7 @@ import '../widgets/ovals_painter.dart';
 import '../widgets/place_card.dart'; // Widget para mostrar un evento
 import '../widgets/bottom_navbar.dart';
 import '../views/main_screen.dart';
+import '../widgets/card_event.dart'; // Widget del detalle
 
 class EventScreen extends StatefulWidget {
   final int initialIndex;
@@ -47,7 +48,7 @@ class _SeeAllEventsScreenState extends State<EventScreen> {
     );
   }
 
-  // Función para formatear la fecha de inicio (start_time) sin dependencias externas
+  // Función para formatear la fecha de inicio (start_time)
   String formatDateTime(String dateTime) {
     try {
       final DateTime parsedDate = DateTime.parse(dateTime);
@@ -115,7 +116,13 @@ class _SeeAllEventsScreenState extends State<EventScreen> {
                         final formattedDate = formatDateTime(event['start_time']); // Formateamos la fecha
                         return GestureDetector(
                           onTap: () {
-                            // Aquí puedes manejar la navegación al detalle del evento
+                            // Navegar a la pantalla de detalle del evento
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CardEvent(eventId: event['id']),
+                              ),
+                            );
                           },
                           child: PlaceCard(
                             imagePath: event['image_url'] ?? '',

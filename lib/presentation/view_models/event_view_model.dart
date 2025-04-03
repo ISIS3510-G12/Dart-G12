@@ -5,6 +5,7 @@ import '../views/main_screen.dart';
 class EventViewModel extends ChangeNotifier {
   final EventRepository repository = EventRepository();
   List<Map<String, dynamic>> _events = [];
+  Map<String, dynamic>? _event;  // Almacenará los detalles del evento
   bool _isLoading = false;
   String? _error;
   int _selectedIndex = 0;
@@ -13,6 +14,7 @@ class EventViewModel extends ChangeNotifier {
 
   /// Getters
   List<Map<String, dynamic>> get events => _events;
+  Map<String, dynamic>? get event => _event;  // Obtener detalles del evento
   bool get isLoading => _isLoading;
   String? get error => _error;
   int get selectedIndex => _selectedIndex;
@@ -25,6 +27,23 @@ class EventViewModel extends ChangeNotifier {
 
     try {
       _events = await repository.fetchEvents();
+    } catch (e) {
+      _error = e.toString();
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  /// Método para obtener los detalles de un evento desde Supabase
+  Future<void> fetchEventDetails(int eventId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      // Usamos el repository para obtener los detalles de un evento específico
+      _event = await repository.fetchEventById(eventId);
     } catch (e) {
       _error = e.toString();
     }
@@ -46,6 +65,19 @@ class EventViewModel extends ChangeNotifier {
       MaterialPageRoute(
         builder: (context) => MainScreen(initialIndex: index),
       ),
+    );
+  }
+
+  void updateSelectedIndex(int index) {
+    _selectedIndex = index;
+    notifyListeners();
+  }
+
+  void goToMapPage(BuildContext context) {
+    updateSelectedIndex(2);  // Índice 2 es para la página del mapa
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const MainScreen(initialIndex: 2)),
     );
   }
 }
