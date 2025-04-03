@@ -23,7 +23,7 @@ class HomeRepository {
   Future<List<Map<String, dynamic>>> fetchRecommendations() async {
     try {
       final response = await supabase
-          .from('recommendations')
+          .from('events')
           .select('*, locations(name)') // Incluye el nombre del lugar
           .gte('end_time',
               DateTime.now().toIso8601String()); // Solo eventos futuros
