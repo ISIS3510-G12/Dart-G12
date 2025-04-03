@@ -6,7 +6,7 @@ class EventRepository {
 
   EventRepository();
 
-  /// 🔹 Obtener todos los eventos y ordenarlos por proximidad al usuario
+  /// 🔹 Obtener todos los eventos futuros
   Future<List<Map<String, dynamic>>> fetchEvents() async {
     // Obtener la ubicación actual del usuario
     Position position = await Geolocator.getCurrentPosition(
@@ -14,32 +14,54 @@ class EventRepository {
     final double userLat = position.latitude;
     final double userLon = position.longitude;
 
-    // Obtener todos los eventos desde Supabase
-    final response = await supabase
-        .from('events')
-        .select('id, title, description, image_url, location_id, start_time, end_time, created_at, type');
+    try {
+      // Obtener eventos futuros desde Supabase (filtrando por `end_time`)
+      final response = await supabase
+          .from('events')
+          .select('id, title, description, image_url, location_id, start_time, end_time, created_at, type')
+          .gte('end_time', DateTime.now().toIso8601String()); // Solo eventos futuros
 
-    if (response.isEmpty) {
-      throw Exception('No se encontraron eventos.');
+      if (response.isEmpty) {
+        throw Exception('No se encontraron eventos.');
+      }
+
+      List<Map<String, dynamic>> events = List<Map<String, dynamic>>.from(response);
+
+      // Ordenar los eventos por proximidad al usuario
+      events.sort((a, b) {
+        double distanceA = Geolocator.distanceBetween(
+            userLat, userLon, a['latitude'], a['longitude']);
+        double distanceB = Geolocator.distanceBetween(
+            userLat, userLon, b['latitude'], b['longitude']);
+        return distanceA.compareTo(distanceB);
+      });
+
+      return events;
+
+    } catch (e) {
+      print('Error fetching events: $e');
+      return [];
     }
-
-    List<Map<String, dynamic>> events = List<Map<String, dynamic>>.from(response);
-
-    return events;
   }
 
-  /// 🔹 Obtener eventos por tipo
+  /// 🔹 Obtener eventos futuros por tipo
   Future<List<Map<String, dynamic>>> fetchEventsByType(String type) async {
-    final response = await supabase
-        .from('events')
-        .select('id, title, description, image_url, location_id, start_time, end_time, created_at, type')
-        .eq('type', type);
+    try {
+      final response = await supabase
+          .from('events')
+          .select('id, title, description, image_url, location_id, start_time, end_time, created_at, type')
+          .eq('type', type)
+          .gte('end_time', DateTime.now().toIso8601String()); // Solo eventos futuros
 
-    if (response.isEmpty) {
-      throw Exception('No se encontraron eventos del tipo: $type.');
+      if (response.isEmpty) {
+        throw Exception('No se encontraron eventos del tipo: $type.');
+      }
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      print('Error fetching events by type: $e');
+      return [];
     }
-
-    return List<Map<String, dynamic>>.from(response);
   }
 
   /// 🔹 Obtener un evento por su ID
@@ -53,7 +75,7 @@ class EventRepository {
     return response;
   }
 
-  /// 🔹 Obtener eventos con paginación
+  /// 🔹 Obtener eventos con paginación, solo futuros
   Future<List<Map<String, dynamic>>> fetchEventsPaginated(int page, int limit) async {
     final start = (page - 1) * limit;
     final end = start + limit - 1;
@@ -61,17 +83,20 @@ class EventRepository {
     final response = await supabase
         .from('events')
         .select('id, title, description, image_url, location_id, start_time, end_time, created_at, type')
-        .range(start, end);
+        .gte('end_time', DateTime.now().toIso8601String())
+        .range(start, end)
+        ; // Solo eventos futuros
 
     return List<Map<String, dynamic>>.from(response);
   }
 
-  /// 🔹 Obtener eventos de una ubicación específica
+  /// 🔹 Obtener eventos futuros de una ubicación específica
   Future<List<Map<String, dynamic>>> fetchEventsByLocation(int locationId) async {
     final response = await supabase
         .from('events')
         .select('id, title, description, image_url, location_id, start_time, end_time, created_at, type')
-        .eq('location_id', locationId);
+        .eq('location_id', locationId)
+        .gte('end_time', DateTime.now().toIso8601String()); // Solo eventos futuros
 
     if (response.isEmpty) {
       throw Exception('No se encontraron eventos para esta ubicación.');
