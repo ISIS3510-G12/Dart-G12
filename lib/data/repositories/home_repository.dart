@@ -43,9 +43,9 @@ class HomeRepository {
   Future<List<Map<String, dynamic>>> fetchMostSearchedLocations() async {
     try {
       final response = await Supabase.instance.client
-          .from('pl_locations_view')
+          .from('most_popular_user_interactions')
           .select('*')
-          .limit(8); // Obtener los primeros 8 lugares más buscados
+          .limit(8); 
 
       if (response is List) {
         return List<Map<String, dynamic>>.from(response);

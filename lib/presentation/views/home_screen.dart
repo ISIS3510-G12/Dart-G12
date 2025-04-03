@@ -110,8 +110,8 @@ class HomeScreen extends StatelessWidget {
                                         .map((location) {
                                       return PlaceCard(
                                         imagePath: location['image_url'] ??
-                                            'assets/default_image.png',
-                                        title: location['location_name'] ??
+                                            'assets/images/default_image.jpg',
+                                        title: location['title_or_name'] ??
                                             'Unknown Location',
                                         subtitle: location['description'] ??
                                             'No description available',
