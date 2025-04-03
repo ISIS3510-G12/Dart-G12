@@ -7,6 +7,7 @@ import '../widgets/place_card.dart';
 import '../widgets/category_list.dart'; 
 import 'see_all_screen.dart';
 import '../widgets/card.dart';
+import '../widgets/chat_widget.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -65,18 +66,11 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 16),
 
                     // Barra de búsqueda
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: "Where to go?",
-                        filled: true,
-                        fillColor: Colors.white,
-                        prefixIcon: const Icon(Icons.search),
-                        suffixIcon: const Icon(Icons.filter_list),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: ChatWidget(),
                     ),
                     const SizedBox(height: 16),
 
