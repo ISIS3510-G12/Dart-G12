@@ -55,4 +55,16 @@ class CardViewModel extends ChangeNotifier {
       MaterialPageRoute(builder: (context) => const MainScreen(initialIndex: 2)),
     );
   }
+
+    void onItemTapped(BuildContext context, int index) {
+    _selectedIndex = index;
+    notifyListeners();
+    Navigator.popUntil(context, (route) => route.isFirst);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MainScreen(initialIndex: index),
+      ),
+    );
+  }
 }
