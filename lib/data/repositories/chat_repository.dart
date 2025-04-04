@@ -1,5 +1,5 @@
 import 'dart:developer';
-import 'package:dart_g12/data/services/supabase_service.dart    ';
+import 'package:dart_g12/data/services/supabase_service.dart';
 
 class ChatRepository {
   final supabase = SupabaseService().client;
