@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:dart_g12/presentation/views/started_page.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
+import 'package:dart_g12/presentation/views/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: '/',
       routes: {
-        '/': (context) => const WelcomePage(),
+        '/': (context) => const SplashScreen(), // Pantalla de inicio
         '/home': (context) => const MainScreen(),
       },
     );
