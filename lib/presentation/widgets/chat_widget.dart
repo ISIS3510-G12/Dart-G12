@@ -81,7 +81,6 @@ class ChatWidgetState extends State<ChatWidget> {
                   ),
                   child: Column(
                     children: [
-                      // Header del chat
                       Container(
                         padding: EdgeInsets.all(10),
                         color: Colors.grey[200],
@@ -107,7 +106,6 @@ class ChatWidgetState extends State<ChatWidget> {
                           ],
                         ),
                       ),
-                      // Lista de mensajes con scroll automático
                       Expanded(
                         child: ListView.builder(
                           controller: _scrollController,
@@ -133,7 +131,6 @@ class ChatWidgetState extends State<ChatWidget> {
                           },
                         ),
                       ),
-                      // Input del chat
                       Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: Row(

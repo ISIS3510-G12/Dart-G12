@@ -9,6 +9,7 @@ import '../widgets/place_card.dart';
 import '../widgets/category_list.dart';
 import 'see_all_screen.dart';
 import 'see_all_events_page.dart';
+import '../widgets/card_event.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -179,6 +180,15 @@ class HomeScreen extends StatelessWidget {
                                         onTap: () {
                                           viewModel.onRecommendationTap(
                                               recommendation);
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  CardEvent(
+                                                    eventId: recommendation['id'],
+                                                  ),
+                                            ),
+                                          );
                                         },
                                       );
                                     }).toList(),

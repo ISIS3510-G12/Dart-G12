@@ -61,12 +61,9 @@ class EventViewModel extends ChangeNotifier {
   }
 
   /// Método para actualizar el índice seleccionado y navegar a `MainScreen`
-  void onItemTapped(BuildContext context, int index) {
-    if (index == _selectedIndex) return;
-
+    void onItemTapped(BuildContext context, int index) {
     _selectedIndex = index;
     notifyListeners();
-
     Navigator.popUntil(context, (route) => route.isFirst);
     Navigator.pushReplacement(
       context,

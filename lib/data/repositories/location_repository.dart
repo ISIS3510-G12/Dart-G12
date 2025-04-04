@@ -6,7 +6,7 @@ class LocationRepository {
 
   LocationRepository();
 
-  /// 🔹 Obtener todas las ubicaciones y ordenarlas por proximidad al usuario
+  /// Obtener todas las ubicaciones y ordenarlas por proximidad al usuario
   Future<List<Map<String, dynamic>>> fetchLocations() async {
     // Obtener la ubicación actual del usuario
     Position position = await Geolocator.getCurrentPosition(

@@ -137,7 +137,7 @@ class _CardEventState extends State<CardEvent> {
       ),
       bottomNavigationBar: BottomNavbar(
         currentIndex: viewModel.selectedIndex,
-        onTap: _onItemTapped,
+        onTap:  (index) => viewModel.onItemTapped(context, index),
       ),
     );
   }
