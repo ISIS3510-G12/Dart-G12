@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:dart_g12/presentation/view_models/event_view_model.dart';
 import 'package:dart_g12/presentation/widgets/transparent_ovals_painter.dart';
-import 'package:dart_g12/presentation/widgets/place_card.dart'; // Usamos PlaceCard para mostrar detalles del evento
-import 'package:dart_g12/presentation/widgets/bottom_navbar.dart'; // Si tienes un BottomNavbar
+import 'package:dart_g12/presentation/widgets/place_card.dart';
+import 'package:dart_g12/presentation/widgets/bottom_navbar.dart';
 import 'package:dart_g12/presentation/views/map_page.dart';
 
 class CardEvent extends StatefulWidget {
@@ -26,16 +26,11 @@ class _CardEventState extends State<CardEvent> {
 
   Future<void> _fetchEventDetails() async {
     await viewModel.fetchEventDetails(widget.eventId);
-    setState(() {}); // Actualizamos el estado después de obtener los datos
+    setState(() {});
   }
 
   void _onItemTapped(int index) {
     viewModel.updateSelectedIndex(index);
-  }
-
-  // Función para navegar al mapa si es necesario
-  void _goToMapPage(BuildContext context) {
-    viewModel.goToMapPage(context);
   }
 
   @override
@@ -51,111 +46,93 @@ class _CardEventState extends State<CardEvent> {
             child: Container(
               height: 280,
               decoration: BoxDecoration(
-                image: DecorationImage(
+                image: viewModel.event != null && viewModel.event?['image_url'] != null
+                    ? DecorationImage(
                   image: NetworkImage(viewModel.event?['image_url'] ?? ''),
                   fit: BoxFit.cover,
-                ),
+                )
+                    : null, // Evita errores si la imagen no está disponible
+                color: Colors.grey[300], // Fondo gris si no hay imagen
               ),
             ),
           ),
 
-          // Fondo con OvalsPainter Transparente (Encima de la Imagen)
+          // Fondo con OvalsPainter Transparente
           Positioned.fill(child: CustomPaint(painter: TransparentOvalsPainter())),
 
-          // Nombre del Evento (centrado y encima del oval)
-          Positioned(
+          // Cuerpo principal
+          Positioned.fill(
             top: 280,
-            left: 10,
-            child: Text(
-              '${viewModel.event?['title'] ?? ''}',
-              style: const TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-              softWrap: true,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-
-          // Contenido principal
-          if (viewModel.isLoading)
-            const Center(child: CircularProgressIndicator())
-          else if (viewModel.event == null)
-            const Center(child: Text("Event could not be loaded"))
-          else ...[
-              SingleChildScrollView(
+            child: viewModel.event == null
+                ? const Center(child: CircularProgressIndicator()) // Mostramos "Cargando..."
+                : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 320), // Espacio para la imagen
-
-
-                    // Descripción del evento (solo si no está vacía)
-                    if (viewModel.event?['description']?.isNotEmpty ?? false) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Text(
-                          'Description:',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
+                    // Título del evento
+                    Text(
+                      viewModel.event?['title'] ?? '',
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Text(
-                          viewModel.event?['description'] ?? 'No description available',
-                          style: const TextStyle(fontSize: 16),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // Fechas del evento
+                    if (viewModel.event?['start_time'] != null && viewModel.event?['end_time'] != null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Event Dates:',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              '🕒 Start: ${formatDateTime(viewModel.event?['start_time'] ?? '')}',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            Text(
+                              '⏳ End: ${formatDateTime(viewModel.event?['end_time'] ?? '')}',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 16),
                     ],
 
-                    // Fechas del evento (Start Time y End Time)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        'Event Dates:',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    // Descripción del evento
+                    if (viewModel.event?['description']?.isNotEmpty ?? false) ...[
+                      const Text(
+                        'Description:',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        'Start Time: ${formatDateTime(viewModel.event?['start_time'] ?? '')}',
+                      const SizedBox(height: 6),
+                      Text(
+                        viewModel.event?['description'] ?? '',
                         style: const TextStyle(fontSize: 16),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        'End Time: ${formatDateTime(viewModel.event?['end_time'] ?? '')}',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-                    // Lista de Lugares
-                    SizedBox(
-                      height: 150,
-                      child: viewModel.events.isNotEmpty
-                          ? ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: viewModel.events.length,
-                        itemBuilder: (context, index) {
-                          final place = viewModel.events[index];
-                          return PlaceCard(
-                            imagePath: place['url_image'] ?? '',
-                            title: place['name'],
-                            subtitle: 'Floor: ${place['floor']}',
-                          );
-                        },
-                      )
-                          : const Center(child: Text("")),
-                    ),
+                      const SizedBox(height: 16),
+                    ],
                   ],
                 ),
               ),
-            ]
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: BottomNavbar(
@@ -165,12 +142,13 @@ class _CardEventState extends State<CardEvent> {
     );
   }
 
-  // Función para formatear la fecha del evento
+
+  // Función para formatear la fecha
   String formatDateTime(String dateTime) {
     try {
       final DateTime parsedDate = DateTime.parse(dateTime);
-      final String formattedDate = '${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')} ${parsedDate.hour.toString().padLeft(2, '0')}:${parsedDate.minute.toString().padLeft(2, '0')}';
-      return formattedDate;
+      return '${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}'
+          ' ${parsedDate.hour.toString().padLeft(2, '0')}:${parsedDate.minute.toString().padLeft(2, '0')}';
     } catch (e) {
       return 'Invalid date';
     }
