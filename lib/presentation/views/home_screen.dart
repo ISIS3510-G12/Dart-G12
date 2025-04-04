@@ -8,6 +8,7 @@ import '../widgets/section_header.dart';
 import '../widgets/place_card.dart';
 import '../widgets/category_list.dart';
 import 'see_all_screen.dart';
+import 'see_all_events_page.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -157,7 +158,7 @@ class HomeScreen extends StatelessWidget {
                             // Sección Recommendations
                             const SectionHeader(
                                 title: "Events",
-                                destinationScreen: SeeAllScreen()),
+                                destinationScreen: EventScreen()),
                             SizedBox(
                               height: 180,
                               child: Consumer<HomeViewModel>(

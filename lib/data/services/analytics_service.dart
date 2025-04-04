@@ -7,6 +7,7 @@ class AnalyticsService {
     int? eventId,
     String? eventType,
     int? locationId,
+    String? title
   }) async {
     try {
       final user = Supabase.instance.client.auth.currentUser;
@@ -27,6 +28,7 @@ class AnalyticsService {
             'event_id': eventId ?? 0,
             'event_type': eventType ?? 0,
             'location_id': locationId ?? 0,
+            'title': title ?? '',
             'created_at': DateTime.now().toIso8601String(),
           },
         );

@@ -147,7 +147,7 @@ class CardScreenState extends State<CardScreen> {
 
                   // Lista de Lugares
                   SizedBox(
-                    height: 150,
+                    height: 165,
                     child: viewModel.places.isNotEmpty
                         ? ListView.builder(
                             scrollDirection: Axis.horizontal,

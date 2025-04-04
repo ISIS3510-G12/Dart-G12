@@ -73,39 +73,48 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                   ),
                   const SizedBox(height: 20),
                   Expanded(
-                    child: _viewModel.isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : _viewModel.error != null
-                        ? Center(child: Text(_viewModel.error!))
-                        : _viewModel.buildings.isEmpty
-                        ? const Center(child: Text("No hay edificios disponibles"))
-                        : GridView.builder(
-                            padding: const EdgeInsets.all(16.0),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 16.0,
-                              mainAxisSpacing: 16.0,
-                            ),
-                            itemCount: _viewModel.buildings.length,
-                            itemBuilder: (context, index) {
-                              final building = _viewModel.buildings[index];
-                              return GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => CardScreen(buildingId: building['id']),
-                                    ),
-                                  );
-                                },
-                                child: PlaceCard(
-                                  imagePath: building['image_url'] ?? '',
-                                  title: building['name'],
-                                  subtitle: building['description'] ?? 'Sin descripción',
-                                ),
-                              );
-                            },
-                          ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          _viewModel.isLoading
+                              ? const Center(child: CircularProgressIndicator())
+                              : _viewModel.error != null
+                                  ? Center(child: Text(_viewModel.error!))
+                                  : _viewModel.buildings.isEmpty
+                                      ? const Center(child: Text("No hay edificios disponibles"))
+                                      : GridView.builder(
+                                          shrinkWrap: true,
+                                          physics: const NeverScrollableScrollPhysics(),
+                                          padding: const EdgeInsets.all(16.0),
+                                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: 2,
+                                            crossAxisSpacing: 16.0,
+                                            mainAxisSpacing: 16.0,
+                                            childAspectRatio: 0.9,
+                                          ),
+                                          itemCount: _viewModel.buildings.length,
+                                          itemBuilder: (context, index) {
+                                            final building = _viewModel.buildings[index];
+                                            return GestureDetector(
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => CardScreen(buildingId: building['id']),
+                                                  ),
+                                                );
+                                              },
+                                              child: PlaceCard(
+                                                imagePath: building['image_url'] ?? '',
+                                                title: building['name'],
+                                                subtitle: building['description'] ?? 'Sin descripción',
+                                              ),
+                                            );
+                                          },
+                                        ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
