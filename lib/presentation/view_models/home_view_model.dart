@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../data/services/auth_service.dart';
 import '../../data/repositories/home_repository.dart';
 import '../../data/services/analytics_service.dart';
+import 'dart:developer';
 
 class HomeViewModel extends ChangeNotifier {
   late final AuthService _authService;
@@ -53,7 +54,7 @@ class HomeViewModel extends ChangeNotifier {
       _locations = await _homeRepository.fetchLocations();
       notifyListeners(); // Siempre notificamos
     } catch (error) {
-      print('Error al cargar las ubicaciones: $error');
+      log('Error al cargar las ubicaciones', error: error);
     }
   }
 
@@ -62,7 +63,7 @@ class HomeViewModel extends ChangeNotifier {
       _recommendations = await _homeRepository.fetchRecommendations();
       notifyListeners();
     } catch (error) {
-      print('Error al cargar las recomendaciones: $error');
+      log('Error al cargar las recomendaciones', error: error);
     }
   }
 

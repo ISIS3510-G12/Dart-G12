@@ -3,7 +3,6 @@ import '../view_models/see_all_view_model.dart';
 import '../widgets/ovals_painter.dart';
 import '../widgets/place_card.dart';
 import '../widgets/bottom_navbar.dart';
-import '../views/main_screen.dart';
 import '../widgets/card.dart';
 
 class SeeAllScreen extends StatefulWidget {
@@ -12,10 +11,10 @@ class SeeAllScreen extends StatefulWidget {
   const SeeAllScreen({super.key, this.initialIndex = 0});
 
   @override
-  _SeeAllScreenState createState() => _SeeAllScreenState();
+  SeeAllScreenState createState() => SeeAllScreenState();
 }
 
-class _SeeAllScreenState extends State<SeeAllScreen> {
+class SeeAllScreenState extends State<SeeAllScreen> {
   late SeeAllViewModel _viewModel;
 
   @override
@@ -34,18 +33,6 @@ class _SeeAllScreenState extends State<SeeAllScreen> {
 
   void _updateState() {
     setState(() {});
-  }
-
-  void _onItemTapped(int index) {
-    if (index == _viewModel.selectedIndex) return;
-
-    Navigator.popUntil(context, (route) => route.isFirst);
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MainScreen(initialIndex: index),
-      ),
-    );
   }
 
   @override
@@ -128,7 +115,10 @@ class _SeeAllScreenState extends State<SeeAllScreen> {
       ),
       bottomNavigationBar: BottomNavbar(
         currentIndex: _viewModel.selectedIndex,
-        onTap: _onItemTapped,
+        onTap: (index) => _viewModel.onItemTapped(
+          context,
+          index,
+        ),
       ),
     );
   }

@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:dart_g12/presentation/view_models/card_view_model.dart';
 import '../widgets/transparent_ovals_painter.dart';
 import '../widgets/place_card.dart';
-import '../widgets/bottom_navbar.dart';  // Asumiendo que tienes un widget BottomNavbar
-import 'package:dart_g12/presentation/views/map_page.dart'; // Asegúrate de que MapPage esté correctamente importada
+import '../widgets/bottom_navbar.dart';
 
 class CardScreen extends StatefulWidget {
   final int buildingId;
@@ -11,10 +10,10 @@ class CardScreen extends StatefulWidget {
   const CardScreen({super.key, required this.buildingId});
 
   @override
-  _CardScreenState createState() => _CardScreenState();
+  CardScreenState createState() => CardScreenState();
 }
 
-class _CardScreenState extends State<CardScreen> {
+class CardScreenState extends State<CardScreen> {
   late CardViewModel viewModel;
 
   @override
@@ -26,16 +25,9 @@ class _CardScreenState extends State<CardScreen> {
 
   Future<void> _fetchBuildingDetails() async {
     await viewModel.fetchBuildingDetails(widget.buildingId);
-    setState(() {}); // Actualizamos el estado después de obtener los datos
-  }
-
-  void _onItemTapped(int index) {
-    viewModel.updateSelectedIndex(index);
-  }
-
-  // Función para navegar al mapa
-  void _goToMapPage(BuildContext context) {
-    viewModel.goToMapPage(context);
+    if (mounted) {
+      setState(() {}); 
+    }
   }
 
   @override
@@ -94,7 +86,7 @@ class _CardScreenState extends State<CardScreen> {
                     child: Row(
                       children: [
                         ElevatedButton.icon(
-                          onPressed: () => _goToMapPage(context),  // Llamada a la función para navegar al mapa
+                          onPressed: () => viewModel.goToMapPage(context),  // Llamada a la función para navegar al mapa
                           icon: const Icon(Icons.directions, size: 20),
                           label: const Text('How to get there', style: TextStyle(fontSize: 14)),
                           style: ElevatedButton.styleFrom(
@@ -179,7 +171,7 @@ class _CardScreenState extends State<CardScreen> {
       ),
       bottomNavigationBar: BottomNavbar(
         currentIndex: viewModel.selectedIndex,
-        onTap: _onItemTapped,
+        onTap: (index) => viewModel.onItemTapped(context, index),
       ),
     );
   }

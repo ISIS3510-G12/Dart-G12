@@ -1,3 +1,5 @@
+import 'package:dart_g12/presentation/widgets/card.dart';
+import 'package:dart_g12/presentation/widgets/chat_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/home_view_model.dart';
@@ -65,19 +67,7 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 16),
 
                     // Barra de búsqueda
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: "Where to go?",
-                        filled: true,
-                        fillColor: Colors.white,
-                        prefixIcon: const Icon(Icons.search),
-                        suffixIcon: const Icon(Icons.filter_list),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
+                    const ChatWidget(),
                     const SizedBox(height: 16),
 
                     // Categorías
@@ -145,6 +135,16 @@ class HomeScreen extends StatelessWidget {
                                         imagePath: location['image_url'],
                                         title: location['name'],
                                         subtitle: location['description'],
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  CardScreen(
+                                                    buildingId: location['id'])
+                                            ),
+                                          );
+                                        },
                                       );
                                     }).toList(),
                                   );

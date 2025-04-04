@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/ovals_painter.dart';
+import '../widgets/chat_widget.dart'; // Asegúrate de que la ruta sea correcta
 
 class Pagina2 extends StatelessWidget {
   const Pagina2({super.key});
@@ -17,11 +18,16 @@ class Pagina2 extends StatelessWidget {
           ),
 
           // Contenido principal
-          const Center(
-            child: Text(
-              'Página 2',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
+          Column(
+            children: [
+              const Center(
+                child: Text(
+                  'Página 2',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Expanded(child: ChatWidget()), // Agregamos el ChatWidget aquí
+            ],
           ),
         ],
       ),
