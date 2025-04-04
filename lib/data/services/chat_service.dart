@@ -1,19 +1,19 @@
 import 'dart:convert';
+import 'package:dart_g12/data/repositories/chat_repository.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:dart_g12/data/services/supabase_service.dart';
-import 'package:dart_g12/data/repositories/home_repository.dart';
 
 class ChatService {
   final String apiKey = "A";
   final String apiUrl = "https://api.openai.com/v1/chat/completions";
   final SupabaseClient supabase = SupabaseService().client;
-  final HomeRepository homeRepository = HomeRepository();
+  final ChatRepository chatRepository = ChatRepository();
 
   Future<String> sendMessage(String message) async {
     try {
       // 🔍 1. Obtener datos de Supabase
-      List<Map<String, dynamic>> locations = await homeRepository.fetchLocations();
+      List<Map<String, dynamic>> locations = await chatRepository.fetchLocations();
       // 📝 2. Construir el contexto con los datos obtenidos
       String systemMessage = """
       Eres un asistente de la Universidad de Los Andes (Uniandes).
