@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: '/',
       routes: {
-        '/': (context) => const SplashScreen(), // Pantalla de inicio
+        '/': (context) => const WelcomePage(), // Pantalla de inicio
         '/home': (context) => const MainScreen(),
       },
     );

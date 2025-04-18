@@ -179,7 +179,7 @@ class MapViewModel extends ChangeNotifier {
       toLocation = locations[locationName];
       toLocationName = locationName;
 
-      // Registrar búsqueda de ubicación de destino
+      //TODO: Registrar búsqueda de ubicación de destino en PostHog
       final int? locId = locationIds[locationName];
       if (locId != null) {
         AnalyticsService.logLocationSearch(

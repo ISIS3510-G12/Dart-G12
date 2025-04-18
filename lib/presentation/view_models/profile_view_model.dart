@@ -18,6 +18,8 @@ class ProfileViewModel extends ChangeNotifier {
 
   Future<void> logout() async {
     await _authService.signOut();
+    notifyListeners();
+    
   }
 
   void loadUserAvatar() {

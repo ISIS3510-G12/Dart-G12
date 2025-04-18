@@ -58,6 +58,7 @@ class _MapPageState extends State<MapPage> {
                   locations: viewModel.locations,
                   onChanged: (newValue) {
                     if (newValue != null) {
+                      //TODO: Implementar lógica para cambiar la ubicación de destino y captura del evento
                       viewModel.updateLocation(false, newValue);
                     }
                   },
