@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dart_g12/presentation/view_models/card_view_model.dart';
 import '../widgets/transparent_ovals_painter.dart';
 import '../widgets/place_card.dart';
@@ -25,8 +26,15 @@ class CardScreenState extends State<CardScreen> {
 
   Future<void> _fetchBuildingDetails() async {
     await viewModel.fetchBuildingDetails(widget.buildingId);
-    if (mounted) {
-      setState(() {}); 
+    if (mounted) setState(() {});
+  }
+
+  ImageProvider _getImageProvider(CardViewModel viewModel) {
+    final imageUrl = viewModel.building?['image_url'];
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      return CachedNetworkImageProvider(imageUrl);
+    } else {
+      return const AssetImage('assets/images/default_image.jpg');
     }
   }
 
@@ -44,17 +52,19 @@ class CardScreenState extends State<CardScreen> {
               height: 260,
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: NetworkImage(viewModel.building?['image_url'] ?? ''),
+                  image: _getImageProvider(viewModel),
                   fit: BoxFit.cover,
                 ),
               ),
             ),
           ),
 
-          // Fondo con OvalsPainter Transparente (Encima de la Imagen)
-          Positioned.fill(child: CustomPaint(painter: TransparentOvalsPainter())),
+          // Fondo con OvalsPainter Transparente (encima de la imagen)
+          Positioned.fill(
+            child: CustomPaint(painter: TransparentOvalsPainter()),
+          ),
 
-          // Nombre del Bloque (centrado y encima del oval)
+          // Nombre del bloque (centrado)
           Positioned(
             top: 50,
             left: MediaQuery.of(context).size.width / 2 - 80,
@@ -80,34 +90,32 @@ class CardScreenState extends State<CardScreen> {
                 children: [
                   const SizedBox(height: 270), // Espacio para la imagen
 
-                  // Botones: Indicaciones y Añadir a Favoritos
+                  // Botones: Indicaciones y Favoritos
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Row(
                       children: [
                         ElevatedButton.icon(
-                          onPressed: () => viewModel.goToMapPage(context),  // Llamada a la función para navegar al mapa
+                          onPressed: () => viewModel.goToMapPage(context),
                           icon: const Icon(Icons.directions, size: 20),
-                          label: const Text('How to get there', style: TextStyle(fontSize: 14)),
+                          label: const Text('How to get there'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFEA1D5D),
                             foregroundColor: Colors.white,
-                            iconColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            textStyle: const TextStyle(fontSize: 14),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
                           ),
                         ),
                         const SizedBox(width: 12),
                         ElevatedButton.icon(
                           onPressed: () {},
                           icon: const Icon(Icons.favorite_border, size: 20),
-                          label: const Text('Favorites', style: TextStyle(fontSize: 14)),
+                          label: const Text('Favorites'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFEA1D5D),
                             foregroundColor: Colors.white,
-                            iconColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            textStyle: const TextStyle(fontSize: 14),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
                           ),
                         ),
                       ],
@@ -133,19 +141,22 @@ class CardScreenState extends State<CardScreen> {
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 16),
 
-                  // Lugares Populares
+                  // Título
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.0),
                     child: Text(
                       'Popular Places',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                   ),
+
                   const SizedBox(height: 8),
 
-                  // Lista de Lugares
+                  // Lista horizontal de lugares
                   SizedBox(
                     height: 165,
                     child: viewModel.places.isNotEmpty
@@ -166,7 +177,7 @@ class CardScreenState extends State<CardScreen> {
                 ],
               ),
             ),
-          ]
+          ],
         ],
       ),
       bottomNavigationBar: BottomNavbar(

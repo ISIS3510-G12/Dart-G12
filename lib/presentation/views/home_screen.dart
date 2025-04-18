@@ -107,6 +107,37 @@ class HomeScreen extends StatelessWidget {
                                             'Unknown Location',
                                         subtitle: location['description'] ??
                                             'No description available',
+                                        onTap: () {
+                                          if (location['location_id'] != null) {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    CardScreen(
+                                                        buildingId: location[
+                                                            'location_id']),
+                                              ),
+                                            );
+                                          } else if (location['event_id'] !=
+                                              null) {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => CardEvent(
+                                                    eventId:
+                                                        location['event_id']),
+                                              ),
+                                            );
+                                          } else {
+                                            // Manejo opcional si no hay ningún ID válido
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                  content: Text(
+                                                      "No se puede abrir esta tarjeta")),
+                                            );
+                                          }
+                                        },
                                       );
                                     }).toList(),
                                   );
@@ -141,10 +172,10 @@ class HomeScreen extends StatelessWidget {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) =>
-                                                  CardScreen(
-                                                    buildingId: location['id'])
-                                            ),
+                                                builder: (context) =>
+                                                    CardScreen(
+                                                        buildingId:
+                                                            location['id'])),
                                           );
                                         },
                                       );
@@ -183,10 +214,9 @@ class HomeScreen extends StatelessWidget {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) =>
-                                                  CardEvent(
-                                                    eventId: recommendation['id'],
-                                                  ),
+                                              builder: (context) => CardEvent(
+                                                eventId: recommendation['id'],
+                                              ),
                                             ),
                                           );
                                         },

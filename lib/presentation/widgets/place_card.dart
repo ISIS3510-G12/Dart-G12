@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class PlaceCard extends StatelessWidget {
   final String imagePath;
@@ -29,30 +30,16 @@ class PlaceCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Imagen
+                // Imagen con caché
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                  child: Image.network(
-                    imagePath, // Carga la imagen desde la URL
+                  child: CachedNetworkImage(
+                    imageUrl: imagePath, // Carga la imagen desde la URL
                     fit: BoxFit.cover,
                     height: 100,
                     width: 150,
-                    loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                      if (loadingProgress == null) {
-                        return child;
-                      } else {
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
-                                : null,
-                          ),
-                        );
-                      }
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Center(child: Icon(Icons.error)); // Muestra un icono de error si falla la carga
-                    },
+                    placeholder: (context, url) => Container(), // No muestra ningún cargador
+                    errorWidget: (context, url, error) => const Center(child: Icon(Icons.error)), // Muestra un icono de error si falla la carga
                   ),
                 ),
                 Padding(

@@ -9,6 +9,7 @@ class CardViewModel extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   int _selectedIndex = 0;
+  final Map<int, Map<String, dynamic>> _buildingCache = {};
 
   CardViewModel();
 
@@ -26,13 +27,16 @@ class CardViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Obtener el edificio
-      _building = await repository.fetchLocationById(buildingId);
-      if (_building == null) {
-        throw Exception('No se encontró el edificio.');
+      if (_buildingCache.containsKey(buildingId)) {
+        _building = _buildingCache[buildingId];
+      } else {
+        _building = await repository.fetchLocationById(buildingId);
+        if (_building == null) {
+          throw Exception('No se encontró el edificio.');
+        }
+        _buildingCache[buildingId] = _building!;
       }
 
-      // Obtener los lugares dentro del edificio
       _places = await repository.fetchPlacesByLocation(buildingId);
     } catch (e) {
       _error = e.toString();
@@ -49,14 +53,15 @@ class CardViewModel extends ChangeNotifier {
   }
 
   void goToMapPage(BuildContext context) {
-    updateSelectedIndex(2);  // Índice 2 es para la página del mapa
+    updateSelectedIndex(2); // Índice 2 es para la página del mapa
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const MainScreen(initialIndex: 2)),
+      MaterialPageRoute(
+          builder: (context) => const MainScreen(initialIndex: 2)),
     );
   }
 
-    void onItemTapped(BuildContext context, int index) {
+  void onItemTapped(BuildContext context, int index) {
     _selectedIndex = index;
     notifyListeners();
     Navigator.popUntil(context, (route) => route.isFirst);
