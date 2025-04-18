@@ -3,8 +3,6 @@ import '../../data/services/auth_service.dart';
 import '../../data/repositories/home_repository.dart';
 import '../../data/services/analytics_service.dart';
 import 'dart:developer';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert'; 
 
 class HomeViewModel extends ChangeNotifier {
   late final AuthService _authService;
@@ -31,13 +29,13 @@ class HomeViewModel extends ChangeNotifier {
   void _initialize() {
     loadUserName();
     loadUserAvatar();
-    loadLocations(); // Cargar ubicaciones desde Supabase
+    loadAllData();
   }
 
   void loadUserName() {
     final fullName = _authService.getCurrentUsername();
     if (fullName != null && fullName.isNotEmpty) {
-      _userName = fullName.split(' ')[0]; // Solo el primer nombre
+      _userName = fullName.split(' ')[0];
       notifyListeners();
     }
   }
@@ -50,70 +48,16 @@ class HomeViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> loadLocations() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedLocations = prefs.getString('locations');
-    
-    if (savedLocations != null) {
-      _locations = List<Map<String, dynamic>>.from(json.decode(savedLocations)); // Si existe, carga desde local
-    } else {
-      try {
-        _locations = await _homeRepository.fetchLocations();
-        saveLocations();  // Guardar en caché local
-      } catch (error) {
-        log('Error al cargar las ubicaciones', error: error);
-      }
+  Future<void> loadAllData() async {
+    try {
+      final data = await _homeRepository.fetchAllData();
+      _locations = data['locations'] ?? [];
+      _recommendations = data['recommendations'] ?? [];
+      _mostSearchedLocations = data['mostSearched'] ?? [];
+    } catch (error) {
+      log('Error cargando los datos del home: $error');
     }
     notifyListeners();
-  }
-
-  Future<void> saveLocations() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString('locations', json.encode(_locations));  // Guardar las ubicaciones como JSON
-  }
-
-  Future<void> loadRecommendations() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedRecommendations = prefs.getString('recommendations');
-    
-    if (savedRecommendations != null) {
-      _recommendations = List<Map<String, dynamic>>.from(json.decode(savedRecommendations)); // Cargar desde local
-    } else {
-      try {
-        _recommendations = await _homeRepository.fetchRecommendations();
-        saveRecommendations();  // Guardar en caché local
-      } catch (error) {
-        log('Error al cargar las recomendaciones', error: error);
-      }
-    }
-    notifyListeners();
-  }
-
-  Future<void> saveRecommendations() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString('recommendations', json.encode(_recommendations));  // Guardar las recomendaciones como JSON
-  }
-
-  Future<void> loadMostSearchedLocations() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedMostSearchedLocations = prefs.getString('mostSearchedLocations');
-    
-    if (savedMostSearchedLocations != null) {
-      _mostSearchedLocations = List<Map<String, dynamic>>.from(json.decode(savedMostSearchedLocations)); // Cargar desde local
-    } else {
-      try {
-        _mostSearchedLocations = await _homeRepository.fetchMostSearchedLocations();
-        saveMostSearchedLocations();  // Guardar en caché local
-      } catch (error) {
-        print('Error al cargar los lugares más buscados: $error');
-      }
-    }
-    notifyListeners();
-  }
-
-  Future<void> saveMostSearchedLocations() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString('mostSearchedLocations', json.encode(_mostSearchedLocations));  // Guardar los lugares más buscados como JSON
   }
 
   void onRecommendationTap(Map<String, dynamic> recommendation) {

@@ -18,7 +18,7 @@ class LocationRepository {
     // Obtener todas las ubicaciones desde Supabase
     final response = await supabase
         .from('locations')
-        .select('id, name, description, image_url, category, latitude, longitude');
+        .select('location_id, name, description, image_url, category, latitude, longitude');
 
     if (response.isEmpty) {
       throw Exception('No se encontraron ubicaciones.');
@@ -42,7 +42,7 @@ class LocationRepository {
   Future<List<Map<String, dynamic>>> fetchBuildings() async {
     final response = await supabase
         .from('locations')
-        .select('id, name, description, image_url, category, latitude, longitude')
+        .select('location_id, name, description, image_url, category, latitude, longitude')
         .eq('category', 'Buildings');
 
     if (response.isEmpty) {
@@ -73,8 +73,8 @@ class LocationRepository {
   Future<Map<String, dynamic>?> fetchLocationById(int id) async {
     final response = await supabase
         .from('locations')
-        .select('id, name, description, image_url, category, latitude, longitude')
-        .eq('id', id)
+        .select('location_id, name, description, image_url, category, latitude, longitude')
+        .eq('location_id', id)
         .maybeSingle();
 
     return response;
@@ -87,7 +87,7 @@ class LocationRepository {
 
     final response = await supabase
         .from('locations')
-        .select('id, name, description, image_url, category, latitude, longitude')
+        .select('location_id, name, description, image_url, category, latitude, longitude')
         .range(start, end);
 
     return List<Map<String, dynamic>>.from(response);
