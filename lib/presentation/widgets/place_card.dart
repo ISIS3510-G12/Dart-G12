@@ -4,13 +4,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 class PlaceCard extends StatelessWidget {
   final String imagePath;
   final String title;
-  final String subtitle;
   final VoidCallback? onTap; // Agregamos el callback opcional
 
   const PlaceCard({
     required this.imagePath,
     required this.title,
-    required this.subtitle,
     this.onTap, // parámetro opcional
     super.key,
   });
@@ -30,16 +28,21 @@ class PlaceCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Imagen con caché
+                // Imagen
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(12)),
                   child: CachedNetworkImage(
-                    imageUrl: imagePath, // Carga la imagen desde la URL
+                    imageUrl: imagePath, // URL de la imagen
+                    placeholder: (context, url) =>
+                        const Center(child: CircularProgressIndicator()), // Indicador de carga mientras se descarga
+                    errorWidget: (context, url, error) => Image.asset(
+                      'assets/images/default_image.jpg', // Imagen por defecto si falla la carga
+                      fit: BoxFit.cover,
+                    ),
                     fit: BoxFit.cover,
                     height: 100,
                     width: 150,
-                    placeholder: (context, url) => Container(), // No muestra ningún cargador
-                    errorWidget: (context, url, error) => const Center(child: Icon(Icons.error)), // Muestra un icono de error si falla la carga
                   ),
                 ),
                 Padding(
@@ -54,13 +57,7 @@ class PlaceCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      // Subtítulo
-                      Text(
-                        subtitle,
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      // Subtítulo (puedes agregar un subtítulo si lo deseas)
                     ],
                   ),
                 ),
