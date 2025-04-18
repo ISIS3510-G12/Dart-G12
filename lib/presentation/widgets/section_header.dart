@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class SectionHeader extends StatelessWidget {
   final String title;
-  final Widget destinationScreen;
+  final Widget Function() destinationScreen;
 
   const SectionHeader({
     required this.title,
@@ -25,7 +25,7 @@ class SectionHeader extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => destinationScreen),
+                MaterialPageRoute(builder: (context) => destinationScreen()),
               );
             },
             child: const Text(
@@ -38,3 +38,4 @@ class SectionHeader extends StatelessWidget {
     );
   }
 }
+

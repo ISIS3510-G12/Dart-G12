@@ -8,7 +8,6 @@ import '../widgets/section_header.dart';
 import '../widgets/place_card.dart';
 import '../widgets/category_list.dart';
 import 'see_all_screen.dart';
-import 'see_all_events_page.dart';
 import '../widgets/card_event.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -83,10 +82,12 @@ class HomeScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Sección Most Popular
-                            const SectionHeader(
-                              title: "Most Popular",
-                              destinationScreen: SeeAllScreen(),
+                            SectionHeader(
+                              title: "Buildings",
+                              destinationScreen: () =>
+                                  SeeAllScreen(contentType: "building"),
                             ),
+
                             SizedBox(
                               height: 180,
                               child: Consumer<HomeViewModel>(
@@ -105,8 +106,6 @@ class HomeScreen extends StatelessWidget {
                                             'assets/images/default_image.jpg',
                                         title: location['title_or_name'] ??
                                             'Unknown Location',
-                                        subtitle: location['description'] ??
-                                            'No description available',
                                         onTap: () {
                                           if (location['location_id'] != null) {
                                             Navigator.push(
@@ -144,13 +143,15 @@ class HomeScreen extends StatelessWidget {
                                 },
                               ),
                             ),
-
                             const SizedBox(height: 16),
 
                             // Sección Buildings
-                            const SectionHeader(
-                                title: "Buildings",
-                                destinationScreen: SeeAllScreen()),
+                            SectionHeader(
+                              title: "Buildings",
+                              destinationScreen: () =>
+                                  SeeAllScreen(contentType: "building"),
+                            ),
+
                             SizedBox(
                               height: 180,
                               child: Consumer<HomeViewModel>(
@@ -165,17 +166,17 @@ class HomeScreen extends StatelessWidget {
                                     children:
                                         viewModel.locations.map((location) {
                                       return PlaceCard(
-                                        imagePath: location['image_url'],
-                                        title: location['name'],
-                                        subtitle: location['description'],
+                                        imagePath: location['image_url'] ??
+                                            'assets/images/default_image.jpg',
+                                        title: location['name'] ??
+                                            'Unknown Location',
                                         onTap: () {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                                builder: (context) =>
-                                                    CardScreen(
-                                                        buildingId:
-                                                            location['id'])),
+                                              builder: (context) => CardScreen(
+                                                  buildingId: location['id']),
+                                            ),
                                           );
                                         },
                                       );
@@ -187,10 +188,13 @@ class HomeScreen extends StatelessWidget {
 
                             const SizedBox(height: 16),
 
-                            // Sección Recommendations
-                            const SectionHeader(
-                                title: "Events",
-                                destinationScreen: EventScreen()),
+                            // Sección Events
+                            SectionHeader(
+                              title: "Buildings",
+                              destinationScreen: () =>
+                                  SeeAllScreen(contentType: "event"),
+                            ),
+
                             SizedBox(
                               height: 180,
                               child: Consumer<HomeViewModel>(
@@ -205,18 +209,18 @@ class HomeScreen extends StatelessWidget {
                                     children: viewModel.recommendations
                                         .map((recommendation) {
                                       return PlaceCard(
-                                        imagePath: recommendation['image_url'],
-                                        title: recommendation['title'],
-                                        subtitle: recommendation['description'],
+                                        imagePath: recommendation[
+                                                'image_url'] ??
+                                            'assets/images/default_image.jpg',
+                                        title: recommendation['title'] ??
+                                            'Unknown Event',
                                         onTap: () {
-                                          viewModel.onRecommendationTap(
-                                              recommendation);
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) => CardEvent(
-                                                eventId: recommendation['id'],
-                                              ),
+                                                  eventId:
+                                                      recommendation['id']),
                                             ),
                                           );
                                         },

@@ -4,11 +4,13 @@ import '../widgets/ovals_painter.dart';
 import '../widgets/place_card.dart';
 import '../widgets/bottom_navbar.dart';
 import '../widgets/card.dart';
+import '../widgets/card_event.dart';
 
 class SeeAllScreen extends StatefulWidget {
   final int initialIndex;
+  final String contentType;  // Puede ser "building" o "event"
 
-  const SeeAllScreen({super.key, this.initialIndex = 0});
+  const SeeAllScreen({super.key, this.initialIndex = 0, required this.contentType});
 
   @override
   SeeAllScreenState createState() => SeeAllScreenState();
@@ -16,13 +18,21 @@ class SeeAllScreen extends StatefulWidget {
 
 class SeeAllScreenState extends State<SeeAllScreen> {
   late SeeAllViewModel _viewModel;
+  
 
   @override
   void initState() {
     super.initState();
     _viewModel = SeeAllViewModel();
-    _viewModel.fetchBuildings();
+    _viewModel.contentType = widget.contentType;  // Asignar el contentType
     _viewModel.addListener(_updateState);
+
+    // Cargar los datos basados en contentType
+    if (widget.contentType == "building") {
+      _viewModel.fetchBuildings();  // Fetch edificios
+    } else if (widget.contentType == "event") {
+      _viewModel.fetchEvents();  // Fetch eventos
+    }
   }
 
   @override
@@ -41,80 +51,85 @@ class SeeAllScreenState extends State<SeeAllScreen> {
       body: Stack(
         children: [
           Positioned.fill(child: CustomPaint(painter: OvalsPainter())),
-          Positioned(
-            top: 50,
-            left: MediaQuery.of(context).size.width / 2 - 65,
-            child: Text(
-              "Buildings",
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-          ),
-          Positioned.fill(
+          SafeArea(
             child: Padding(
-              padding: const EdgeInsets.only(top: 120),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: "Where to go?",
-                        filled: true,
-                        fillColor: Colors.white,
-                        prefixIcon: const Icon(Icons.search),
-                        suffixIcon: const Icon(Icons.filter_list),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25),
-                          borderSide: BorderSide.none,
-                        ),
+                  // Título dinámico basado en el contentType
+                  Center(
+                    child: Text(
+                      widget.contentType == "building" ? "Buildings" : "Events",  // Cambiar título según el tipo
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          _viewModel.isLoading
-                              ? const Center(child: CircularProgressIndicator())
-                              : _viewModel.error != null
-                                  ? Center(child: Text(_viewModel.error!))
-                                  : _viewModel.buildings.isEmpty
-                                      ? const Center(child: Text("No hay edificios disponibles"))
-                                      : GridView.builder(
-                                          shrinkWrap: true,
-                                          physics: const NeverScrollableScrollPhysics(),
-                                          padding: const EdgeInsets.all(16.0),
-                                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                            crossAxisCount: 2,
-                                            crossAxisSpacing: 16.0,
-                                            mainAxisSpacing: 16.0,
-                                            childAspectRatio: 0.9,
-                                          ),
-                                          itemCount: _viewModel.buildings.length,
-                                          itemBuilder: (context, index) {
-                                            final building = _viewModel.buildings[index];
-                                            return GestureDetector(
-                                              onTap: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) => CardScreen(buildingId: building['id']),
-                                                  ),
-                                                );
-                                              },
-                                              child: PlaceCard(
-                                                imagePath: building['image_url'] ?? '',
-                                                title: building['name'],
-                                                subtitle: building['description'] ?? 'Sin descripción',
-                                              ),
-                                            );
-                                          },
-                                        ),
-                        ],
+                  const SizedBox(height: 16),
+
+                  // Barra de búsqueda
+                  TextField(
+                    decoration: InputDecoration(
+                      hintText: "Where to go?",
+                      filled: true,
+                      fillColor: Colors.white,
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: const Icon(Icons.filter_list),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide.none,
                       ),
                     ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Cargar contenido dinámico
+                  Expanded(
+                    child: _viewModel.isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : _viewModel.error != null
+                            ? Center(child: Text(_viewModel.error!))
+                            : _viewModel.items.isEmpty
+                                ? Center(child: Text("No hay ${widget.contentType}s disponibles"))
+                                : SingleChildScrollView(
+                                    child: Align(
+                                      alignment: Alignment.topCenter,
+                                      child: ConstrainedBox(
+                                        constraints: const BoxConstraints(maxWidth: 600),
+                                        child: Wrap(
+                                          alignment: WrapAlignment.start,
+                                          spacing: 16,
+                                          runSpacing: 16,
+                                          children: _viewModel.items.map((item) {
+                                            return PlaceCard(
+                                              imagePath: item['image_url'] ?? 'assets/images/default_image.jpg',
+                                              title: item['title'] ?? item['name'] ?? 'Unknown ${widget.contentType}',
+                                              onTap: () {
+                                                if (widget.contentType == "building") {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) => CardScreen(buildingId: item['location_id']),
+                                                    ),
+                                                  );
+                                                } else if (widget.contentType == "event") {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) => CardEvent(eventId: item['event_id']),
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                   ),
                 ],
               ),
@@ -124,10 +139,7 @@ class SeeAllScreenState extends State<SeeAllScreen> {
       ),
       bottomNavigationBar: BottomNavbar(
         currentIndex: _viewModel.selectedIndex,
-        onTap: (index) => _viewModel.onItemTapped(
-          context,
-          index,
-        ),
+        onTap: (index) => _viewModel.onItemTapped(context, index),
       ),
     );
   }

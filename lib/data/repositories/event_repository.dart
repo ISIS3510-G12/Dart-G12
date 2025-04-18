@@ -17,7 +17,7 @@ class EventRepository {
     // Obtener todos los eventos desde Supabase
     final response = await supabase
         .from('events')
-        .select('id, title, description, image_url, location_id, start_time, end_time, created_at, type');
+        .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type');
 
     if (response.isEmpty) {
       throw Exception('No se encontraron eventos.');
@@ -32,7 +32,7 @@ class EventRepository {
   Future<List<Map<String, dynamic>>> fetchEventsByType(String type) async {
     final response = await supabase
         .from('events')
-        .select('id, title, description, image_url, location_id, start_time, end_time, created_at, type')
+        .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type')
         .eq('type', type);
 
     if (response.isEmpty) {
@@ -46,8 +46,8 @@ class EventRepository {
   Future<Map<String, dynamic>?> fetchEventById(int id) async {
     final response = await supabase
         .from('events')
-        .select('id, title, description, image_url, location_id, start_time, end_time, created_at, type')
-        .eq('id', id)
+        .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type')
+        .eq('event_id', id)
         .maybeSingle();
 
     return response;
@@ -60,7 +60,7 @@ class EventRepository {
 
     final response = await supabase
         .from('events')
-        .select('id, title, description, image_url, location_id, start_time, end_time, created_at, type')
+        .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type')
         .range(start, end);
 
     return List<Map<String, dynamic>>.from(response);
@@ -70,7 +70,7 @@ class EventRepository {
   Future<List<Map<String, dynamic>>> fetchEventsByLocation(int locationId) async {
     final response = await supabase
         .from('events')
-        .select('id, title, description, image_url, location_id, start_time, end_time, created_at, type')
+        .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type')
         .eq('location_id', locationId);
 
     if (response.isEmpty) {
