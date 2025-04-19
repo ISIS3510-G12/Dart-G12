@@ -18,6 +18,7 @@ class SeeAllScreen extends StatefulWidget {
 
 class SeeAllScreenState extends State<SeeAllScreen> {
   late SeeAllViewModel _viewModel;
+  final TextEditingController _searchCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -37,6 +38,7 @@ class SeeAllScreenState extends State<SeeAllScreen> {
   @override
   void dispose() {
     _viewModel.removeListener(_updateState);
+    _searchCtrl.dispose();
     super.dispose();
   }
 
@@ -73,12 +75,22 @@ class SeeAllScreenState extends State<SeeAllScreen> {
 
                   // Barra de búsqueda
                   TextField(
+                    controller:  _searchCtrl,
+                    onChanged: _viewModel.filterItems,
                     decoration: InputDecoration(
                       hintText: "Where to go?",
                       filled: true,
                       fillColor: Colors.white,
                       prefixIcon: const Icon(Icons.search),
-                      suffixIcon: const Icon(Icons.filter_list),
+                      suffixIcon: _searchCtrl.text.isEmpty                // limpiador opcional
+                        ? const Icon(Icons.filter_list)
+                        : IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchCtrl.clear();
+                            _viewModel.filterItems('');
+                          },
+                        ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25),
                         borderSide: BorderSide.none,
