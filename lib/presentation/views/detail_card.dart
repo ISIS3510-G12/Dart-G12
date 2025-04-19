@@ -2,25 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:dart_g12/presentation/view_models/card_detail_view_model.dart';
 import 'package:dart_g12/presentation/widgets/transparent_ovals_painter.dart';
 import 'package:dart_g12/presentation/widgets/bottom_navbar.dart';
-
+import 'package:dart_g12/presentation/widgets/place_card.dart';
 
 enum CardType {
   event,
   building,
-  // Para agregar mas tipos a futuro
 }
 
 class DetailCard extends StatefulWidget {
   final int id;
-  final CardType type; 
+  final CardType type;
 
   const DetailCard({super.key, required this.id, required this.type});
 
   @override
   _DetailCardState createState() => _DetailCardState();
 }
-
-
 
 class _DetailCardState extends State<DetailCard> {
   late CombinedViewModel viewModel;
@@ -29,10 +26,9 @@ class _DetailCardState extends State<DetailCard> {
   void initState() {
     super.initState();
     viewModel = CombinedViewModel();
-    _fetchDetails(); // Llama a una función general para manejar el tipo
+    _fetchDetails();
   }
 
-  // Función general para obtener los detalles según el tipo
   Future<void> _fetchDetails() async {
     switch (widget.type) {
       case CardType.event:
@@ -47,128 +43,62 @@ class _DetailCardState extends State<DetailCard> {
 
   @override
   Widget build(BuildContext context) {
+    final isEvent = widget.type == CardType.event;
+    final imageUrl = isEvent
+        ? (viewModel.event != null ? viewModel.event!['image_url'] : null)
+        : (viewModel.building != null ? viewModel.building!['image_url'] : null);
+
+    final title = isEvent
+        ? (viewModel.event != null ? viewModel.event!['title'] ?? '' : '')
+        : (viewModel.building != null ? viewModel.building!['name'] ?? '' : '');
+
     return Scaffold(
       body: Stack(
         children: [
-          // Imagen de fondo (según el tipo)
+          // Imagen de fondo
           Positioned(
             top: 0,
             left: 0,
             right: 0,
             child: Container(
-              height: widget.type == CardType.event ? 280 : 260,
+              height: isEvent ? 280 : 260,
               decoration: BoxDecoration(
-                image: widget.type == CardType.event
-                    ? (viewModel.event != null &&
-                            viewModel.event?['image_url'] != null
-                        ? DecorationImage(
-                            image: NetworkImage(
-                                viewModel.event?['image_url'] ?? ''),
-                            fit: BoxFit.cover,
-                          )
-                        : null)
-                    : widget.type == CardType.building
-                        ? DecorationImage(
-                            image: NetworkImage(
-                                viewModel.building?['image_url'] ?? ''),
-                            fit: BoxFit.cover,
-                          )
-                        : null, // Asegúrate de que aquí esté un "null" o el valor adecuado en caso de no ser un edificio.
-                color: Colors.grey[300], // Fondo gris si no hay imagen
+                image: imageUrl != null
+                    ? DecorationImage(
+                        image: NetworkImage(imageUrl),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+                color: Colors.grey[300],
               ),
             ),
           ),
 
-          // Fondo con OvalsPainter Transparente
+          // Fondo con óvalos
+          Positioned.fill(child: CustomPaint(painter: TransparentOvalsPainter())),
+
+          // Título arriba del óvalo
+          Positioned(
+            top: isEvent ? 240 : 220,
+            left: 16,
+            right: 16,
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                shadows: [Shadow(blurRadius: 2, color: Colors.white)],
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+
+          // Contenido principal
           Positioned.fill(
-              child: CustomPaint(painter: TransparentOvalsPainter())),
-
-          // Cuerpo principal
-          Positioned.fill(
-            top: widget.type == CardType.event ? 280 : 260,
-            child: widget.type == CardType.event
-                ? viewModel.event == null
-                    ? const Center(
-                        child:
-                            CircularProgressIndicator()) // Mostramos "Cargando..."
-                    : SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Título del evento
-                              Text(
-                                viewModel.event?['title'] ?? '',
-                                style: const TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-
-                              const SizedBox(height: 10),
-
-                              // Fechas del evento
-                              if (viewModel.event?['start_time'] != null &&
-                                  viewModel.event?['end_time'] != null) ...[
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'Event Dates:',
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        '🕒 Start: ${formatDateTime(viewModel.event?['start_time'] ?? '')}',
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
-                                      Text(
-                                        '⏳ End: ${formatDateTime(viewModel.event?['end_time'] ?? '')}',
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                              ],
-
-                              // Descripción del evento
-                              if (viewModel.event?['description']?.isNotEmpty ??
-                                  false) ...[
-                                const Text(
-                                  'Description:',
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  viewModel.event?['description'] ?? '',
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                                const SizedBox(height: 16),
-                              ],
-                            ],
-                          ),
-                        ),
-                      )
-                // Agregar lógica similar para otros tipos (building, restaurant, etc.)
-                : const Center(
-                    child:
-                        CircularProgressIndicator()), // Ejemplo de lógica para mostrar el contenido
+            top: isEvent ? 300 : 280,
+            child: _buildContent(),
           ),
         ],
       ),
@@ -179,7 +109,204 @@ class _DetailCardState extends State<DetailCard> {
     );
   }
 
-  // Función para formatear la fecha
+  Widget _buildContent() {
+    if (widget.type == CardType.event) {
+      return _buildEventContent();
+    }
+    if (widget.type == CardType.building) {
+      return _buildBuildingContent();
+    }
+    return const SizedBox();
+  }
+
+  Widget _buildEventContent() {
+    if (viewModel.event == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 12),
+            _buildActionButtons(),
+            const SizedBox(height: 16),
+            if (viewModel.event?['start_time'] != null &&
+                viewModel.event?['end_time'] != null)
+              _buildEventDates(),
+            const SizedBox(height: 16),
+            if (viewModel.event?['description']?.isNotEmpty ?? false)
+              _buildDescription(viewModel.event?['description'] ?? ''),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBuildingContent() {
+    if (viewModel.building == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 12),
+            _buildActionButtons(),
+            const SizedBox(height: 16),
+            if (viewModel.building?['address']?.isNotEmpty ?? false)
+              _buildAddress(viewModel.building?['address'] ?? ''),
+            const SizedBox(height: 16),
+            if (viewModel.building?['description']?.isNotEmpty ?? false)
+              _buildDescription(viewModel.building?['description'] ?? ''),
+            const SizedBox(height: 16),
+            if (viewModel.building?['opening_hours']?.isNotEmpty ?? false)
+              _buildOpeningHours(viewModel.building?['opening_hours'] ?? ''),
+            const SizedBox(height: 24),
+
+            // Sección de lugares populares
+            if (viewModel.places.isNotEmpty) ...[
+              const Text(
+                'Popular Places',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 165,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: viewModel.places.length,
+                  itemBuilder: (context, index) {
+                    final place = viewModel.places[index];
+                    return PlaceCard(
+                      imagePath: place['url_image'] ?? '',
+                      title: place['name'],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      children: [
+        ElevatedButton.icon(
+          onPressed: () => viewModel.goToMapPage(context),
+          icon: const Icon(Icons.directions, size: 20),
+          label: const Text('How to get there'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFEA1D5D),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          ),
+        ),
+        const SizedBox(width: 12),
+        ElevatedButton.icon(
+          onPressed: () {
+            // Aquí puedes conectar con tu lógica de favoritos
+            print("Favorite pressed");
+          },
+          icon: const Icon(Icons.favorite_border, size: 20),
+          label: const Text('Favorites'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFEA1D5D),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEventDates() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Event Dates:',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '🕒 Start: ${formatDateTime(viewModel.event?['start_time'] ?? '')}',
+            style: const TextStyle(fontSize: 16),
+          ),
+          Text(
+            '⏳ End: ${formatDateTime(viewModel.event?['end_time'] ?? '')}',
+            style: const TextStyle(fontSize: 16),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDescription(String description) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Description:',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          description,
+          style: const TextStyle(fontSize: 16),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAddress(String address) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Address:',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          address,
+          style: const TextStyle(fontSize: 16),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOpeningHours(String openingHours) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Opening Hours:',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          openingHours,
+          style: const TextStyle(fontSize: 16),
+        ),
+      ],
+    );
+  }
+
   String formatDateTime(String dateTime) {
     try {
       final DateTime parsedDate = DateTime.parse(dateTime);

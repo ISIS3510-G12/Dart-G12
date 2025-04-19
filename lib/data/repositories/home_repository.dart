@@ -61,7 +61,7 @@ class HomeRepository {
     try {
       final response = await supabase
           .from('events')
-          .select('event_id, title, name, image_url') // Solo los campos necesarios
+          .select('event_id, title, image_url') // Solo los campos necesarios
           .gte('end_time', DateTime.now().toIso8601String());
 
       final parsed = await compute(_parseList, response as List<dynamic>);

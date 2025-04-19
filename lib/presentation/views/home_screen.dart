@@ -7,8 +7,7 @@ import '../widgets/place_card.dart';
 import '../widgets/category_list.dart';
 import '../widgets/chat_widget.dart';
 import 'see_all_screen.dart';
-import '../widgets/card_event.dart';
-import '../widgets/card.dart';
+import 'detail_card.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -39,7 +38,8 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     const CategoryList(),
                     const SizedBox(height: 16),
-                    Expanded(child: _buildContent(context)), // Pasamos context aquí
+                    Expanded(
+                        child: _buildContent(context)), // Pasamos context aquí
                   ],
                 ),
               ),
@@ -57,39 +57,56 @@ class HomeScreen extends StatelessWidget {
         children: [
           Text(
             'Hi, ${viewModel.userName}',
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+            style: const TextStyle(
+                fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           CircleAvatar(
             radius: 24,
             backgroundImage: viewModel.avatarUrl != null
                 ? NetworkImage(viewModel.avatarUrl!)
-                : const AssetImage('assets/images/profile.jpg') as ImageProvider,
+                : const AssetImage('assets/images/profile.jpg')
+                    as ImageProvider,
           ),
         ],
       );
     });
   }
 
-  Widget _buildContent(BuildContext context) { // context ya está definido aquí
+  Widget _buildContent(BuildContext context) {
+    // context ya está definido aquí
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSection("Most Popular", SeeAllScreen(contentType: "building",), context, (viewModel) {
-            return _buildHorizontalList(viewModel.mostSearchedLocations, context);
+          _buildSection(
+              "Most Popular",
+              SeeAllScreen(
+                contentType: "building",
+              ),
+              context, (viewModel) {
+            return _buildHorizontalList(
+                viewModel.mostSearchedLocations, context);
           }),
-          _buildSection("Buildings", SeeAllScreen(contentType: "building",), context, (viewModel) {
+          _buildSection(
+              "Buildings",
+              SeeAllScreen(
+                contentType: "building",
+              ),
+              context, (viewModel) {
             return _buildHorizontalList(viewModel.locations, context);
           }),
-          _buildSection("Events", SeeAllScreen(contentType: "event"), context, (viewModel) {
-            return _buildHorizontalList(viewModel.recommendations, context, isEvent: true);
+          _buildSection("Events", SeeAllScreen(contentType: "event"), context,
+              (viewModel) {
+            return _buildHorizontalList(viewModel.recommendations, context,
+                isEvent: true);
           }),
         ],
       ),
     );
   }
 
-  Widget _buildSection(String title, Widget destinationScreen, BuildContext context, Widget Function(HomeViewModel) builder) {
+  Widget _buildSection(String title, Widget destinationScreen,
+      BuildContext context, Widget Function(HomeViewModel) builder) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -104,7 +121,8 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHorizontalList(List<dynamic> items, BuildContext context, {bool isEvent = false}) {
+  Widget _buildHorizontalList(List<dynamic> items, BuildContext context,
+      {bool isEvent = false}) {
     if (items.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -115,28 +133,42 @@ class HomeScreen extends StatelessWidget {
         children: items.map((item) {
           return PlaceCard(
             imagePath: item['image_url'] ?? 'assets/images/default_image.jpg',
-            title: item['title_or_name'] ?? item['title'] ?? item['name'] ?? 'Unknown Location',
+            title: item['title_or_name'] ??
+                item['title'] ??
+                item['name'] ??
+                'Unknown Location',
             onTap: () {
-            if (isEvent && item['event_id'] != null) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CardEvent(eventId: item['event_id'])),
-              );
-            } else if (!isEvent && item['event_id'] != null){
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CardEvent(eventId: item['event_id'])),
-              );
-            } else if (!isEvent && item['location_id'] != null) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CardScreen(buildingId: item['location_id'])),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("No se puede abrir esta tarjeta")),
-              );
-            }
+              if (isEvent && item['event_id'] != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetailCard(
+                      id: item['event_id'],
+                      type: CardType.event,
+                    ),
+                  ),
+                );
+              } else if (!isEvent && item['event_id'] != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetailCard(
+                      id: item['event_id'],
+                      type: CardType.event,
+                    ),
+                  ),
+                );
+              } else if (!isEvent && item['location_id'] != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetailCard(
+                      id: item['location_id'],
+                      type: CardType.building,
+                    ),
+                  ),
+                );
+              }
             },
           );
         }).toList(),
