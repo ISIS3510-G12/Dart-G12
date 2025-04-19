@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../data/repositories/map_repository.dart';
 import '../../data/services/analytics_service.dart';
+import 'dart:developer';
 
 class MapViewModel extends ChangeNotifier {
   final MapRepository repository = MapRepository();
@@ -73,7 +74,7 @@ class MapViewModel extends ChangeNotifier {
 
       for (var location in response) {
         final name = location['name'] as String;
-        final id = location['id'] as int;
+        final id = location['location_id'] as int;
         final lat = location['latitude'] as double;
         final lng = location['longitude'] as double;
         locations[name] = LatLng(lat, lng);
@@ -179,7 +180,6 @@ class MapViewModel extends ChangeNotifier {
       toLocation = locations[locationName];
       toLocationName = locationName;
 
-      //TODO: Registrar búsqueda de ubicación de destino en PostHog
       final int? locId = locationIds[locationName];
       if (locId != null) {
         AnalyticsService.logLocationSearch(

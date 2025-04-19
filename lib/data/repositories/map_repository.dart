@@ -25,7 +25,7 @@ class MapRepository {
     final response = await supabase
         .from('locations')
         .select('name, latitude, longitude')
-        .eq('id', id)
+        .eq('location_id', id)
         .maybeSingle();
     return response;
   }
