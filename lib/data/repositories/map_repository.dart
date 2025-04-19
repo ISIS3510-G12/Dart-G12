@@ -1,56 +1,121 @@
+import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:dart_g12/data/services/supabase_service.dart';
+import 'package:dart_g12/data/services/local_storage_service.dart';
+import 'dart:async';
+
+List<Map<String, dynamic>> _parseList(List<dynamic> response) {
+  return List<Map<String, dynamic>>.from(response);
+}
 
 class MapRepository {
   final supabase = SupabaseService().client;
+  final LocalStorageService _cache = LocalStorageService();
 
-  /// Obtiene las ubicaciones de manera concurrente
+  MapRepository();
+
+  // Obtener ubicaciones desde la caché o red
   Future<List<Map<String, dynamic>>> fetchLocations() async {
-    final response = await supabase.from('locations').select();
-    return List<Map<String, dynamic>>.from(response);
+    List<Map<String, dynamic>> cached = [];
+
+    // Intentar leer los datos desde caché
+    try {
+      cached = await _cache.fetch('locations');
+    } catch (e) {
+      log('Error leyendo cache locations: $e');
+    }
+
+    // Lanza el fetch de red en segundo plano
+    unawaited(_fetchAndCacheLocations());
+
+    return cached;
   }
 
-  /// Obtiene la ruta desde la tabla 'routes' según los id de inicio y fin de manera concurrente
-  Future<Map<String, dynamic>?> fetchRouteData(int fromId, int toId) async {
-    final routeResponse = await supabase
-        .from('routes')
-        .select('id, start_location_id, end_location_id')
-        .eq('start_location_id', fromId)
-        .eq('end_location_id', toId)
-        .maybeSingle();
-    return routeResponse;
+  // Obtener y guardar las ubicaciones desde la red
+  Future<void> _fetchAndCacheLocations() async {
+    try {
+      final response = await supabase.from('locations').select('location_id, name, image_url'); // Campos necesarios
+      final parsed = await compute(_parseList, response as List<dynamic>);
+      await _cache.save('locations', parsed);
+    } catch (e) {
+      log('Error fetching locations from network: $e');
+    }
   }
 
-  /// Obtiene la información de una ubicación en la tabla 'locations' por su id
-  Future<Map<String, dynamic>?> fetchLocationById(int id) async {
-    final response = await supabase
-        .from('locations')
-        .select('name, latitude, longitude')
-        .eq('id', id)
-        .maybeSingle();
-    return response;
+  // Obtener recomendaciones desde la caché o red
+  Future<List<Map<String, dynamic>>> fetchRecommendations() async {
+    List<Map<String, dynamic>> cached = [];
+
+    // Intentar leer los datos desde caché
+    try {
+      cached = await _cache.fetch('recommendations');
+    } catch (e) {
+      log('Error leyendo cache recommendations: $e');
+    }
+
+    // Lanza el fetch de red en segundo plano
+    unawaited(_fetchAndCacheRecommendations());
+
+    return cached;
   }
 
-  Future<List<Map<String, dynamic>>> fetchRouteNodes(int routeId) async {
-    final nodesResponse = await supabase
-        .from('route_nodes')
-        .select('latitude, longitude, node_name, node_index')
-        .eq('route_id', routeId)
-        .order('node_index', ascending: true);
-    return List<Map<String, dynamic>>.from(nodesResponse);
+  // Obtener y guardar recomendaciones desde la red
+  Future<void> _fetchAndCacheRecommendations() async {
+    try {
+      final response = await supabase
+          .from('events')
+          .select('event_id, title, name, image_url') // Solo los campos necesarios
+          .gte('end_time', DateTime.now().toIso8601String());
+      final parsed = await compute(_parseList, response as List<dynamic>);
+      await _cache.save('recommendations', parsed);
+    } catch (e) {
+      log('Error fetching recommendations from network: $e');
+    }
   }
 
-  Future<Map<String, dynamic>> fetchCompleteRouteData(int fromId, int toId, int routeId) async {
+  // Obtener las ubicaciones más buscadas desde la caché o red
+  Future<List<Map<String, dynamic>>> fetchMostSearchedLocations() async {
+    List<Map<String, dynamic>> cached = [];
+
+    // Intentar leer los datos desde caché
+    try {
+      cached = await _cache.fetch('mostSearchedLocations');
+    } catch (e) {
+      log('Error leyendo cache most searched: $e');
+    }
+
+    // Lanza el fetch de red en segundo plano
+    unawaited(_fetchAndCacheMostSearchedLocations());
+
+    return cached;
+  }
+
+  // Obtener y guardar las ubicaciones más buscadas desde la red
+  Future<void> _fetchAndCacheMostSearchedLocations() async {
+    try {
+      final response = await supabase
+          .from('most_popular_user_interactions')
+          .select('event_id,location_id,title_or_name,image_url')
+          .limit(8);
+      final parsed = await compute(_parseList, response as List<dynamic>);
+      await _cache.save('mostSearchedLocations', parsed);
+    } catch (e) {
+      log('Error fetching most searched locations from network: $e');
+    }
+  }
+
+  // Recuperación de todos los datos de manera concurrente
+  Future<Map<String, List<Map<String, dynamic>>>> fetchAllData() async {
     final results = await Future.wait([
-      fetchLocationById(fromId),
-      fetchLocationById(toId),
-      fetchRouteData(fromId, toId),
-      fetchRouteNodes(routeId)
+      fetchLocations(),
+      fetchRecommendations(),
+      fetchMostSearchedLocations(),
     ]);
+
     return {
-      'from_location': results[0],
-      'to_location': results[1],
-      'route_data': results[2],
-      'route_nodes': results[3],
+      'locations': results[0],
+      'recommendations': results[1],
+      'mostSearched': results[2],
     };
   }
 }

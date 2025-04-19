@@ -3,227 +3,93 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../data/repositories/map_repository.dart';
 import '../../data/services/analytics_service.dart';
+import 'dart:developer';
 
 class MapViewModel extends ChangeNotifier {
   final MapRepository repository = MapRepository();
+
+  // Datos obtenidos del repositorio
+  List<Map<String, dynamic>> locations = [];
+  List<Map<String, dynamic>> recommendations = [];
+  List<Map<String, dynamic>> mostSearched = [];
+
+  // Ubicación actual del usuario para centrar el mapa
+  LatLng? currentLocation;
+
   GoogleMapController? mapController;
 
-  LatLng? fromLocation;
-  
-  LatLng? toLocation;
-  String? fromLocationName;
-  String? toLocationName;
-  
-  double? distance;
-  Set<Polyline> polylines = {};
-  Set<Circle> circles = {};
-  bool showSteps = false;
-  List<Map<String, dynamic>> stepNodes = [];
-
-  final Map<String, LatLng> locations = {};
-  final Map<String, int> locationIds = {};
-
   MapViewModel() {
-    fetchLocations();
-    getCurrentLocation(); 
+    _init();
   }
 
+  Future<void> _init() async {
+    await getCurrentLocation();
+    await fetchAllData();
+  }
 
+  /// Verifica y solicita permisos de ubicación
   Future<bool> checkLocationPermission() async {
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.deniedForever) {
-        return false; 
+        return false;
       }
     }
     return permission == LocationPermission.whileInUse ||
            permission == LocationPermission.always;
   }
 
-
+  /// Obtiene la ubicación actual y centra el mapa
   Future<void> getCurrentLocation() async {
     final hasPermission = await checkLocationPermission();
-    if (!hasPermission) {
-      return;
-    }
+    if (!hasPermission) return;
 
     try {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
-
-      // Actualiza solo la ubicación actual para centrar el mapa
-      fromLocation = LatLng(position.latitude, position.longitude);
-      
-      // NOTA: No se asigna un nombre ni se agrega al mapa "locations"
+      currentLocation = LatLng(position.latitude, position.longitude);
       notifyListeners();
-
     } catch (e) {
-      print("Error obteniendo la ubicación: $e");
+      log('Error obteniendo la ubicación: $e');
     }
   }
 
-  /// Carga las ubicaciones desde el repositorio (de Supabase).
-  Future<void> fetchLocations() async {
+  /// Obtiene todos los datos: locations, recommendations y mostSearched
+  Future<void> fetchAllData() async {
     try {
-      final response = await repository.fetchLocations();
-      locations.clear();
-      locationIds.clear();
-
-      for (var location in response) {
-        final name = location['name'] as String;
-        final id = location['id'] as int;
-        final lat = location['latitude'] as double;
-        final lng = location['longitude'] as double;
-        locations[name] = LatLng(lat, lng);
-        locationIds[name] = id;
-      }
+      final data = await repository.fetchAllData();
+      locations        = data['locations']       ?? [];
+      recommendations  = data['recommendations'] ?? [];
+      mostSearched     = data['mostSearched']    ?? [];
       notifyListeners();
     } catch (e) {
-      print("Error obteniendo ubicaciones: $e");
+      log('Error obteniendo datos: $e');
     }
   }
 
-  // El resto del código se mantiene igual...
-  /// Carga la ruta seleccionada y actualiza polylines y circles.
-  Future<void> fetchRoute() async {
-    if (fromLocationName == null || toLocationName == null) return;
-
-    final fromId = locationIds[fromLocationName!];
-    final toId = locationIds[toLocationName!];
-    if (fromId == null || toId == null) return;
-
-    try {
-      final routeResponse = await repository.fetchRouteData(fromId, toId);
-      if (routeResponse == null) return;
-
-      final routeId = routeResponse['id'];
-
-      final startLocResponse =
-          await repository.fetchLocationById(routeResponse['start_location_id']);
-      final endLocResponse =
-          await repository.fetchLocationById(routeResponse['end_location_id']);
-      final intermediateNodes = await repository.fetchRouteNodes(routeId);
-
-      if (startLocResponse == null || endLocResponse == null) return;
-
-      final startNode = {
-        'latitude': startLocResponse['latitude'],
-        'longitude': startLocResponse['longitude'],
-        'node_name': startLocResponse['name'] ?? 'Inicio',
-        'node_index': 0,
-      };
-
-      final endNode = {
-        'latitude': endLocResponse['latitude'],
-        'longitude': endLocResponse['longitude'],
-        'node_name': endLocResponse['name'] ?? 'Final',
-        'node_index': -1,
-      };
-
-      final fullNodes = <Map<String, dynamic>>[];
-      fullNodes.add(startNode);
-      fullNodes.addAll(intermediateNodes);
-      fullNodes.add(endNode);
-      fullNodes.last['node_index'] = fullNodes.length - 1;
-
-      stepNodes = fullNodes;
-      final routePoints = fullNodes
-          .map((n) => LatLng(n['latitude'], n['longitude']))
-          .toList();
-
-      polylines = {
-        Polyline(
-          polylineId: const PolylineId('route'),
-          color: Colors.red,
-          width: 4,
-          points: routePoints,
-          patterns: [PatternItem.dash(10), PatternItem.gap(5)],
-        ),
-      };
-
-      circles = routePoints.asMap().entries.map((entry) {
-        final index = entry.key;
-        final point = entry.value;
-        Color fillColor;
-        if (index == 0) {
-          fillColor = Colors.pink;
-        } else if (index == routePoints.length - 1) {
-          fillColor = Colors.green;
-        } else {
-          fillColor = Colors.black;
-        }
-        return Circle(
-          circleId: CircleId('node_$index'),
-          center: point,
-          radius: 5.5,
-          fillColor: fillColor,
-          strokeColor: Colors.white,
-          strokeWidth: 1,
-        );
-      }).toSet();
-
-      notifyListeners();
-    } catch (e) {
-      print("Error obteniendo la ruta: $e");
-    }
-  }
-
-  /// Actualiza las ubicaciones de inicio o destino.
-  void updateLocation(bool isFrom, String locationName) {
-    if (isFrom) {
-      fromLocation = locations[locationName];
-      fromLocationName = locationName;
-    } else {
-      toLocation = locations[locationName];
-      toLocationName = locationName;
-
-      //TODO: Registrar búsqueda de ubicación de destino en PostHog
-      final int? locId = locationIds[locationName];
-      if (locId != null) {
-        AnalyticsService.logLocationSearch(
-          locationId: locId,
-          locationName: locationName,
-        );
-      }
-    }
-    calculateDistance();
-    fetchRoute();
-    notifyListeners();
-  }
-
-  /// Calcula la distancia entre dos ubicaciones.
-  void calculateDistance() {
-    if (fromLocation != null && toLocation != null) {
-      distance = Geolocator.distanceBetween(
-        fromLocation!.latitude,
-        fromLocation!.longitude,
-        toLocation!.latitude,
-        toLocation!.longitude,
+  /// Registra interacción cuando el usuario selecciona un ítem
+  void selectItem(String type, Map<String, dynamic> item) {
+    final int? locationId = item['location_id'] ?? item['event_id'];
+    final String? name    = item['name']        ??
+                             item['title']      ??
+                             item['title_or_name'];
+    if (locationId != null && name != null) {
+      AnalyticsService.logLocationSearch(
+        locationId: locationId,
+        locationName: name,
       );
     }
-    notifyListeners();
   }
 
-  /// Intercambia las ubicaciones de inicio y destino.
-  void swapLocations() {
-    final tempLocation = fromLocation;
-    fromLocation = toLocation;
-    toLocation = tempLocation;
-
-    final tempName = fromLocationName;
-    fromLocationName = toLocationName;
-    toLocationName = tempName;
-
-    calculateDistance();
-    fetchRoute();
-    notifyListeners();
-  }
-
-  /// Muestra/oculta la tarjeta de pasos.
-  void toggleSteps() {
-    showSteps = !showSteps;
-    notifyListeners();
+  /// Asocia el controlador de Google Map y centra la cámara
+  void onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+    if (currentLocation != null) {
+      controller.animateCamera(
+        CameraUpdate.newLatLngZoom(currentLocation!, 14),
+      );
+    }
   }
 }
