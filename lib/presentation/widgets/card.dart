@@ -168,7 +168,6 @@ class CardScreenState extends State<CardScreen> {
                               return PlaceCard(
                                 imagePath: place['url_image'] ?? '',
                                 title: place['name'],
-                                subtitle: 'Floor: ${place['floor']}',
                               );
                             },
                           )

@@ -7,7 +7,6 @@ import '../widgets/place_card.dart';
 import '../widgets/category_list.dart';
 import '../widgets/chat_widget.dart';
 import 'see_all_screen.dart';
-import 'see_all_events_page.dart';
 import '../widgets/card_event.dart';
 import '../widgets/card.dart';
 
@@ -76,13 +75,13 @@ class HomeScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSection("Most Popular", SeeAllScreen(), context, (viewModel) {
+          _buildSection("Most Popular", SeeAllScreen(contentType: "building",), context, (viewModel) {
             return _buildHorizontalList(viewModel.mostSearchedLocations, context);
           }),
-          _buildSection("Buildings", SeeAllScreen(), context, (viewModel) {
+          _buildSection("Buildings", SeeAllScreen(contentType: "building",), context, (viewModel) {
             return _buildHorizontalList(viewModel.locations, context);
           }),
-          _buildSection("Events", EventScreen(), context, (viewModel) {
+          _buildSection("Events", SeeAllScreen(contentType: "event"), context, (viewModel) {
             return _buildHorizontalList(viewModel.recommendations, context, isEvent: true);
           }),
         ],
@@ -117,7 +116,6 @@ class HomeScreen extends StatelessWidget {
           return PlaceCard(
             imagePath: item['image_url'] ?? 'assets/images/default_image.jpg',
             title: item['title_or_name'] ?? item['title'] ?? item['name'] ?? 'Unknown Location',
-            subtitle: item['description'] ?? 'No description available',
             onTap: () {
             if (isEvent && item['event_id'] != null) {
               Navigator.push(

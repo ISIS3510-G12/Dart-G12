@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class SectionHeader extends StatelessWidget {
   final String title;
-  final Widget destinationScreen;
+  final Widget destinationScreen; // Cambiado a Widget
 
   const SectionHeader({
     required this.title,
