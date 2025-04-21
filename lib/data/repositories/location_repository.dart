@@ -1,5 +1,6 @@
 import 'package:dart_g12/data/services/supabase_service.dart';
 import 'package:geolocator/geolocator.dart';
+import 'dart:async';
 
 class LocationRepository {
   final supabase = SupabaseService().client;
