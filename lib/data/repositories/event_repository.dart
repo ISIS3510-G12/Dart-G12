@@ -17,7 +17,6 @@ class EventRepository {
   /// Obtener todos los eventos con caché
   Future<List<Map<String, dynamic>>> fetchEvents() async {
     List<Map<String, dynamic>> cached = [];
-
     try {
       cached = await _cache.fetch('events');
     } catch (e) {
