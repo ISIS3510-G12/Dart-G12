@@ -8,7 +8,8 @@ class SeeAllViewModel extends ChangeNotifier {
   final EventRepository eventRepository = EventRepository(); // Asegúrate de tener esto
 
   late String contentType;
-  List<Map<String, dynamic>> _items = []; // Para almacenar tanto edificios como eventos
+  List<Map<String, dynamic>> _allItems = []; // Para almacenar tanto edificios como eventos
+  List<Map<String, dynamic>> _items = []; // Para lo que se muestran en la view
   bool _isLoading = false;
   String? _error;
   int _selectedIndex = 0;
@@ -28,7 +29,8 @@ class SeeAllViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _items = await locationRepository.fetchBuildings(); // Cambié _buildings por _items
+      _allItems = await locationRepository.fetchBuildings(); // Cambié _buildings por _items
+      _items = List.from(_allItems);
     } catch (e) {
       _error = e.toString();
     }
@@ -44,7 +46,8 @@ class SeeAllViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _items = await eventRepository.fetchEvents(); // Cambié _buildings por _items
+      _allItems = await eventRepository.fetchEvents(); // Cambié _buildings por _items
+      _items = List.from(_allItems);
     } catch (e) {
       _error = e.toString();
     }
@@ -86,5 +89,18 @@ class SeeAllViewModel extends ChangeNotifier {
         builder: (context) => MainScreen(initialIndex: index),
       ),
     );
+  }
+
+  void filterItems(String query){
+    if (query.trim().isEmpty){
+        _items = List.from(_allItems);
+    } else {
+        final q = query.toLowerCase();
+        _items = _allItems.where((item) {
+        final text = (item['title'] ?? item['name'] ?? '').toString().toLowerCase();
+        return text.contains(q);
+      }).toList();
+    }
+    notifyListeners();
   }
 }
