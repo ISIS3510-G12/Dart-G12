@@ -1,7 +1,7 @@
 import 'package:dart_g12/presentation/views/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:dart_g12/presentation/views/Pagina1.dart';
-import 'package:dart_g12/presentation/views/Pagina2.dart';
+import 'package:dart_g12/presentation/views/notificacion_page.dart';
 import 'package:dart_g12/presentation/widgets/bottom_navbar.dart';
 import 'package:dart_g12/presentation/views/map_page.dart';
 import '../views/home_screen.dart';
@@ -27,7 +27,7 @@ class _MainScreenState extends State<MainScreen> {
     const HomeScreen(),
     const Pagina1(),
     const MapPage(),
-    const Pagina2(),
+    const NotificacionPage(),
     const ProfilePage(),
   ];
 
