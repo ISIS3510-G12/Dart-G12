@@ -128,7 +128,7 @@ class NotificacionPage extends StatelessWidget {
                         );
                       },
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 4),
                     Consumer<NotificacionViewModel>(
                       builder: (context, viewModel, child) {
                         final eventsForSelectedDay = viewModel.events[viewModel.selectedDay] ?? [];
