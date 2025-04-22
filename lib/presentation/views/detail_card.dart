@@ -240,8 +240,13 @@ class _DetailCardState extends State<DetailCard> {
         const SizedBox(width: 12),
         ElevatedButton.icon(
           onPressed: () {
-            // conectar lógica de favoritos
-            print("Favorite pressed");
+                if (viewModel.isFavorite) {
+                   viewModel.removeFromFavorites();
+                } else {
+                  viewModel.addToFavorites();
+                }
+
+                setState(() {}); 
           },
           icon:
               const Icon(Icons.favorite_border, size: 20, color: Colors.white),

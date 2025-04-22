@@ -3,10 +3,12 @@ import '../../data/repositories/event_repository.dart';
 import '../../data/repositories/location_repository.dart';
 import '../views/main_screen.dart';
 import '../../data/services/analytics_service.dart';
+import '../../data/repositories/favorite_repository.dart';
 
 class CombinedViewModel extends ChangeNotifier {
   final EventRepository eventRepository = EventRepository();
   final LocationRepository locationRepository = LocationRepository();
+  final FavoriteRepository favoriteRepository = FavoriteRepository();
 
   List<Map<String, dynamic>> _events = [];
   Map<String, dynamic>? _event;  // Detalles del evento
@@ -16,7 +18,8 @@ class CombinedViewModel extends ChangeNotifier {
   String? _error;
   int _selectedIndex = 0;
   final Map<int, Map<String, dynamic>> _buildingCache = {};
-
+  bool isFavorite = false;
+  
   CombinedViewModel();
 
   // Getters
@@ -27,6 +30,30 @@ class CombinedViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   int get selectedIndex => _selectedIndex;
+
+  Future<void> checkIfFavorite() async {
+    if (_event == null) return;
+    final favorites = await favoriteRepository.getFavoriteEvents();
+    isFavorite = favorites.any((fav) => fav['id'] == _event!['id']);
+    notifyListeners();
+  }
+
+  Future<void> addToFavorites() async {
+    if (_event != null) {
+      await favoriteRepository.saveFavoriteEvent(_event!);
+      isFavorite = true;
+      notifyListeners();
+    }
+  }
+
+  Future<void> removeFromFavorites() async {
+    if (_event != null) {
+      await favoriteRepository.removeFavoriteEvent(_event!);
+      isFavorite = false;
+      notifyListeners();
+    }
+  }
+
 
   // Métodos para manejar eventos
   Future<void> fetchEvents() async {
@@ -44,14 +71,14 @@ class CombinedViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> fetchEventDetails(int eventId) async {
+ Future<void> fetchEventDetails(int eventId) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
       _event = (await eventRepository.fetchEventById(eventId)).firstOrNull;
-      
+
       await AnalyticsService.logUserAction(
         actionType: 'consult_event',
         eventId: eventId,
@@ -59,6 +86,8 @@ class CombinedViewModel extends ChangeNotifier {
         title: _event?['title'],
         locationId: _event?['location_id'],
       );
+
+      await checkIfFavorite(); // Verificar favorito al cargar el evento
     } catch (e) {
       _error = e.toString();
     }
