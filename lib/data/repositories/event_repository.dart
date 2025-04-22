@@ -1,59 +1,96 @@
+import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:dart_g12/data/services/supabase_service.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:dart_g12/data/services/local_storage_service.dart';
+import 'dart:async';
+
+List<Map<String, dynamic>> _parseList(List<dynamic> response) {
+  return List<Map<String, dynamic>>.from(response);
+}
 
 class EventRepository {
   final supabase = SupabaseService().client;
+  final LocalStorageService _cache = LocalStorageService();
 
   EventRepository();
 
-  /// 🔹 Obtener todos los eventos y ordenarlos por proximidad al usuario
   Future<List<Map<String, dynamic>>> fetchEvents() async {
-    // Obtener la ubicación actual del usuario
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    final double userLat = position.latitude;
-    final double userLon = position.longitude;
-
-    // Obtener todos los eventos desde Supabase
-    final response = await supabase
-        .from('events')
-        .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type');
-
-    if (response.isEmpty) {
-      throw Exception('No se encontraron eventos.');
+    List<Map<String, dynamic>> cached = [];
+    try {
+      cached = await _cache.fetch('events');
+    } catch (e) {
+      log('Error leyendo cache de eventos: $e');
     }
-
-    List<Map<String, dynamic>> events = List<Map<String, dynamic>>.from(response);
-
-    return events;
+    unawaited(_fetchAndCacheAllEvents());
+    return cached;
   }
 
-  /// 🔹 Obtener eventos por tipo
+  Future<void> _fetchAndCacheAllEvents() async {
+    try {
+      final response = await supabase
+          .from('events')
+          .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type');
+      final parsed = await compute(_parseList, response as List<dynamic>);
+      await _cache.save('events', parsed);
+    } catch (e) {
+      log('Error al obtener eventos desde red: $e');
+    }
+  }
+
   Future<List<Map<String, dynamic>>> fetchEventsByType(String type) async {
-    final response = await supabase
-        .from('events')
-        .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type')
-        .eq('type', type);
-
-    if (response.isEmpty) {
-      throw Exception('No se encontraron eventos del tipo: $type.');
+    final cacheKey = 'events_type_$type';
+    List<Map<String, dynamic>> cached = [];
+    try {
+      cached = await _cache.fetch(cacheKey);
+    } catch (e) {
+      log('Error leyendo cache eventos por tipo ($type): $e');
     }
-
-    return List<Map<String, dynamic>>.from(response);
+    unawaited(_fetchAndCacheEventsByType(type));
+    return cached;
   }
 
-  /// 🔹 Obtener un evento por su ID
-  Future<Map<String, dynamic>?> fetchEventById(int id) async {
+  Future<void> _fetchAndCacheEventsByType(String type) async {
+    try {
+      final response = await supabase
+          .from('events')
+          .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type')
+          .eq('type', type);
+
+      final parsed = await compute(_parseList, response as List<dynamic>);
+      await _cache.save('events_type_$type', parsed);
+    } catch (e) {
+      log('Error al obtener eventos por tipo desde red: $e');
+    }
+  }
+
+Future<List<Map<String, dynamic>>> fetchEventById(int id) async {
+  final cacheKey = 'event_$id';
+  List<Map<String, dynamic>> cached = [];
+  try {
+    cached = await _cache.fetch(cacheKey);
+  } catch (e) {
+    log('Error leyendo cache de evento por ID ($id): $e');
+  }
+  unawaited(_fetchAndCacheEventById(id, cacheKey));
+  return cached;
+}
+
+Future<void> _fetchAndCacheEventById(int id, String cacheKey) async {
+  try {
     final response = await supabase
         .from('events')
         .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type')
         .eq('event_id', id)
         .maybeSingle();
-
-    return response;
+    if (response != null) {
+      await _cache.save(cacheKey, [response]); 
+    }
+  } catch (e) {
+    log('Error al obtener evento por ID desde red ($id): $e');
   }
+}
 
-  /// 🔹 Obtener eventos con paginación
+
   Future<List<Map<String, dynamic>>> fetchEventsPaginated(int page, int limit) async {
     final start = (page - 1) * limit;
     final end = start + limit - 1;
@@ -66,17 +103,30 @@ class EventRepository {
     return List<Map<String, dynamic>>.from(response);
   }
 
-  /// 🔹 Obtener eventos de una ubicación específica
   Future<List<Map<String, dynamic>>> fetchEventsByLocation(int locationId) async {
-    final response = await supabase
-        .from('events')
-        .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type')
-        .eq('location_id', locationId);
+    final cacheKey = 'events_location_$locationId';
+    List<Map<String, dynamic>> cached = [];
 
-    if (response.isEmpty) {
-      throw Exception('No se encontraron eventos para esta ubicación.');
+    try {
+      cached = await _cache.fetch(cacheKey);
+    } catch (e) {
+      log('Error leyendo cache eventos por ubicación ($locationId): $e');
     }
+    unawaited(_fetchAndCacheEventsByLocation(locationId));
+    return cached;
+  }
 
-    return List<Map<String, dynamic>>.from(response);
+  Future<void> _fetchAndCacheEventsByLocation(int locationId) async {
+    try {
+      final response = await supabase
+          .from('events')
+          .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type')
+          .eq('location_id', locationId);
+
+      final parsed = await compute(_parseList, response as List<dynamic>);
+      await _cache.save('events_location_$locationId', parsed);
+    } catch (e) {
+      log('Error al obtener eventos por ubicación desde red: $e');
+    }
   }
 }
