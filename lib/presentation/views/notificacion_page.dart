@@ -28,7 +28,7 @@ class NotificacionPage extends StatelessWidget {
                       child: Text(
                         'Notifications',
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 30,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
