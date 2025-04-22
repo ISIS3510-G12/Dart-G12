@@ -9,6 +9,7 @@ class LocationRepository {
   final LocalStorageService cache = LocalStorageService();
 
   LocationRepository();
+
   /// Obtener todas las ubicaciones y ordenarlas por proximidad al usuario
   Future<List<Map<String, dynamic>>> fetchLocations() async {
     final String cacheKey = 'all_locations_sorted';
@@ -25,16 +26,17 @@ class LocationRepository {
     final double userLat = position.latitude;
     final double userLon = position.longitude;
 
-    final response = await supabase
-        .from('locations')
-        .select('location_id, name, description, image_url, category, latitude, longitude');
+    final response = await supabase.from('locations').select(
+        'location_id, name, description, latitude, longitude, description, image_url, block');
 
     if (response.isEmpty) throw Exception('No se encontraron ubicaciones.');
 
     locations = List<Map<String, dynamic>>.from(response);
     locations.sort((a, b) {
-      double distanceA = Geolocator.distanceBetween(userLat, userLon, a['latitude'], a['longitude']);
-      double distanceB = Geolocator.distanceBetween(userLat, userLon, b['latitude'], b['longitude']);
+      double distanceA = Geolocator.distanceBetween(
+          userLat, userLon, a['latitude'], a['longitude']);
+      double distanceB = Geolocator.distanceBetween(
+          userLat, userLon, b['latitude'], b['longitude']);
       return distanceA.compareTo(distanceB);
     });
 
@@ -42,7 +44,7 @@ class LocationRepository {
     return locations;
   }
 
-  /// Obtener ubicaciones donde category = 'Buildings'
+  /// Obtener ubicaciones (todos los edificios)
   Future<List<Map<String, dynamic>>> fetchBuildings() async {
     const String cacheKey = 'buildings';
     List<Map<String, dynamic>> buildings = [];
@@ -52,12 +54,11 @@ class LocationRepository {
       if (buildings.isNotEmpty) return buildings;
     } catch (_) {}
 
-    final response = await supabase
-        .from('locations')
-        .select('location_id, name, description, image_url, category, latitude, longitude')
-        .eq('category', 'Buildings');
+    final response = await supabase.from('locations').select(
+        'location_id, name, description, latitude, longitude, image_url, block');
 
-    if (response.isEmpty) throw Exception('No se encontraron edificios.');
+    // Verificar que la respuesta no esté vacía
+    if (response.isEmpty) throw Exception('No se encontraron ubicaciones.');
 
     buildings = List<Map<String, dynamic>>.from(response);
 
@@ -68,8 +69,10 @@ class LocationRepository {
     final double userLon = position.longitude;
 
     buildings.sort((a, b) {
-      double distanceA = Geolocator.distanceBetween(userLat, userLon, a['latitude'], a['longitude']);
-      double distanceB = Geolocator.distanceBetween(userLat, userLon, b['latitude'], b['longitude']);
+      double distanceA = Geolocator.distanceBetween(
+          userLat, userLon, a['latitude'], a['longitude']);
+      double distanceB = Geolocator.distanceBetween(
+          userLat, userLon, b['latitude'], b['longitude']);
       return distanceA.compareTo(distanceB);
     });
 
@@ -88,7 +91,8 @@ class LocationRepository {
 
     final response = await supabase
         .from('locations')
-        .select('location_id, name, description, image_url, category, latitude, longitude')
+        .select(
+            'location_id, name, description, latitude, longitude, description, image_url, block')
         .eq('location_id', id)
         .maybeSingle();
 
@@ -100,7 +104,8 @@ class LocationRepository {
   }
 
   /// Obtener ubicaciones con paginación
-  Future<List<Map<String, dynamic>>> fetchLocationsPaginated(int page, int limit) async {
+  Future<List<Map<String, dynamic>>> fetchLocationsPaginated(
+      int page, int limit) async {
     final String cacheKey = 'locations_page_$page';
     List<Map<String, dynamic>> paginated = [];
 
@@ -114,7 +119,8 @@ class LocationRepository {
 
     final response = await supabase
         .from('locations')
-        .select('location_id, name, description, image_url, category, latitude, longitude')
+        .select(
+            'location_id, name, description, latitude, longitude, description, image_url, block')
         .range(start, end);
 
     paginated = List<Map<String, dynamic>>.from(response);
@@ -124,7 +130,8 @@ class LocationRepository {
   }
 
   /// Obtener todos los lugares (`places`) de una `location` específica
-  Future<List<Map<String, dynamic>>> fetchPlacesByLocation(int locationId) async {
+  Future<List<Map<String, dynamic>>> fetchPlacesByLocation(
+      int locationId) async {
     final String cacheKey = 'places_location_$locationId';
     List<Map<String, dynamic>> places = [];
 
@@ -138,7 +145,8 @@ class LocationRepository {
         .select('id, id_location, name, url_image, floor')
         .eq('id_location', locationId);
 
-    if (response.isEmpty) throw Exception('No se encontraron lugares para esta ubicación.');
+    if (response.isEmpty)
+      throw Exception('No se encontraron lugares para esta ubicación.');
 
     places = List<Map<String, dynamic>>.from(response);
     await cache.save(cacheKey, places);
