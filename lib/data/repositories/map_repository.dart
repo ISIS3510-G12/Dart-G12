@@ -1,12 +1,37 @@
 import 'package:dart_g12/data/services/supabase_service.dart';
+import 'package:dart_g12/data/services/local_storage_service.dart';
+import 'dart:developer';
+import 'dart:async';
+import 'package:flutter/foundation.dart';
+
+List<Map<String, dynamic>> parseList(List<dynamic> response) {
+  return List<Map<String, dynamic>>.from(response);
+}
 
 class MapRepository {
   final supabase = SupabaseService().client;
+  final LocalStorageService cache = LocalStorageService();
 
-  /// Obtiene las ubicaciones de manera concurrente
   Future<List<Map<String, dynamic>>> fetchLocations() async {
-    final response = await supabase.from('locations').select();
-    return List<Map<String, dynamic>>.from(response);
+    List<Map<String, dynamic>> cached = [];
+    try {
+      cached = await cache.fetch('locationsmap');
+    } catch (e) {
+      log('Error leyendo cache locations: $e');
+    }
+    log('Cached locations: $cached');
+    unawaited(_fetchAndCacheLocations());
+    return cached;
+  }
+
+  Future<void> _fetchAndCacheLocations() async {
+    try {
+      final response = await supabase.from('locations').select('location_id, name, latitude, longitude');
+      final parsed = await compute(parseList, response as List<dynamic>);
+      await cache.save('locationsmap', parsed);
+    } catch (e) {
+      log('Error fetching locations from network: $e');
+    }
   }
 
   /// Obtiene la ruta desde la tabla 'routes' según los id de inicio y fin de manera concurrente
