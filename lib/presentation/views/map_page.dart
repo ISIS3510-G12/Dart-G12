@@ -19,15 +19,14 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   late final MapViewModel viewModel;
-  bool _isInitialized = false; // Para evitar múltiples inicializaciones
+  bool _isInitialized = false; 
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_isInitialized) {
-      viewModel = MapViewModel();
-      viewModel.getCurrentLocation();
-      _isInitialized = true; // Evita múltiples llamadas
+    viewModel = MapViewModel(); // ¡Esto ya llama a fetchLocations internamente!
+    _isInitialized = true; // Evita que se vuelva a inicializar
     }
   }
 
