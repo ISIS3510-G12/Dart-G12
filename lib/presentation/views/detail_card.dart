@@ -248,8 +248,17 @@ class _DetailCardState extends State<DetailCard> {
 
                 setState(() {}); 
           },
-          icon:
-              const Icon(Icons.favorite_border, size: 20, color: Colors.white),
+          icon: FutureBuilder<bool>(
+            future: Future.value(viewModel.isFavorite),
+            builder: (context, snapshot) {
+              final isFavorite = snapshot.data ?? false;
+              return Icon(
+                isFavorite ? Icons.favorite : Icons.favorite_border,
+                size: 20,
+                color: Colors.white,
+              );
+            },
+          ),
           label: const Text(
             'Favorites',
             style: TextStyle(
