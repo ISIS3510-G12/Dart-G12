@@ -14,7 +14,6 @@ class EventRepository {
 
   EventRepository();
 
-  /// Obtener todos los eventos con caché
   Future<List<Map<String, dynamic>>> fetchEvents() async {
     List<Map<String, dynamic>> cached = [];
     try {
@@ -22,9 +21,7 @@ class EventRepository {
     } catch (e) {
       log('Error leyendo cache de eventos: $e');
     }
-
     unawaited(_fetchAndCacheAllEvents());
-
     return cached;
   }
 
@@ -33,7 +30,6 @@ class EventRepository {
       final response = await supabase
           .from('events')
           .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type');
-
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('events', parsed);
     } catch (e) {
@@ -41,19 +37,15 @@ class EventRepository {
     }
   }
 
-  /// Obtener eventos por tipo con caché individual
   Future<List<Map<String, dynamic>>> fetchEventsByType(String type) async {
     final cacheKey = 'events_type_$type';
     List<Map<String, dynamic>> cached = [];
-
     try {
       cached = await _cache.fetch(cacheKey);
     } catch (e) {
       log('Error leyendo cache eventos por tipo ($type): $e');
     }
-
     unawaited(_fetchAndCacheEventsByType(type));
-
     return cached;
   }
 
@@ -71,18 +63,34 @@ class EventRepository {
     }
   }
 
-  /// Obtener un evento por ID (sin caché, normalmente esto es detalle puntual)
-  Future<Map<String, dynamic>?> fetchEventById(int id) async {
+Future<List<Map<String, dynamic>>> fetchEventById(int id) async {
+  final cacheKey = 'event_$id';
+  List<Map<String, dynamic>> cached = [];
+  try {
+    cached = await _cache.fetch(cacheKey);
+  } catch (e) {
+    log('Error leyendo cache de evento por ID ($id): $e');
+  }
+  unawaited(_fetchAndCacheEventById(id, cacheKey));
+  return cached;
+}
+
+Future<void> _fetchAndCacheEventById(int id, String cacheKey) async {
+  try {
     final response = await supabase
         .from('events')
         .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type')
         .eq('event_id', id)
         .maybeSingle();
-
-    return response;
+    if (response != null) {
+      await _cache.save(cacheKey, [response]); 
+    }
+  } catch (e) {
+    log('Error al obtener evento por ID desde red ($id): $e');
   }
+}
 
-  /// Obtener eventos con paginación (sin caché, ya que es dinámico)
+
   Future<List<Map<String, dynamic>>> fetchEventsPaginated(int page, int limit) async {
     final start = (page - 1) * limit;
     final end = start + limit - 1;
@@ -95,7 +103,6 @@ class EventRepository {
     return List<Map<String, dynamic>>.from(response);
   }
 
-  /// Obtener eventos por ubicación con caché por ubicación
   Future<List<Map<String, dynamic>>> fetchEventsByLocation(int locationId) async {
     final cacheKey = 'events_location_$locationId';
     List<Map<String, dynamic>> cached = [];
@@ -105,9 +112,7 @@ class EventRepository {
     } catch (e) {
       log('Error leyendo cache eventos por ubicación ($locationId): $e');
     }
-
     unawaited(_fetchAndCacheEventsByLocation(locationId));
-
     return cached;
   }
 

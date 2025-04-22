@@ -50,8 +50,8 @@ class CombinedViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _event = await eventRepository.fetchEventById(eventId);
-
+      _event = (await eventRepository.fetchEventById(eventId)).firstOrNull;
+      
       await AnalyticsService.logUserAction(
         actionType: 'consult_event',
         eventId: eventId,
