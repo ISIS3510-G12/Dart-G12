@@ -21,6 +21,7 @@ class DetailCard extends StatefulWidget {
 
 class _DetailCardState extends State<DetailCard> {
   late CombinedViewModel viewModel;
+  final TextEditingController _searchCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -46,7 +47,9 @@ class _DetailCardState extends State<DetailCard> {
     final isEvent = widget.type == CardType.event;
     final imageUrl = isEvent
         ? (viewModel.event != null ? viewModel.event!['image_url'] : null)
-        : (viewModel.building != null ? viewModel.building!['image_url'] : null);
+        : (viewModel.building != null
+            ? viewModel.building!['image_url']
+            : null);
 
     final title = isEvent
         ? (viewModel.event != null ? viewModel.event!['title'] ?? '' : '')
@@ -55,7 +58,6 @@ class _DetailCardState extends State<DetailCard> {
     return Scaffold(
       body: Stack(
         children: [
-          // Imagen de fondo
           Positioned(
             top: 0,
             left: 0,
@@ -75,27 +77,34 @@ class _DetailCardState extends State<DetailCard> {
           ),
 
           // Fondo con óvalos
-          Positioned.fill(child: CustomPaint(painter: TransparentOvalsPainter())),
+          Positioned.fill(
+            child: CustomPaint(painter: TransparentOvalsPainter()),
+          ),
 
-          // Título arriba del óvalo
           Positioned(
-            top: isEvent ? 240 : 220,
+            top: 48,
             left: 16,
             right: 16,
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                shadows: [Shadow(blurRadius: 2, color: Colors.white)],
+            child: Center(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  shadows: [Shadow(blurRadius: 6, color: Colors.black)],
+                ),
+                textAlign: TextAlign.center,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
 
-          // Contenido principal
+          Positioned(
+            top: isEvent ? 220 : 200,
+            left: 16,
+            child: _buildActionButtons(),
+          ),
+
           Positioned.fill(
             top: isEvent ? 300 : 280,
             child: _buildContent(),
@@ -130,8 +139,6 @@ class _DetailCardState extends State<DetailCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 12),
-            _buildActionButtons(),
             const SizedBox(height: 16),
             if (viewModel.event?['start_time'] != null &&
                 viewModel.event?['end_time'] != null)
@@ -156,8 +163,6 @@ class _DetailCardState extends State<DetailCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 12),
-            _buildActionButtons(),
             const SizedBox(height: 16),
             if (viewModel.building?['address']?.isNotEmpty ?? false)
               _buildAddress(viewModel.building?['address'] ?? ''),
@@ -171,11 +176,27 @@ class _DetailCardState extends State<DetailCard> {
 
             // Sección de lugares populares
             if (viewModel.places.isNotEmpty) ...[
+
+              TextField(
+                decoration: InputDecoration(
+                  hintText: "Where to go?",
+                  filled: true,
+                  fillColor: Colors.white,
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
               const Text(
                 'Popular Places',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
+
               SizedBox(
                 height: 165,
                 child: ListView.builder(
@@ -202,8 +223,14 @@ class _DetailCardState extends State<DetailCard> {
       children: [
         ElevatedButton.icon(
           onPressed: () => viewModel.goToMapPage(context),
-          icon: const Icon(Icons.directions, size: 20),
-          label: const Text('How to get there'),
+          label: const Text(
+            'Indications',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          icon: const Icon(Icons.directions, size: 20, color: Colors.white),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFEA1D5D),
             foregroundColor: Colors.white,
@@ -213,11 +240,18 @@ class _DetailCardState extends State<DetailCard> {
         const SizedBox(width: 12),
         ElevatedButton.icon(
           onPressed: () {
-            // Aquí puedes conectar con tu lógica de favoritos
+            // conectar lógica de favoritos
             print("Favorite pressed");
           },
-          icon: const Icon(Icons.favorite_border, size: 20),
-          label: const Text('Favorites'),
+          icon:
+              const Icon(Icons.favorite_border, size: 20, color: Colors.white),
+          label: const Text(
+            'Favorites',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFEA1D5D),
             foregroundColor: Colors.white,
