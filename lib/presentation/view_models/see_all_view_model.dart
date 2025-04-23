@@ -1,17 +1,20 @@
 import 'package:dart_g12/data/repositories/laboratories_repository.dart';
 import 'package:flutter/material.dart';
 import '../../data/repositories/location_repository.dart';
-import '../../data/repositories/event_repository.dart'; // Importa tu repository de eventos
+import '../../data/repositories/event_repository.dart';
 import '../views/main_screen.dart';
+import '../../data/repositories/access_repository.dart';
 
 class SeeAllViewModel extends ChangeNotifier {
   final LocationRepository locationRepository = LocationRepository();
-  final EventRepository eventRepository = EventRepository(); // Asegúrate de tener esto
-  final LaboratoriesRepository laboratoriesRepository = LaboratoriesRepository();
+  final EventRepository eventRepository = EventRepository();
+  final LaboratoriesRepository laboratoriesRepository =
+      LaboratoriesRepository();
+  final AccessRepository accessRepository = AccessRepository();
 
   late String contentType;
-  List<Map<String, dynamic>> _allItems = []; // Para almacenar tanto edificios como eventos
-  List<Map<String, dynamic>> _items = []; // Para lo que se muestran en la view
+  List<Map<String, dynamic>> _allItems = [];
+  List<Map<String, dynamic>> _items = [];
   bool _isLoading = false;
   String? _error;
   int _selectedIndex = 0;
@@ -31,7 +34,8 @@ class SeeAllViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _allItems = await locationRepository.fetchBuildings(); // Cambié _buildings por _items
+      _allItems = await locationRepository
+          .fetchBuildings(); // Cambié _buildings por _items
       _items = List.from(_allItems);
     } catch (e) {
       _error = e.toString();
@@ -48,7 +52,8 @@ class SeeAllViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _allItems = await eventRepository.fetchEvents(); // Cambié _buildings por _items
+      _allItems =
+          await eventRepository.fetchEvents(); // Cambié _buildings por _items
       _items = List.from(_allItems);
     } catch (e) {
       _error = e.toString();
@@ -75,6 +80,23 @@ class SeeAllViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Método para obtener los access points desde Supabase
+  Future<void> fetchAccess() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _allItems = await accessRepository.fetchAccess();
+      _items = List.from(_allItems);
+    } catch (e) {
+      _error = e.toString();
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
   // Método común para cargar datos dependiendo del tipo de contenido
   Future<void> fetchData() async {
     _isLoading = true;
@@ -86,6 +108,10 @@ class SeeAllViewModel extends ChangeNotifier {
         await fetchBuildings();
       } else if (contentType == 'event') {
         await fetchEvents();
+      } else if (contentType == 'laboratory') {
+        await fetchLaboratories();
+      } else if (contentType == 'access') {
+        await fetchAccess(); 
       } else {
         _error = 'Tipo de contenido no soportado: $contentType';
       }
@@ -110,13 +136,14 @@ class SeeAllViewModel extends ChangeNotifier {
     );
   }
 
-  void filterItems(String query){
-    if (query.trim().isEmpty){
-        _items = List.from(_allItems);
+  void filterItems(String query) {
+    if (query.trim().isEmpty) {
+      _items = List.from(_allItems);
     } else {
-        final q = query.toLowerCase();
-        _items = _allItems.where((item) {
-        final text = (item['title'] ?? item['name'] ?? '').toString().toLowerCase();
+      final q = query.toLowerCase();
+      _items = _allItems.where((item) {
+        final text =
+            (item['title'] ?? item['name'] ?? '').toString().toLowerCase();
         return text.contains(q);
       }).toList();
     }

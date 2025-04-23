@@ -39,7 +39,7 @@ class HomeScreen extends StatelessWidget {
                     const CategoryList(),
                     const SizedBox(height: 16),
                     Expanded(
-                      child: _buildContent(context), // Pasamos context aquí
+                      child: _buildContent(context), 
                     ),
                   ],
                 ),
@@ -111,6 +111,17 @@ class HomeScreen extends StatelessWidget {
               );
             },
           ),
+          _buildSection(
+            "Access points", // Nueva sección para los access points
+            SeeAllScreen(contentType: "access"),
+            context,
+            (viewModel) {
+              return _buildHorizontalList(
+                viewModel.access,
+                context,
+              );
+            },
+          ),
         ],
       ),
     );
@@ -176,13 +187,23 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                 );
-              }  else if (item['laboratories_id'] != null) {
+              } else if (item['laboratories_id'] != null) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => DetailCard(
                       id: item['laboratories_id'],
                       type: CardType.laboratories,
+                    ),
+                  ),
+                );
+              } else if (item['access_id'] != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetailCard(
+                      id: item['access_id'],
+                      type: CardType.access,
                     ),
                   ),
                 );
