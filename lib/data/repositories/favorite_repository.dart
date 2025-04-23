@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
@@ -8,6 +9,7 @@ class FavoriteRepository {
     List<String> favorites = prefs.getStringList('favorite_events') ?? [];
     String eventJson = json.encode(event);
     favorites.add(eventJson);
+    log(favorites.toString());
     await prefs.setStringList('favorite_events', favorites);
   }
 
@@ -15,6 +17,7 @@ class FavoriteRepository {
     final prefs = await SharedPreferences.getInstance();
     List<String> favorites = prefs.getStringList('favorite_events') ?? [];
     return favorites.map((eventJson) => json.decode(eventJson) as Map<String, dynamic>).toList();
+    
   }
 
   Future<void> removeFavoriteEvent(Map<String, dynamic> event) async {
