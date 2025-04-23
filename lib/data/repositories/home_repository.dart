@@ -84,18 +84,44 @@ class HomeRepository {
     }
   }
 
+
+  Future<List<Map<String, dynamic>>> fetchAccess() async {
+    List<Map<String, dynamic>> cached = [];
+    try {
+      cached = await _cache.fetch('access');
+    } catch (e) {
+      log('Error leyendo cache accesses: $e');
+    }
+    unawaited(_fetchAndCacheAccess());
+    return cached;
+  }
+
+  Future<void> _fetchAndCacheAccess() async {
+    try {
+      final response = await supabase
+          .from('access')
+          .select('access_id, name, location_id, image_url, locations (name, block)');
+      final parsed = await compute(_parseList, response as List<dynamic>);
+      await _cache.save('accesses', parsed);
+    } catch (e) {
+      log('Error fetching accesses from network: $e');
+    }
+  }
+
   // ✅ Actualizado: ahora incluye los laboratorios
   Future<Map<String, List<Map<String, dynamic>>>> fetchAllData() async {
     final results = await Future.wait([
       fetchLocations(),
       fetchMostSearchedLocations(),
-      fetchLaboratories(), // Añadido
+      fetchLaboratories(),
+      fetchAccess(), 
     ]);
 
     return {
       'locations': results[0],
       'mostSearched': results[1],
       'laboratories': results[2],
+      'access': results[3],
     };
   }
 }

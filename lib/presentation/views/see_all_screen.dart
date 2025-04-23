@@ -7,7 +7,7 @@ import 'detail_card.dart';
 
 class SeeAllScreen extends StatefulWidget {
   final int initialIndex;
-  final String contentType; // Puede ser "building", "event" o "laboratory"
+  final String contentType;
 
   const SeeAllScreen(
       {super.key, this.initialIndex = 0, required this.contentType});
@@ -33,6 +33,8 @@ class SeeAllScreenState extends State<SeeAllScreen> {
       _viewModel.fetchEvents();
     } else if (widget.contentType == "laboratory") {
       _viewModel.fetchLaboratories();
+    } else if (widget.contentType == "access") {
+      _viewModel.fetchAccess();
     }
   }
 
@@ -65,7 +67,11 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                           ? "Buildings"
                           : widget.contentType == "event"
                               ? "Events"
-                              : "Laboratories",
+                              : widget.contentType == "laboratory"
+                                  ? "Laboratories"
+                                  : widget.contentType == "access"
+                                      ? "Access Points"
+                                      : "Unknown", // En caso de que el tipo no sea reconocido
                       style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -104,32 +110,41 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                         : _viewModel.error != null
                             ? Center(child: Text(_viewModel.error!))
                             : _viewModel.items.isEmpty
-                                ? Center(child: Text("No hay ${widget.contentType}s disponibles"))
+                                ? Center(
+                                    child: Text(
+                                        "No hay ${widget.contentType}s disponibles"))
                                 : SingleChildScrollView(
                                     child: Align(
                                       alignment: Alignment.topCenter,
                                       child: ConstrainedBox(
-                                        constraints: const BoxConstraints(maxWidth: 600),
+                                        constraints:
+                                            const BoxConstraints(maxWidth: 600),
                                         child: Wrap(
                                           alignment: WrapAlignment.start,
                                           spacing: 16,
                                           runSpacing: 16,
-                                          children: _viewModel.items.map((item) {
+                                          children:
+                                              _viewModel.items.map((item) {
                                             String? subtitle;
                                             String? block;
 
                                             // Eventos o laboratorios: toman datos desde la relación con locations
                                             if (item['locations'] != null) {
-                                              if (item['locations']['name'] != null) {
-                                                subtitle = item['locations']['name'];
+                                              if (item['locations']['name'] !=
+                                                  null) {
+                                                subtitle =
+                                                    item['locations']['name'];
                                               }
-                                              if (item['locations']['block'] != null) {
-                                                block = item['locations']['block'];
+                                              if (item['locations']['block'] !=
+                                                  null) {
+                                                block =
+                                                    item['locations']['block'];
                                               }
                                             }
 
                                             // Si es un building/location directo
-                                            if (widget.contentType == "building") {
+                                            if (widget.contentType ==
+                                                "building") {
                                               subtitle = null;
                                               if (item['block'] != null) {
                                                 block = item['block'];
@@ -145,23 +160,41 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                                               subtitle: subtitle ?? '',
                                               block: block,
                                               onTap: () {
-                                                if (widget.contentType == "building") {
+                                                if (widget.contentType ==
+                                                    "building") {
                                                   Navigator.push(
                                                     context,
                                                     MaterialPageRoute(
-                                                      builder: (context) => DetailCard(
+                                                      builder: (context) =>
+                                                          DetailCard(
                                                         id: item['location_id'],
                                                         type: CardType.building,
                                                       ),
                                                     ),
                                                   );
-                                                }  else if (widget.contentType == "laboratory") {
+                                                } else if (widget.contentType ==
+                                                    "laboratory") {
                                                   Navigator.push(
                                                     context,
                                                     MaterialPageRoute(
-                                                      builder: (context) => DetailCard(
-                                                        id: item['laboratories_id'],
-                                                        type: CardType.laboratories,
+                                                      builder: (context) =>
+                                                          DetailCard(
+                                                        id: item[
+                                                            'laboratories_id'],
+                                                        type: CardType
+                                                            .laboratories,
+                                                      ),
+                                                    ),
+                                                  );
+                                                } else if (widget.contentType ==
+                                                    "access") {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          DetailCard(
+                                                        id: item['access_id'],
+                                                        type: CardType.access,
                                                       ),
                                                     ),
                                                   );

@@ -31,7 +31,7 @@ class AccessRepository {
     try {
       final response = await supabase
           .from('access')
-          .select('access_id, name, location_id, image_url, locations(block)'); // Se incluye el campo 'block' de 'locations'
+          .select('access_id, name, location_id, image_url, locations(name, block)'); // Se incluye el campo 'block' de 'locations'
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('access', parsed);
     } catch (e) {
@@ -56,7 +56,7 @@ class AccessRepository {
     try {
       final response = await supabase
           .from('access')
-          .select('access_id, name, location_id, image_url, locations(block)') // Se incluye el campo 'block' de 'locations'
+          .select('access_id, name, location_id, image_url, locations(name, block)') // Se incluye el campo 'block' de 'locations'
           .eq('access_id', accessId)
           .maybeSingle();
       if (response != null) {
@@ -84,7 +84,7 @@ class AccessRepository {
     try {
       final response = await supabase
           .from('access')
-          .select('access_id, name, location_id, image_url, locations(block)') // Se incluye el campo 'block' de 'locations'
+          .select('access_id, name, location_id, image_url, locations(name, block)') 
           .eq('location_id', locationId);
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('access_location_$locationId', parsed);

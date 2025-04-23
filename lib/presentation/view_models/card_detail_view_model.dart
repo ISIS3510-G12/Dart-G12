@@ -4,17 +4,19 @@ import '../../data/repositories/location_repository.dart';
 import '../views/main_screen.dart';
 import '../../data/services/analytics_service.dart';
 import '../../data/repositories/laboratories_repository.dart';
+import '../../data/repositories/access_repository.dart';
 
 class CardDetailViewModel extends ChangeNotifier {
   final EventRepository eventRepository = EventRepository();
   final LocationRepository locationRepository = LocationRepository();
-  final LaboratoriesRepository laboratoriesRepository =
-      LaboratoriesRepository();
+  final LaboratoriesRepository laboratoriesRepository = LaboratoriesRepository();
+  final AccessRepository accessRepository = AccessRepository();
 
   List<Map<String, dynamic>> _events = [];
   Map<String, dynamic>? _event;
   Map<String, dynamic>? _building;
   List<Map<String, dynamic>> _laboratories = [];
+  List<Map<String, dynamic>> _access = [];
   bool _isLoading = false;
   String? _error;
   int _selectedIndex = 0;
@@ -27,6 +29,7 @@ class CardDetailViewModel extends ChangeNotifier {
   Map<String, dynamic>? get event => _event;
   Map<String, dynamic>? get building => _building;
   List<Map<String, dynamic>> get laboratories => _laboratories;
+  List<Map<String, dynamic>> get access => _access;
   bool get isLoading => _isLoading;
   String? get error => _error;
   int get selectedIndex => _selectedIndex;
@@ -88,6 +91,7 @@ class CardDetailViewModel extends ChangeNotifier {
 
       _laboratories =
           await laboratoriesRepository.fetchLaboratoriesByLocation(buildingId);
+      _access = await accessRepository.fetchAccessByLocation(buildingId);
     } catch (e) {
       _error = e.toString();
     }
@@ -105,12 +109,27 @@ class CardDetailViewModel extends ChangeNotifier {
       final lab =
           await laboratoriesRepository.fetchLaboratoryById(laboratoryId);
       if (lab != null) {
-        _laboratories = [
-          lab
-        ]; 
+        _laboratories = [lab];
       } else {
         throw Exception('Laboratorio no encontrado.');
       }
+    } catch (e) {
+      _error = e.toString();
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> fetchAccessDetails(int accessId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final accList = await accessRepository
+          .fetchAccessById(accessId); 
+      _access = accList;
     } catch (e) {
       _error = e.toString();
     }
@@ -127,7 +146,7 @@ class CardDetailViewModel extends ChangeNotifier {
 
   // Navegar a la página de mapa
   void goToMapPage(BuildContext context) {
-    updateSelectedIndex(2); // Índice 2 es para la página del mapa
+    updateSelectedIndex(2);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(

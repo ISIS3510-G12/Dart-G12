@@ -12,13 +12,16 @@ class HomeViewModel extends ChangeNotifier {
   String? _avatarUrl;
   List<Map<String, dynamic>> _locations = [];
   List<Map<String, dynamic>> _mostSearchedLocations = [];
-  List<Map<String, dynamic>> _laboratories = []; // 🧪 NUEVO
+  List<Map<String, dynamic>> _laboratories = []; 
+  List<Map<String, dynamic>> _access = [];
+
 
   String get userName => _userName;
   String? get avatarUrl => _avatarUrl;
   List<Map<String, dynamic>> get locations => _locations;
   List<Map<String, dynamic>> get mostSearchedLocations => _mostSearchedLocations;
-  List<Map<String, dynamic>> get laboratories => _laboratories; // 🧪 NUEVO
+  List<Map<String, dynamic>> get laboratories => _laboratories; 
+  List<Map<String, dynamic>> get access => _access; 
 
   HomeViewModel() {
     _authService = AuthService();
@@ -53,7 +56,8 @@ class HomeViewModel extends ChangeNotifier {
       final data = await _homeRepository.fetchAllData();
       _locations = data['locations'] ?? [];
       _mostSearchedLocations = data['mostSearched'] ?? [];
-      _laboratories = data['laboratories'] ?? []; // 🧪 NUEVO
+      _laboratories = data['laboratories'] ?? [];
+      _access = data['access'] ?? []; 
     } catch (error) {
       log('Error cargando los datos del home: $error');
     }
