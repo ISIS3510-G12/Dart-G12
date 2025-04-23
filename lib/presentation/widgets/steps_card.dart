@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 class StepsCard extends StatelessWidget {
   final VoidCallback onClose;
-  // Recibe la lista de nodos (cada nodo es un map con node_name, etc.)
   final List<Map<String, dynamic>> nodes;
 
   const StepsCard({
@@ -38,8 +37,11 @@ class StepsCard extends StatelessWidget {
               ],
             ),
           ),
-          // Mostramos la lista de nodos con ListView.builder
-          Flexible(
+          const SizedBox(height: 8),
+          ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxHeight: 300, // 👈 Ajusta esto según el espacio que quieras ocupar
+            ),
             child: ListView.builder(
               shrinkWrap: true,
               itemCount: nodes.length,
@@ -47,10 +49,6 @@ class StepsCard extends StatelessWidget {
                 final node = nodes[index];
                 final nodeName = node['node_name'] ?? 'Paso ${index + 1}';
 
-                // Color estándar:
-                //  - Index 0 => rosado (punto de inicio)
-                //  - Index último => verde (punto final)
-                //  - Resto => negro
                 Color color;
                 if (index == 0) {
                   color = Colors.pink;
