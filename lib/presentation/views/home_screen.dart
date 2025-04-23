@@ -39,7 +39,8 @@ class HomeScreen extends StatelessWidget {
                     const CategoryList(),
                     const SizedBox(height: 16),
                     Expanded(
-                        child: _buildContent(context)), // Pasamos context aquí
+                      child: _buildContent(context), // Pasamos context aquí
+                    ),
                   ],
                 ),
               ),
@@ -73,33 +74,43 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context) {
-    // context ya está definido aquí
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSection(
-              "Most Popular",
-              SeeAllScreen(
-                contentType: "building",
-              ),
-              context, (viewModel) {
-            return _buildHorizontalList(
-                viewModel.mostSearchedLocations, context);
-          }),
+            "Most Popular",
+            SeeAllScreen(contentType: "building"),
+            context,
+            (viewModel) {
+              return _buildHorizontalList(
+                viewModel.mostSearchedLocations,
+                context,
+              );
+            },
+          ),
           _buildSection(
-              "Buildings",
-              SeeAllScreen(
-                contentType: "building",
-              ),
-              context, (viewModel) {
-            return _buildHorizontalList(viewModel.locations, context);
-          }),
-          _buildSection("Events", SeeAllScreen(contentType: "event"), context,
-              (viewModel) {
-            return _buildHorizontalList(viewModel.recommendations, context,
-                isEvent: true);
-          }),
+            "Buildings",
+            SeeAllScreen(contentType: "building"),
+            context,
+            (viewModel) {
+              return _buildHorizontalList(
+                viewModel.locations,
+                context,
+              );
+            },
+          ),
+          _buildSection(
+            "Laboratories", // Nueva sección para los laboratorios
+            SeeAllScreen(contentType: "laboratory"),
+            context,
+            (viewModel) {
+              return _buildHorizontalList(
+                viewModel.laboratories,
+                context,
+              );
+            },
+          ),
         ],
       ),
     );
@@ -121,50 +132,57 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHorizontalList(List<dynamic> items, BuildContext context,
-      {bool isEvent = false}) {
+  Widget _buildHorizontalList(List<dynamic> items, BuildContext context) {
     if (items.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
+
     return SizedBox(
       height: 180,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: items.map((item) {
+          String? subtitle;
+          String? block;
+
+          if (item['locations'] != null) {
+            if (item['locations']['name'] != null) {
+              subtitle = item['locations']['name'];
+            }
+            if (item['locations']['block'] != null) {
+              block = item['locations']['block'];
+            }
+          }
+
+          if (item['block'] != null && subtitle == null) {
+            subtitle = '';
+            block = item['block'];
+          }
+
           return PlaceCard(
             imagePath: item['image_url'] ?? 'assets/images/default_image.jpg',
-            title: item['title_or_name'] ??
-                item['title'] ??
-                item['name'] ??
-                'Unknown Location',
+            subtitle: subtitle ?? '',
+            title: item['name'] ?? 'Unknown Location',
+            block: block,
             onTap: () {
-              if (isEvent && item['event_id'] != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DetailCard(
-                      id: item['event_id'],
-                      type: CardType.event,
-                    ),
-                  ),
-                );
-              } else if (!isEvent && item['event_id'] != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DetailCard(
-                      id: item['event_id'],
-                      type: CardType.event,
-                    ),
-                  ),
-                );
-              } else if (!isEvent && item['location_id'] != null) {
+              // Chequeamos qué tipo de contenido es y navegamos
+              if (item['location_id'] != null) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => DetailCard(
                       id: item['location_id'],
                       type: CardType.building,
+                    ),
+                  ),
+                );
+              }  else if (item['laboratories_id'] != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetailCard(
+                      id: item['laboratories_id'],
+                      type: CardType.laboratories,
                     ),
                   ),
                 );

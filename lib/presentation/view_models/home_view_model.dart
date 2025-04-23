@@ -11,14 +11,14 @@ class HomeViewModel extends ChangeNotifier {
   String _userName = "Guest";
   String? _avatarUrl;
   List<Map<String, dynamic>> _locations = [];
-  List<Map<String, dynamic>> _recommendations = [];
   List<Map<String, dynamic>> _mostSearchedLocations = [];
+  List<Map<String, dynamic>> _laboratories = []; // 🧪 NUEVO
 
   String get userName => _userName;
   String? get avatarUrl => _avatarUrl;
   List<Map<String, dynamic>> get locations => _locations;
-  List<Map<String, dynamic>> get recommendations => _recommendations;
   List<Map<String, dynamic>> get mostSearchedLocations => _mostSearchedLocations;
+  List<Map<String, dynamic>> get laboratories => _laboratories; // 🧪 NUEVO
 
   HomeViewModel() {
     _authService = AuthService();
@@ -52,20 +52,13 @@ class HomeViewModel extends ChangeNotifier {
     try {
       final data = await _homeRepository.fetchAllData();
       _locations = data['locations'] ?? [];
-      _recommendations = data['recommendations'] ?? [];
       _mostSearchedLocations = data['mostSearched'] ?? [];
+      _laboratories = data['laboratories'] ?? []; // 🧪 NUEVO
     } catch (error) {
       log('Error cargando los datos del home: $error');
     }
     notifyListeners();
   }
 
-  void onRecommendationTap(Map<String, dynamic> recommendation) {
-    AnalyticsService.logUserAction(
-      actionType: 'consult_event',
-      eventId: recommendation['id'],
-      eventType: recommendation['type'] ?? 'other',
-      locationId: recommendation['location_id'],
-    );
-  }
 }
+

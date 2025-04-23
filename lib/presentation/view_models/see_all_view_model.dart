@@ -1,3 +1,4 @@
+import 'package:dart_g12/data/repositories/laboratories_repository.dart';
 import 'package:flutter/material.dart';
 import '../../data/repositories/location_repository.dart';
 import '../../data/repositories/event_repository.dart'; // Importa tu repository de eventos
@@ -6,6 +7,7 @@ import '../views/main_screen.dart';
 class SeeAllViewModel extends ChangeNotifier {
   final LocationRepository locationRepository = LocationRepository();
   final EventRepository eventRepository = EventRepository(); // Asegúrate de tener esto
+  final LaboratoriesRepository laboratoriesRepository = LaboratoriesRepository();
 
   late String contentType;
   List<Map<String, dynamic>> _allItems = []; // Para almacenar tanto edificios como eventos
@@ -47,6 +49,23 @@ class SeeAllViewModel extends ChangeNotifier {
 
     try {
       _allItems = await eventRepository.fetchEvents(); // Cambié _buildings por _items
+      _items = List.from(_allItems);
+    } catch (e) {
+      _error = e.toString();
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  // Método para obtener los eventos desde Supabase
+  Future<void> fetchLaboratories() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _allItems = await laboratoriesRepository.fetchLaboratories();
       _items = List.from(_allItems);
     } catch (e) {
       _error = e.toString();

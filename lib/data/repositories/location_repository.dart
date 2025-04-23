@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:dart_g12/data/services/supabase_service.dart';
 import 'package:dart_g12/data/services/local_storage_service.dart';
 import 'package:geolocator/geolocator.dart';
@@ -129,28 +128,4 @@ class LocationRepository {
     return paginated;
   }
 
-  /// Obtener todos los lugares (`places`) de una `location` específica
-  Future<List<Map<String, dynamic>>> fetchPlacesByLocation(
-      int locationId) async {
-    final String cacheKey = 'places_location_$locationId';
-    List<Map<String, dynamic>> places = [];
-
-    try {
-      places = await cache.fetch(cacheKey);
-      if (places.isNotEmpty) return places;
-    } catch (_) {}
-
-    final response = await supabase
-        .from('places')
-        .select('id, id_location, name, url_image, floor')
-        .eq('id_location', locationId);
-
-    if (response.isEmpty)
-      throw Exception('No se encontraron lugares para esta ubicación.');
-
-    places = List<Map<String, dynamic>>.from(response);
-    await cache.save(cacheKey, places);
-
-    return places;
-  }
 }
