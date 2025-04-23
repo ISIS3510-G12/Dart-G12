@@ -3,27 +3,30 @@ import '../../data/repositories/event_repository.dart';
 import '../../data/repositories/location_repository.dart';
 import '../views/main_screen.dart';
 import '../../data/services/analytics_service.dart';
+import '../../data/repositories/laboratories_repository.dart';
 
-class CombinedViewModel extends ChangeNotifier {
+class CardDetailViewModel extends ChangeNotifier {
   final EventRepository eventRepository = EventRepository();
   final LocationRepository locationRepository = LocationRepository();
+  final LaboratoriesRepository laboratoriesRepository =
+      LaboratoriesRepository();
 
   List<Map<String, dynamic>> _events = [];
-  Map<String, dynamic>? _event;  // Detalles del evento
-  Map<String, dynamic>? _building;  // Detalles del edificio
-  List<Map<String, dynamic>> _places = [];
+  Map<String, dynamic>? _event;
+  Map<String, dynamic>? _building;
+  List<Map<String, dynamic>> _laboratories = [];
   bool _isLoading = false;
   String? _error;
   int _selectedIndex = 0;
   final Map<int, Map<String, dynamic>> _buildingCache = {};
 
-  CombinedViewModel();
+  CardDetailViewModel();
 
   // Getters
   List<Map<String, dynamic>> get events => _events;
   Map<String, dynamic>? get event => _event;
   Map<String, dynamic>? get building => _building;
-  List<Map<String, dynamic>> get places => _places;
+  List<Map<String, dynamic>> get laboratories => _laboratories;
   bool get isLoading => _isLoading;
   String? get error => _error;
   int get selectedIndex => _selectedIndex;
@@ -51,7 +54,7 @@ class CombinedViewModel extends ChangeNotifier {
 
     try {
       _event = (await eventRepository.fetchEventById(eventId)).firstOrNull;
-      
+
       await AnalyticsService.logUserAction(
         actionType: 'consult_event',
         eventId: eventId,
@@ -67,7 +70,6 @@ class CombinedViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Métodos para manejar edificios y lugares
   Future<void> fetchBuildingDetails(int buildingId) async {
     _isLoading = true;
     _error = null;
@@ -84,7 +86,31 @@ class CombinedViewModel extends ChangeNotifier {
         _buildingCache[buildingId] = _building!;
       }
 
-      _places = await locationRepository.fetchPlacesByLocation(buildingId);
+      _laboratories =
+          await laboratoriesRepository.fetchLaboratoriesByLocation(buildingId);
+    } catch (e) {
+      _error = e.toString();
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> fetchLaboratoryDetails(int laboratoryId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final lab =
+          await laboratoriesRepository.fetchLaboratoryById(laboratoryId);
+      if (lab != null) {
+        _laboratories = [
+          lab
+        ]; 
+      } else {
+        throw Exception('Laboratorio no encontrado.');
+      }
     } catch (e) {
       _error = e.toString();
     }

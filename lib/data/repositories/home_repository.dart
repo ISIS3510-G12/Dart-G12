@@ -14,19 +14,14 @@ class HomeRepository {
 
   HomeRepository();
 
-  // Modificación: solo seleccionamos location_id, name, y otros campos que necesites.
   Future<List<Map<String, dynamic>>> fetchLocations() async {
     List<Map<String, dynamic>> cached = [];
-
     try {
       cached = await _cache.fetch('locations');
     } catch (e) {
       log('Error leyendo cache locations: $e');
     }
-
-    // Lanza fetch de red en background
     unawaited(_fetchAndCacheLocations());
-
     return cached;
   }
 
@@ -34,7 +29,7 @@ class HomeRepository {
     try {
       final response = await supabase
           .from('locations')
-          .select('location_id, name, image_url'); // Campos necesarios
+          .select('location_id, name, image_url, block');
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('locations', parsed);
     } catch (e) {
@@ -42,47 +37,14 @@ class HomeRepository {
     }
   }
 
-  // Modificación: solo seleccionamos los campos necesarios de eventos y ubicaciones relacionadas.
-  Future<List<Map<String, dynamic>>> fetchRecommendations() async {
-    List<Map<String, dynamic>> cached = [];
-
-    try {
-      cached = await _cache.fetch('recommendations');
-    } catch (e) {
-      log('Error leyendo cache recommendations: $e');
-    }
-
-    unawaited(_fetchAndCacheRecommendations());
-
-    return cached;
-  }
-
-  Future<void> _fetchAndCacheRecommendations() async {
-    try {
-      final response = await supabase
-          .from('events')
-          .select('event_id, title, image_url') // Solo los campos necesarios
-          .gte('end_time', DateTime.now().toIso8601String());
-
-      final parsed = await compute(_parseList, response as List<dynamic>);
-      await _cache.save('recommendations', parsed);
-    } catch (e) {
-      log('Error fetching recommendations from network: $e');
-    }
-  }
-
-  // Modificación: solo seleccionamos los campos necesarios de la tabla de interacciones más buscadas.
   Future<List<Map<String, dynamic>>> fetchMostSearchedLocations() async {
     List<Map<String, dynamic>> cached = [];
-
     try {
       cached = await _cache.fetch('mostSearchedLocations');
     } catch (e) {
       log('Error leyendo cache most searched: $e');
     }
-
     unawaited(_fetchAndCacheMostSearchedLocations());
-
     return cached;
   }
 
@@ -92,7 +54,6 @@ class HomeRepository {
           .from('most_popular_user_interactions')
           .select('event_id,location_id,title_or_name,image_url')
           .limit(8);
-
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('mostSearchedLocations', parsed);
     } catch (e) {
@@ -100,18 +61,41 @@ class HomeRepository {
     }
   }
 
-  // Recuperación de todos los datos
+  // 🚀 NUEVO: Fetch de laboratorios
+  Future<List<Map<String, dynamic>>> fetchLaboratories() async {
+    List<Map<String, dynamic>> cached = [];
+    try {
+      cached = await _cache.fetch('laboratories');
+    } catch (e) {
+      log('Error leyendo cache laboratories: $e');
+    }
+    unawaited(_fetchAndCacheLaboratories());
+    return cached;
+  }
+
+  Future<void> _fetchAndCacheLaboratories() async {
+    try {
+      final response = await supabase.from('laboratories').select(
+          'laboratories_id, name, location, image_url, description, locations (name, block)');
+      final parsed = await compute(_parseList, response as List<dynamic>);
+      await _cache.save('laboratories', parsed);
+    } catch (e) {
+      log('Error fetching laboratories from network: $e');
+    }
+  }
+
+  // ✅ Actualizado: ahora incluye los laboratorios
   Future<Map<String, List<Map<String, dynamic>>>> fetchAllData() async {
     final results = await Future.wait([
       fetchLocations(),
-      fetchRecommendations(),
       fetchMostSearchedLocations(),
+      fetchLaboratories(), // Añadido
     ]);
 
     return {
       'locations': results[0],
-      'recommendations': results[1],
-      'mostSearched': results[2],
+      'mostSearched': results[1],
+      'laboratories': results[2],
     };
   }
 }
