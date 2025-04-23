@@ -29,7 +29,8 @@ class HomeRepository {
     try {
       final response = await supabase
           .from('locations')
-          .select('location_id, name, image_url, block');
+          .select('location_id, name, image_url, block')
+          .limit(10);
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('locations', parsed);
     } catch (e) {
@@ -53,7 +54,7 @@ class HomeRepository {
       final response = await supabase
           .from('most_popular_user_interactions')
           .select('event_id,location_id,title_or_name,image_url')
-          .limit(8);
+          .limit(10);
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('mostSearchedLocations', parsed);
     } catch (e) {
@@ -76,7 +77,8 @@ class HomeRepository {
   Future<void> _fetchAndCacheLaboratories() async {
     try {
       final response = await supabase.from('laboratories').select(
-          'laboratories_id, name, location, image_url, description, locations (name, block)');
+          'laboratories_id, name, image_url, locations (name, block)')
+          .limit(10);
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('laboratories', parsed);
     } catch (e) {
@@ -88,7 +90,7 @@ class HomeRepository {
   Future<List<Map<String, dynamic>>> fetchAccess() async {
     List<Map<String, dynamic>> cached = [];
     try {
-      cached = await _cache.fetch('access');
+      cached = await _cache.fetch('accesses');
     } catch (e) {
       log('Error leyendo cache accesses: $e');
     }
@@ -100,7 +102,8 @@ class HomeRepository {
     try {
       final response = await supabase
           .from('access')
-          .select('access_id, name, location_id, image_url, locations (name, block)');
+          .select('access_id, name, image_url, locations (name, block)')
+          .limit(10);
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('accesses', parsed);
     } catch (e) {
