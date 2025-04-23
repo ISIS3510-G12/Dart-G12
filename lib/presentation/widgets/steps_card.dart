@@ -40,7 +40,7 @@ class StepsCard extends StatelessWidget {
           const SizedBox(height: 8),
           ConstrainedBox(
             constraints: const BoxConstraints(
-              maxHeight: 300, // 👈 Ajusta esto según el espacio que quieras ocupar
+              maxHeight: 300, 
             ),
             child: ListView.builder(
               shrinkWrap: true,

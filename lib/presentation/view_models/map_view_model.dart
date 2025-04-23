@@ -96,7 +96,7 @@ Future<void> fetchRoute() async {
     final pathIds = (shortestPath['path'] as List<dynamic>)
         .map((e) => e is int ? e : int.tryParse(e.toString()) ?? 0)
         .toList();
-    final totalCost = shortestPath['total_cost'];
+    final totalCost = shortestPath['total_cost']*10000; // Convertir a metros
 
     log('Path IDs: $pathIds, totalCost: $totalCost');
 
