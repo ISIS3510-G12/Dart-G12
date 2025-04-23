@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 
+
 List<Map<String, dynamic>> parseList(List<dynamic> response) {
   return List<Map<String, dynamic>>.from(response);
 }
@@ -26,7 +27,7 @@ class MapRepository {
 
   Future<void> _fetchAndCacheLocations() async {
     try {
-      final response = await supabase.from('locations').select('location_id, name, latitude, longitude');
+      final response = await supabase.from('locations').select('location_id, block, latitude, longitude');
       final parsed = await compute(parseList, response as List<dynamic>);
       await cache.save('locationsmap', parsed);
     } catch (e) {
@@ -63,6 +64,70 @@ class MapRepository {
         .order('node_index', ascending: true);
     return List<Map<String, dynamic>>.from(nodesResponse);
   }
+Future<Map<String, dynamic>?> fetchShortestPath(int startId, int endId) async {
+  try {
+    // 1) Llamo al RPC
+    final raw = await supabase.rpc('get_shortest_path', params: {
+      'start_id': startId,
+      'end_id': endId,
+    });
+
+    // 2) Lo trato como lista
+    final rows = raw as List<dynamic>?;
+
+    // 3) Si es nulo o vacío, no hay ruta
+    if (rows == null || rows.isEmpty) {
+      log('fetchShortestPath: no rows returned');
+      return null;
+    }
+
+    // 4) Desempaqueto el primer row como Map
+    final row = rows[0] as Map<String, dynamic>;
+
+    // 5) Extraigo y convierto
+    final totalCost = row['total_cost'] as double;
+    final path = (row['path'] as List<dynamic>)
+        .map((e) => int.parse(e.toString()))
+        .toList();
+
+    log('fetchShortestPath ⇒ totalCost: $totalCost  path: $path');
+
+    return {
+      'total_cost': totalCost,
+      'path': path,
+    };
+  } catch (e) {
+    log('Error al obtener ruta más corta: $e');
+    return null;
+  }
+}
+
+/// En map_repository.dart
+Future<List<Map<String, dynamic>>> fetchNodesByIds(List<int> nodeIds) async {
+  List<Map<String, dynamic>> nodes = [];
+
+  try {
+    for (int nodeId in nodeIds) {
+      final response = await supabase
+          .from('nodes')
+          .select('id, location_id, name, lat, lng')
+          .eq('id', nodeId); // Buscar por cada nodo ID
+
+      if (response != null && response.isNotEmpty) {
+        // Si la respuesta contiene datos, los agregamos a la lista
+        nodes.add(Map<String, dynamic>.from(response[0] as Map));
+      }
+    }
+  } catch (e) {
+    print("Error al obtener los nodos: $e");
+  }
+
+  return nodes;
+}
+
+
+
+
 
   Future<Map<String, dynamic>> fetchCompleteRouteData(int fromId, int toId, int routeId) async {
     final results = await Future.wait([
@@ -78,4 +143,6 @@ class MapRepository {
       'route_nodes': results[3],
     };
   }
+
+  
 }
