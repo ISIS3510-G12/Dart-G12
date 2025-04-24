@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _buildHeader(),
                     const SizedBox(height: 16),
                     const ChatWidget(),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 25),
                     const CategoryList(),
                     const SizedBox(height: 16),
                     Expanded(
