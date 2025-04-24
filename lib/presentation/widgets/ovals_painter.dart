@@ -5,8 +5,8 @@ class OvalsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
 
-    final fixedWidth = 400.0;  
-    final fixedHeight = 765.0;  
+    final fixedWidth = 420.0;  
+    final fixedHeight = 500.0;  
     final paint = Paint()..style = PaintingStyle.fill;
 
 

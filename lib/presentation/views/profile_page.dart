@@ -18,15 +18,15 @@ class ProfilePage extends StatelessWidget {
                 Positioned.fill(child: CustomPaint(painter: OvalsPainter())),
                 Column(
                   children: [
-                    const SizedBox(height: 50),
+                    const SizedBox(height: 70),
                     const Text(
                       'Account',
                       style: TextStyle(
-                          fontSize: 24,
+                          fontSize: 30,
                           fontWeight: FontWeight.bold,
                           color: Colors.white),
                     ),
-                    const SizedBox(height: 120),
+                    const SizedBox(height: 80),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       child: Row(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/home_view_model.dart';
-import '../widgets/ovals_painter.dart';
+import '../widgets/ovals_painter_home.dart';
 import '../widgets/section_header.dart';
 import '../widgets/place_card.dart';
 import '../widgets/category_list.dart';
@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
         body: Stack(
           children: [
             Positioned.fill(
-              child: CustomPaint(painter: OvalsPainter()),
+              child: CustomPaint(painter: OvalsPainterHome()),
             ),
             SafeArea(
               child: Padding(

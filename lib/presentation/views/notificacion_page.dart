@@ -23,7 +23,7 @@ class NotificacionPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 22),
                     const Center(
                       child: Text(
                         'Notifications',

@@ -16,25 +16,6 @@ class WelcomePage extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: 60,
-            right: 20,
-            child: DropdownButton<String>(
-              value: 'English',
-              items: const [
-                DropdownMenuItem(
-                  value: 'English',
-                  child: Text('English', style: TextStyle(color: Colors.white)),
-                ),
-                DropdownMenuItem(
-                  value: 'Español',
-                  child: Text('Español', style: TextStyle(color: Colors.white)),
-                ),
-              ],
-              onChanged: (value) {},
-              dropdownColor: Colors.black,
-            ),
-          ),
-          Positioned(
             top: 200,
             left: 0,
             right: 0,
