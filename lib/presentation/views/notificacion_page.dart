@@ -182,6 +182,8 @@ class NotificacionPage extends StatelessWidget {
                                       time: DateFormat.jm().format(DateTime.parse(event['start_time'])),
                                       location: event['description']?? 'No description available',
                                       imageUrl: event['image_url'],
+                                      id: event['event_id'],
+                                      
                                     );
                                   },
                                 ),
