@@ -21,8 +21,26 @@ class HomeRepository {
     } catch (e) {
       log('Error leyendo cache locations: $e');
     }
-    unawaited(_fetchAndCacheLocations());
-    return cached;
+
+    if (cached.isEmpty) {
+      // No hay cache: esperamos remoto
+      try {
+        final response = await supabase
+            .from('locations')
+            .select('location_id, name, image_url, block')
+            .limit(10);
+        final parsed = await compute(_parseList, response as List<dynamic>);
+        await _cache.save('locations', parsed);
+        return parsed;
+      } catch (e) {
+        log('Error fetching locations from network: $e');
+        return cached;
+      }
+    } else {
+      // Hay cache: lo devolvemos y refrescamos en segundo plano
+      unawaited(_fetchAndCacheLocations());
+      return cached;
+    }
   }
 
   Future<void> _fetchAndCacheLocations() async {
@@ -34,7 +52,7 @@ class HomeRepository {
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('locations', parsed);
     } catch (e) {
-      log('Error fetching locations from network: $e');
+      log('Error fetching locations from network (background): $e');
     }
   }
 
@@ -45,8 +63,24 @@ class HomeRepository {
     } catch (e) {
       log('Error leyendo cache most searched: $e');
     }
-    unawaited(_fetchAndCacheMostSearchedLocations());
-    return cached;
+
+    if (cached.isEmpty) {
+      try {
+        final response = await supabase
+            .from('most_popular_user_interactions')
+            .select('event_id,location_id,title_or_name,image_url')
+            .limit(10);
+        final parsed = await compute(_parseList, response as List<dynamic>);
+        await _cache.save('mostSearchedLocations', parsed);
+        return parsed;
+      } catch (e) {
+        log('Error fetching most searched from network: $e');
+        return cached;
+      }
+    } else {
+      unawaited(_fetchAndCacheMostSearchedLocations());
+      return cached;
+    }
   }
 
   Future<void> _fetchAndCacheMostSearchedLocations() async {
@@ -58,11 +92,10 @@ class HomeRepository {
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('mostSearchedLocations', parsed);
     } catch (e) {
-      log('Error fetching most searched locations from network: $e');
+      log('Error fetching most searched from network (background): $e');
     }
   }
 
-  // 🚀 NUEVO: Fetch de laboratorios
   Future<List<Map<String, dynamic>>> fetchLaboratories() async {
     List<Map<String, dynamic>> cached = [];
     try {
@@ -70,22 +103,38 @@ class HomeRepository {
     } catch (e) {
       log('Error leyendo cache laboratories: $e');
     }
-    unawaited(_fetchAndCacheLaboratories());
-    return cached;
+
+    if (cached.isEmpty) {
+      try {
+        final response = await supabase
+            .from('laboratories')
+            .select('laboratories_id, name, image_url, locations (name, block)')
+            .limit(10);
+        final parsed = await compute(_parseList, response as List<dynamic>);
+        await _cache.save('laboratories', parsed);
+        return parsed;
+      } catch (e) {
+        log('Error fetching laboratories from network: $e');
+        return cached;
+      }
+    } else {
+      unawaited(_fetchAndCacheLaboratories());
+      return cached;
+    }
   }
 
   Future<void> _fetchAndCacheLaboratories() async {
     try {
-      final response = await supabase.from('laboratories').select(
-          'laboratories_id, name, image_url, locations (name, block)')
+      final response = await supabase
+          .from('laboratories')
+          .select('laboratories_id, name, image_url, locations (name, block)')
           .limit(10);
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('laboratories', parsed);
     } catch (e) {
-      log('Error fetching laboratories from network: $e');
+      log('Error fetching laboratories from network (background): $e');
     }
   }
-
 
   Future<List<Map<String, dynamic>>> fetchAccess() async {
     List<Map<String, dynamic>> cached = [];
@@ -94,8 +143,24 @@ class HomeRepository {
     } catch (e) {
       log('Error leyendo cache accesses: $e');
     }
-    unawaited(_fetchAndCacheAccess());
-    return cached;
+
+    if (cached.isEmpty) {
+      try {
+        final response = await supabase
+            .from('access')
+            .select('access_id, name, image_url, locations (name, block)')
+            .limit(10);
+        final parsed = await compute(_parseList, response as List<dynamic>);
+        await _cache.save('accesses', parsed);
+        return parsed;
+      } catch (e) {
+        log('Error fetching accesses from network: $e');
+        return cached;
+      }
+    } else {
+      unawaited(_fetchAndCacheAccess());
+      return cached;
+    }
   }
 
   Future<void> _fetchAndCacheAccess() async {
@@ -107,17 +172,17 @@ class HomeRepository {
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('accesses', parsed);
     } catch (e) {
-      log('Error fetching accesses from network: $e');
+      log('Error fetching accesses from network (background): $e');
     }
   }
 
-  // ✅ Actualizado: ahora incluye los laboratorios
+  // ✅ Combinamos todo
   Future<Map<String, List<Map<String, dynamic>>>> fetchAllData() async {
     final results = await Future.wait([
       fetchLocations(),
       fetchMostSearchedLocations(),
       fetchLaboratories(),
-      fetchAccess(), 
+      fetchAccess(),
     ]);
 
     return {

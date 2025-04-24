@@ -16,54 +16,70 @@ class LaboratoriesRepository {
 
   // Recuperar todos los laboratorios con su "block" asociado
   Future<List<Map<String, dynamic>>> fetchLaboratories() async {
+    const cacheKey = 'laboratories';
     List<Map<String, dynamic>> cached = [];
     try {
-      cached = await _cache.fetch('laboratories');
+      cached = await _cache.fetch(cacheKey);
     } catch (e) {
       log('Error leyendo cache de laboratorios: $e');
     }
-    unawaited(_fetchAndCacheAllLaboratories());
-    return cached;
+
+    if (cached.isEmpty) {
+      // Sin cache: esperamos remoto
+      try {
+        final response = await supabase
+            .from('laboratories')
+            .select('laboratories_id, name, image_url, locations(name, block)');
+        final parsed = await compute(_parseList, response as List<dynamic>);
+        await _cache.save(cacheKey, parsed);
+        return parsed;
+      } catch (e) {
+        log('Error al obtener laboratorios desde red: $e');
+        return cached;
+      }
+    } else {
+      // Con cache: devolvemos ya y refrescamos en background
+      unawaited(_fetchAndCacheAllLaboratories(cacheKey));
+      return cached;
+    }
   }
 
-  // Actualización de la caché con los datos de laboratorios, incluyendo el "block"
-  Future<void> _fetchAndCacheAllLaboratories() async {
+  Future<void> _fetchAndCacheAllLaboratories(String cacheKey) async {
     try {
-      final response = await supabase.from('laboratories').select('''
-        laboratories_id,
-        name,
-        image_url,
-        locations (name, block)  
-      ''');
+      final response = await supabase
+          .from('laboratories')
+          .select('laboratories_id, name, image_url, locations(name, block)');
       final parsed = await compute(_parseList, response as List<dynamic>);
-      await _cache.save('laboratories', parsed);
+      await _cache.save(cacheKey, parsed);
     } catch (e) {
-      log('Error al obtener laboratorios desde red: $e');
+      log('Error fetching laboratorios from network (background): $e');
     }
   }
 
   /// Obtener un laboratorio por su ID
   Future<Map<String, dynamic>?> fetchLaboratoryById(int id) async {
     final cacheKey = 'laboratory_$id';
-
     try {
       final cached = await _cache.fetch(cacheKey);
-      if (cached.isNotEmpty) return cached.first;
+      if (cached.isNotEmpty) {
+        // Si hay cache, devuélvo y refresco en background
+        unawaited(_fetchAndCacheLaboratoryById(id, cacheKey));
+        return cached.first;
+      }
     } catch (e) {
       log('Error leyendo cache de laboratorio por ID ($id): $e');
     }
 
+    // Sin cache: esperamos remoto
     try {
-      final response = await supabase.from('laboratories').select('''
-          laboratories_id, name, location, image_url, description,
-          department_id, location_id,
-          locations (name)
-        ''').eq('laboratories_id', id).maybeSingle();
-
+      final response = await supabase
+          .from('laboratories')
+          .select('laboratories_id, name, location, image_url, description, department_id, location_id, locations(name, block)')
+          .eq('laboratories_id', id)
+          .maybeSingle();
       if (response != null) {
         await _cache.save(cacheKey, [response]);
       }
-
       return response;
     } catch (e) {
       log('Error al obtener laboratorio por ID desde red ($id): $e');
@@ -71,9 +87,23 @@ class LaboratoriesRepository {
     }
   }
 
+  Future<void> _fetchAndCacheLaboratoryById(int id, String cacheKey) async {
+    try {
+      final response = await supabase
+          .from('laboratories')
+          .select('laboratories_id, name, location, image_url, description, department_id, location_id, locations(name, block)')
+          .eq('laboratories_id', id)
+          .maybeSingle();
+      if (response != null) {
+        await _cache.save(cacheKey, [response]);
+      }
+    } catch (e) {
+      log('Error fetching laboratorio by ID from network (background) ($id): $e');
+    }
+  }
+
   // Recuperar laboratorios por ubicación
-  Future<List<Map<String, dynamic>>> fetchLaboratoriesByLocation(
-      int locationId) async {
+  Future<List<Map<String, dynamic>>> fetchLaboratoriesByLocation(int locationId) async {
     final cacheKey = 'laboratories_location_$locationId';
     List<Map<String, dynamic>> cached = [];
     try {
@@ -81,27 +111,41 @@ class LaboratoriesRepository {
     } catch (e) {
       log('Error leyendo cache de laboratorios por ubicación ($locationId): $e');
     }
-    unawaited(_fetchAndCacheLaboratoriesByLocation(locationId));
-    return cached;
+
+    if (cached.isEmpty) {
+      try {
+        final response = await supabase
+            .from('laboratories')
+            .select('laboratories_id, name, location, image_url, description, department_id, location_id, locations(name, block)')
+            .eq('location_id', locationId);
+        final parsed = await compute(_parseList, response as List<dynamic>);
+        await _cache.save(cacheKey, parsed);
+        return parsed;
+      } catch (e) {
+        log('Error al obtener laboratorios por ubicación desde red: $e');
+        return cached;
+      }
+    } else {
+      unawaited(_fetchAndCacheLaboratoriesByLocation(locationId, cacheKey));
+      return cached;
+    }
   }
 
-  Future<void> _fetchAndCacheLaboratoriesByLocation(int locationId) async {
+  Future<void> _fetchAndCacheLaboratoriesByLocation(int locationId, String cacheKey) async {
     try {
       final response = await supabase
           .from('laboratories')
-          .select(
-              'laboratories_id, name, location, image_url, description, department_id, location_id, locations (name, block)') // Incluye el bloque
+          .select('laboratories_id, name, location, image_url, description, department_id, location_id, locations(name, block)')
           .eq('location_id', locationId);
       final parsed = await compute(_parseList, response as List<dynamic>);
-      await _cache.save('laboratories_location_$locationId', parsed);
+      await _cache.save(cacheKey, parsed);
     } catch (e) {
-      log('Error al obtener laboratorios por ubicación desde red: $e');
+      log('Error fetching laboratorios por ubicación from network (background) ($locationId): $e');
     }
   }
 
   // Recuperación de laboratorios por departamento
-  Future<List<Map<String, dynamic>>> fetchLaboratoriesByDepartment(
-      int departmentId) async {
+  Future<List<Map<String, dynamic>>> fetchLaboratoriesByDepartment(int departmentId) async {
     final cacheKey = 'laboratories_department_$departmentId';
     List<Map<String, dynamic>> cached = [];
     try {
@@ -109,21 +153,36 @@ class LaboratoriesRepository {
     } catch (e) {
       log('Error leyendo cache de laboratorios por departamento ($departmentId): $e');
     }
-    unawaited(_fetchAndCacheLaboratoriesByDepartment(departmentId));
-    return cached;
+
+    if (cached.isEmpty) {
+      try {
+        final response = await supabase
+            .from('laboratories')
+            .select('laboratories_id, name, location, image_url, description, department_id, location_id, locations(name, block)')
+            .eq('department_id', departmentId);
+        final parsed = await compute(_parseList, response as List<dynamic>);
+        await _cache.save(cacheKey, parsed);
+        return parsed;
+      } catch (e) {
+        log('Error al obtener laboratorios por departamento desde red: $e');
+        return cached;
+      }
+    } else {
+      unawaited(_fetchAndCacheLaboratoriesByDepartment(departmentId, cacheKey));
+      return cached;
+    }
   }
 
-  Future<void> _fetchAndCacheLaboratoriesByDepartment(int departmentId) async {
+  Future<void> _fetchAndCacheLaboratoriesByDepartment(int departmentId, String cacheKey) async {
     try {
       final response = await supabase
           .from('laboratories')
-          .select(
-              'laboratories_id, name, location, image_url, description, department_id, location_id, locations (block)') // Incluye el bloque
+          .select('laboratories_id, name, location, image_url, description, department_id, location_id, locations(name, block)')
           .eq('department_id', departmentId);
       final parsed = await compute(_parseList, response as List<dynamic>);
-      await _cache.save('laboratories_department_$departmentId', parsed);
+      await _cache.save(cacheKey, parsed);
     } catch (e) {
-      log('Error al obtener laboratorios por departamento desde red: $e');
+      log('Error fetching laboratorios por departamento from network (background) ($departmentId): $e');
     }
   }
 }

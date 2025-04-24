@@ -9,17 +9,27 @@ import '../widgets/chat_widget.dart';
 import 'see_all_screen.dart';
 import 'detail_card.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late HomeViewModel viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    viewModel = HomeViewModel();
+    viewModel.loadAllData();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<HomeViewModel>(
-      create: (_) {
-        final viewModel = HomeViewModel();
-        viewModel.loadAllData();
-        return viewModel;
-      },
+    return ChangeNotifierProvider<HomeViewModel>.value(
+      value: viewModel,
       child: Scaffold(
         body: Stack(
           children: [
@@ -39,7 +49,7 @@ class HomeScreen extends StatelessWidget {
                     const CategoryList(),
                     const SizedBox(height: 16),
                     Expanded(
-                      child: _buildContent(context), 
+                      child: _buildContent(),
                     ),
                   ],
                 ),
@@ -52,28 +62,32 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-    return Consumer<HomeViewModel>(builder: (context, viewModel, child) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Hi, ${viewModel.userName}',
-            style: const TextStyle(
-                fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          CircleAvatar(
-            radius: 24,
-            backgroundImage: viewModel.avatarUrl != null
-                ? NetworkImage(viewModel.avatarUrl!)
-                : const AssetImage('assets/images/profile.jpg')
-                    as ImageProvider,
-          ),
-        ],
-      );
-    });
+    return Consumer<HomeViewModel>(
+      builder: (context, vm, child) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Hi, ${vm.userName}',
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            CircleAvatar(
+              radius: 24,
+              backgroundImage: vm.avatarUrl != null
+                  ? NetworkImage(vm.avatarUrl!)
+                  : const AssetImage('assets/images/profile.jpg') as ImageProvider,
+            ),
+          ],
+        );
+      },
+    );
   }
 
-  Widget _buildContent(BuildContext context) {
+  Widget _buildContent() {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,61 +95,40 @@ class HomeScreen extends StatelessWidget {
           _buildSection(
             "Most Popular",
             SeeAllScreen(contentType: "building"),
-            context,
-            (viewModel) {
-              return _buildHorizontalList(
-                viewModel.mostSearchedLocations,
-                context,
-              );
-            },
+            (vm) => _buildHorizontalList(vm.mostSearchedLocations),
           ),
           _buildSection(
             "Buildings",
             SeeAllScreen(contentType: "building"),
-            context,
-            (viewModel) {
-              return _buildHorizontalList(
-                viewModel.locations,
-                context,
-              );
-            },
+            (vm) => _buildHorizontalList(vm.locations),
           ),
           _buildSection(
-            "Laboratories", // Nueva sección para los laboratorios
+            "Laboratories",
             SeeAllScreen(contentType: "laboratory"),
-            context,
-            (viewModel) {
-              return _buildHorizontalList(
-                viewModel.laboratories,
-                context,
-              );
-            },
+            (vm) => _buildHorizontalList(vm.laboratories),
           ),
           _buildSection(
-            "Access points", // Nueva sección para los access points
+            "Access points",
             SeeAllScreen(contentType: "access"),
-            context,
-            (viewModel) {
-              return _buildHorizontalList(
-                viewModel.access,
-                context,
-              );
-            },
+            (vm) => _buildHorizontalList(vm.access),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSection(String title, Widget destinationScreen,
-      BuildContext context, Widget Function(HomeViewModel) builder) {
+  Widget _buildSection(
+    String title,
+    Widget destinationScreen,
+    Widget Function(HomeViewModel) builder,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeader(title: title, destinationScreen: destinationScreen),
         Consumer<HomeViewModel>(
-          builder: (context, viewModel, child) {
-            return builder(viewModel);
+          builder: (context, vm, child) {
+            return builder(vm);
           },
         ),
         const SizedBox(height: 16),
@@ -143,7 +136,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHorizontalList(List<dynamic> items, BuildContext context) {
+  Widget _buildHorizontalList(List<dynamic> items) {
     if (items.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -157,14 +150,9 @@ class HomeScreen extends StatelessWidget {
           String? block;
 
           if (item['locations'] != null) {
-            if (item['locations']['name'] != null) {
-              subtitle = item['locations']['name'];
-            }
-            if (item['locations']['block'] != null) {
-              block = item['locations']['block'];
-            }
+            subtitle = item['locations']['name'];
+            block = item['locations']['block'];
           }
-
           if (item['block'] != null && subtitle == null) {
             subtitle = '';
             block = item['block'];
@@ -176,12 +164,11 @@ class HomeScreen extends StatelessWidget {
             title: item['name'] ?? 'Unknown Location',
             block: block,
             onTap: () {
-              // Chequeamos qué tipo de contenido es y navegamos
               if (item['location_id'] != null) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => DetailCard(
+                    builder: (_) => DetailCard(
                       id: item['location_id'],
                       type: CardType.building,
                     ),
@@ -191,7 +178,7 @@ class HomeScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => DetailCard(
+                    builder: (_) => DetailCard(
                       id: item['laboratories_id'],
                       type: CardType.laboratories,
                     ),
@@ -201,7 +188,7 @@ class HomeScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => DetailCard(
+                    builder: (_) => DetailCard(
                       id: item['access_id'],
                       type: CardType.access,
                     ),
