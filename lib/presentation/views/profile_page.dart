@@ -1,3 +1,4 @@
+import 'package:dart_g12/presentation/views/started_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dart_g12/presentation/view_models/profile_view_model.dart';
@@ -74,10 +75,15 @@ class ProfilePage extends StatelessWidget {
                       child: Column(
                         children: [
                           _buildMenuItem(Icons.edit, 'Edit profile'),
-                          _buildMenuItem(Icons.language, 'Language'),
-                          _buildMenuItem(Icons.notifications, 'Notifications'),
                           _buildMenuItem(Icons.logout, 'Sign out', 
-                            onTap: () => viewModel.logout()),
+                            onTap: () {
+                              viewModel.logout();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const WelcomePage()
+                                )
+                                );
+                            }),
                         ],
                       ),
                     ),

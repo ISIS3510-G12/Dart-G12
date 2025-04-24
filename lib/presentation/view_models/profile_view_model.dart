@@ -13,6 +13,7 @@ class ProfileViewModel extends ChangeNotifier {
 
   void _loadUserData() {
     currentUsername = _authService.getCurrentUsername();
+    avatarUrl = _authService.getUserAvatar();
     notifyListeners();
   }
 
