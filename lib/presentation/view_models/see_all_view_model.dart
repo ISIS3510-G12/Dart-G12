@@ -1,3 +1,4 @@
+import 'package:dart_g12/data/repositories/favorite_repository.dart';
 import 'package:dart_g12/data/repositories/laboratories_repository.dart';
 import 'package:flutter/material.dart';
 import '../../data/repositories/location_repository.dart';
@@ -11,6 +12,7 @@ class SeeAllViewModel extends ChangeNotifier {
   final LaboratoriesRepository laboratoriesRepository =
       LaboratoriesRepository();
   final AccessRepository accessRepository = AccessRepository();
+  final FavoriteRepository favoriteRepository = FavoriteRepository();
 
   late String contentType;
   List<Map<String, dynamic>> _allItems = [];
@@ -97,6 +99,22 @@ class SeeAllViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> fetchFavorites() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final favorites = await favoriteRepository.getFavorites();
+      _items = List.from(favorites);
+    } catch (e) {
+      _error = e.toString();
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
   // Método común para cargar datos dependiendo del tipo de contenido
   Future<void> fetchData() async {
     _isLoading = true;
@@ -112,6 +130,8 @@ class SeeAllViewModel extends ChangeNotifier {
         await fetchLaboratories();
       } else if (contentType == 'access') {
         await fetchAccess(); 
+      } else if (contentType == 'favorite') {
+        await fetchFavorites();
       } else {
         _error = 'Tipo de contenido no soportado: $contentType';
       }
