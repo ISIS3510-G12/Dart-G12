@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import '../../data/repositories/event_repository.dart';
 import '../../data/repositories/location_repository.dart';
@@ -5,12 +7,14 @@ import '../views/main_screen.dart';
 import '../../data/services/analytics_service.dart';
 import '../../data/repositories/laboratories_repository.dart';
 import '../../data/repositories/access_repository.dart';
+import '../../data/repositories/favorite_repository.dart'; 
 
 class CardDetailViewModel extends ChangeNotifier {
   final EventRepository eventRepository = EventRepository();
   final LocationRepository locationRepository = LocationRepository();
   final LaboratoriesRepository laboratoriesRepository = LaboratoriesRepository();
   final AccessRepository accessRepository = AccessRepository();
+  final FavoriteRepository favoriteRepository = FavoriteRepository();
 
   List<Map<String, dynamic>> _events = [];
   Map<String, dynamic>? _event;
@@ -21,7 +25,7 @@ class CardDetailViewModel extends ChangeNotifier {
   String? _error;
   int _selectedIndex = 0;
   final Map<int, Map<String, dynamic>> _buildingCache = {};
-
+  
   CardDetailViewModel();
 
   // Getters
@@ -33,6 +37,30 @@ class CardDetailViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   int get selectedIndex => _selectedIndex;
+
+  // Toggle favorite for an individual item
+  Future<bool> toggleFavorite(String id, Map<String, dynamic> item) async {
+    final wasFav = await favoriteRepository.isFavorite(id);
+
+    if (wasFav) {
+      // Pasamos solo el id, no el item completo
+      await favoriteRepository.removeFavorite(id);
+      log('Favorito eliminado: $id');
+    } else {
+      // Guardamos el item completo
+      await favoriteRepository.saveFavorite(item);
+      log('Favorito agregado: $id');
+    }
+    final current = await favoriteRepository.isFavorite(id);
+    log( 'Estado actual del favorito: $current');
+    notifyListeners();
+    return current;
+  }
+
+  
+  Future<bool> isFavorite(String id) async {
+    return await favoriteRepository.isFavorite(id);
+  }
 
   // Métodos para manejar eventos
   Future<void> fetchEvents() async {
