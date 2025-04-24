@@ -1,3 +1,4 @@
+import 'package:dart_g12/presentation/views/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/home_view_model.dart';
@@ -75,12 +76,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.white,
               ),
             ),
-            CircleAvatar(
+            GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MainScreen(initialIndex: 4)),
+              );
+            },
+            child: CircleAvatar(
               radius: 24,
               backgroundImage: vm.avatarUrl != null
                   ? NetworkImage(vm.avatarUrl!)
                   : const AssetImage('assets/images/profile.jpg') as ImageProvider,
             ),
+          ),
           ],
         );
       },
