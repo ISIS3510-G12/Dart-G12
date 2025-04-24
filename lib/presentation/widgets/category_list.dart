@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'category_icon.dart';
 
 class CategoryList extends StatelessWidget {
-  const CategoryList({
-    super.key,
-  });
+  const CategoryList({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,16 +11,27 @@ class CategoryList extends StatelessWidget {
       height: 70,
       child: ListView(
         scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         children: [
           CategoryIcon(
             icon: Icons.business,
             label: "Buildings",
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SeeAllScreen(
+                    contentType: "building",
+                  ),
+                ),
+              );
+            },
           ),
+          const SizedBox(width: 16), // Espacio entre íconos
           CategoryIcon(
             icon: Icons.event,
             label: "Events",
             onTap: () {
-              // Navegar a la pantalla de ver todos los eventos
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -33,9 +42,26 @@ class CategoryList extends StatelessWidget {
               );
             },
           ),
-          const CategoryIcon(icon: Icons.restaurant, label: "Food & Rest"),
-          const CategoryIcon(icon: Icons.school, label: "Study Spaces"),
-          const CategoryIcon(icon: Icons.build, label: "Services"),
+          const SizedBox(width: 16),
+          const CategoryIcon(
+            icon: Icons.school,
+            label: "Study Spaces",
+          ),
+          const SizedBox(width: 16),
+          CategoryIcon(
+            icon: Icons.build,
+            label: "Laboratories",
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SeeAllScreen(
+                    contentType: "laboratory",
+                  ),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );

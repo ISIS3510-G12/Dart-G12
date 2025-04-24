@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../view_models/see_all_view_model.dart';
-import '../widgets/ovals_painter.dart';
+import '../widgets/ovals_painter_home.dart';
 import '../widgets/place_card.dart';
 import '../widgets/bottom_navbar.dart';
 import 'detail_card.dart';
@@ -56,7 +56,7 @@ class SeeAllScreenState extends State<SeeAllScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(child: CustomPaint(painter: OvalsPainter())),
+          Positioned.fill(child: CustomPaint(painter: OvalsPainterHome())),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
