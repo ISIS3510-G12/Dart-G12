@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:dart_g12/presentation/view_models/card_detail_view_model.dart';
 import 'package:dart_g12/presentation/widgets/transparent_ovals_painter.dart';
@@ -18,6 +19,7 @@ class DetailCard extends StatefulWidget {
 
 class _DetailCardState extends State<DetailCard> {
   late final CardDetailViewModel viewModel;
+  bool isFavorite = false;
 
   @override
   void initState() {
@@ -25,6 +27,7 @@ class _DetailCardState extends State<DetailCard> {
     viewModel = CardDetailViewModel();
     _loadData();
   }
+
 
   Future<void> _loadData() async {
     switch (widget.type) {
@@ -41,7 +44,62 @@ class _DetailCardState extends State<DetailCard> {
         await viewModel.fetchAccessDetails(widget.id);
         break;
     }
+    isFavorite = await viewModel.isFavorite(widget.id.toString());
     setState(() {});
+  }
+
+ Map<String, dynamic> _prepareFavoriteItem() {
+    switch (widget.type) {
+      case CardType.event:
+        final e = viewModel.event ?? {};
+        return {
+          ...e,
+          'type': 'event',
+          'id': widget.id,
+          'title': e['name'] ?? '',
+          'image': e['image_url'],
+          'start_time': e['start_time'],
+        };
+      case CardType.building:
+        final b = viewModel.building ?? {};
+        return {
+          ...b,
+          'type': 'building',
+          'id': widget.id,
+        };
+      case CardType.laboratories:
+        final l = viewModel.laboratories.isNotEmpty
+            ? viewModel.laboratories[0]
+            : {};
+        return {
+          ...l,
+          'type': 'laboratories',
+          'id': widget.id,
+        };
+      case CardType.access:
+        final a = viewModel.access.isNotEmpty
+            ? viewModel.access[0]
+            : {};
+        return {
+          ...a,
+          'type': 'access',
+          'id': widget.id,
+        };
+    }
+  }
+
+  void _toggleFavorite() async {
+    final item = _prepareFavoriteItem();
+    item['id'] = widget.id;
+    final result = await viewModel.toggleFavorite(
+      widget.id.toString(),
+      item,
+    );
+
+    setState(() {
+      isFavorite = result;
+      log('Favorito: $isFavorite');
+    });
   }
 
   @override
@@ -150,9 +208,9 @@ class _DetailCardState extends State<DetailCard> {
         ),
         const SizedBox(width: 12),
         _ActionButton(
-          icon: Icons.favorite_border,
-          label: 'Favorites',
-          onTap: () => print('Favorite pressed'),
+          icon: isFavorite ? Icons.favorite : Icons.favorite_border,
+          label: isFavorite ? 'Favorited' : 'Favorites',
+          onTap: _toggleFavorite
         ),
       ],
     );

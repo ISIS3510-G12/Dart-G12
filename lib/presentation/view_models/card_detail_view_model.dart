@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import '../../data/repositories/event_repository.dart';
 import '../../data/repositories/location_repository.dart';
@@ -5,12 +7,14 @@ import '../views/main_screen.dart';
 import '../../data/services/analytics_service.dart';
 import '../../data/repositories/laboratories_repository.dart';
 import '../../data/repositories/access_repository.dart';
+import '../../data/repositories/favorite_repository.dart'; 
 
 class CardDetailViewModel extends ChangeNotifier {
   final EventRepository eventRepository = EventRepository();
   final LocationRepository locationRepository = LocationRepository();
   final LaboratoriesRepository laboratoriesRepository = LaboratoriesRepository();
   final AccessRepository accessRepository = AccessRepository();
+  final FavoriteRepository favoriteRepository = FavoriteRepository();
 
   List<Map<String, dynamic>> _events = [];
   Map<String, dynamic>? _event;
@@ -21,7 +25,7 @@ class CardDetailViewModel extends ChangeNotifier {
   String? _error;
   int _selectedIndex = 0;
   final Map<int, Map<String, dynamic>> _buildingCache = {};
-
+  
   CardDetailViewModel();
 
   // Getters
@@ -33,6 +37,28 @@ class CardDetailViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   int get selectedIndex => _selectedIndex;
+
+  // Toggle favorite for an individual item
+  Future<bool> toggleFavorite(String id, Map<String, dynamic> item) async {
+    final wasFav = await favoriteRepository.isFavorite(id);
+
+    if (wasFav) {
+      await favoriteRepository.removeFavorite(id);
+      log('Favorito eliminado: $id');
+    } else {
+      await favoriteRepository.saveFavorite(item);
+      log('Favorito agregado: $item');
+    }
+    final current = await favoriteRepository.isFavorite(id);
+    log( 'Estado actual del favorito: $current');
+    notifyListeners();
+    return current;
+  }
+
+  
+  Future<bool> isFavorite(String id) async {
+    return await favoriteRepository.isFavorite(id);
+  }
 
   // Métodos para manejar eventos
   Future<void> fetchEvents() async {
@@ -50,28 +76,35 @@ class CardDetailViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> fetchEventDetails(int eventId) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+Future<void> fetchEventDetails(int eventId) async {
+  _isLoading = true;
+  _error = null;
+  notifyListeners();
 
-    try {
-      _event = (await eventRepository.fetchEventById(eventId)).firstOrNull;
-
-      await AnalyticsService.logUserAction(
-        actionType: 'consult_event',
-        eventId: eventId,
-        eventType: _event?['type'],
-        title: _event?['title'],
-        locationId: _event?['location_id'],
-      );
-    } catch (e) {
-      _error = e.toString();
+  try {
+    // Traemos los detalles del evento
+    final eventList = await eventRepository.fetchEventById(eventId);
+    if (eventList.isNotEmpty) {
+      _event = eventList.first;
+    } else {
+      throw Exception('Evento no encontrado.');
     }
 
-    _isLoading = false;
-    notifyListeners();
+    // Registramos la acción del usuario en el servicio de Analytics
+    await AnalyticsService.logUserAction(
+      actionType: 'consult_event',
+      eventId: eventId,
+      eventType: _event?['type'],
+      title: _event?['title'],
+      locationId: _event?['location_id'],
+    );
+  } catch (e) {
+    _error = e.toString();
   }
+
+  _isLoading = false;
+  notifyListeners();
+}
 
   Future<void> fetchBuildingDetails(int buildingId) async {
     _isLoading = true;
