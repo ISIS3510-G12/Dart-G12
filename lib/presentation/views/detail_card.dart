@@ -55,7 +55,7 @@ class _DetailCardState extends State<DetailCard> {
         return {
           ...e,
           'type': 'event',
-          'id': widget.id,
+          'event_id': widget.id,
           'title': e['name'] ?? '',
           'image': e['image_url'],
           'start_time': e['start_time'],
@@ -65,7 +65,10 @@ class _DetailCardState extends State<DetailCard> {
         return {
           ...b,
           'type': 'building',
-          'id': widget.id,
+          'location_id': widget.id,
+          'name': b['name'] ?? '',
+          'image': b['image_url'],
+          'block': b['block'],
         };
       case CardType.laboratories:
         final l = viewModel.laboratories.isNotEmpty
@@ -74,7 +77,10 @@ class _DetailCardState extends State<DetailCard> {
         return {
           ...l,
           'type': 'laboratories',
-          'id': widget.id,
+          'laboratories_id': widget.id,
+          'name': l['name'] ?? '',
+          'image': l['image_url'],
+          'block': l['locations']?['block'],
         };
       case CardType.access:
         final a = viewModel.access.isNotEmpty
@@ -83,7 +89,10 @@ class _DetailCardState extends State<DetailCard> {
         return {
           ...a,
           'type': 'access',
-          'id': widget.id,
+          'access_id': widget.id,
+          'name': a['name'] ?? '',
+          'image': a['image_url'],
+          'block': a['locations']?['block'],
         };
     }
   }

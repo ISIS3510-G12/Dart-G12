@@ -1,4 +1,5 @@
 import 'package:dart_g12/presentation/views/profile_page.dart';
+import 'package:dart_g12/presentation/views/see_all_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:dart_g12/presentation/views/Pagina1.dart';
 import 'package:dart_g12/presentation/views/notificacion_page.dart';
@@ -25,7 +26,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _pages = [
     const HomeScreen(),
-    const Pagina1(),
+    const SeeAllScreen(contentType:"favorite"),
     const MapPage(),
     const NotificacionPage(),
     const ProfilePage(),

@@ -35,6 +35,8 @@ class SeeAllScreenState extends State<SeeAllScreen> {
       _viewModel.fetchLaboratories();
     } else if (widget.contentType == "access") {
       _viewModel.fetchAccess();
+    } else if (widget.contentType == "favorite") {
+      _viewModel.fetchFavorites();
     }
   }
 
@@ -71,7 +73,9 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                                   ? "Laboratories"
                                   : widget.contentType == "access"
                                       ? "Access Points"
-                                      : "Unknown", // En caso de que el tipo no sea reconocido
+                                      : widget.contentType == "favorite"
+                                          ? "Favorites"
+                                          : "Unknown",
                       style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -161,7 +165,8 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                                               block: block,
                                               onTap: () {
                                                 if (widget.contentType ==
-                                                    "building") {
+                                                    "building" || (widget.contentType ==
+                                                    "favorite" && (item['type'] ?? '') == 'building') ) {
                                                   Navigator.push(
                                                     context,
                                                     MaterialPageRoute(
@@ -173,7 +178,8 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                                                     ),
                                                   );
                                                 } else if (widget.contentType ==
-                                                    "laboratory") {
+                                                    "laboratory" || (widget.contentType ==
+                                                    "favorite" && (item['type'] ?? '') == 'laboratories')) {
                                                   Navigator.push(
                                                     context,
                                                     MaterialPageRoute(
@@ -187,7 +193,8 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                                                     ),
                                                   );
                                                 } else if (widget.contentType ==
-                                                    "access") {
+                                                    "access" ||(widget.contentType ==
+                                                    "favorite" && (item['type'] ?? '') == 'access') ) {
                                                   Navigator.push(
                                                     context,
                                                     MaterialPageRoute(
@@ -199,7 +206,8 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                                                     ),
                                                   );
                                                 } else if (widget.contentType ==
-                                                    "event") {
+                                                    "event" || (widget.contentType ==
+                                                    "favorite" && (item['type'] ?? '') == 'event') ) {
                                                   Navigator.push(
                                                     context,
                                                     MaterialPageRoute(
@@ -225,10 +233,12 @@ class SeeAllScreenState extends State<SeeAllScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavbar(
-        currentIndex: _viewModel.selectedIndex,
-        onTap: (index) => _viewModel.onItemTapped(context, index),
-      ),
+      bottomNavigationBar: widget.contentType == "favorite"
+          ? null
+          : BottomNavbar(
+              currentIndex: _viewModel.selectedIndex,
+              onTap: (index) => _viewModel.onItemTapped(context, index),
+            ),
     );
   }
 }
