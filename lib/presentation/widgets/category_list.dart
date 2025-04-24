@@ -18,7 +18,21 @@ class CategoryList extends StatelessWidget {
             icon: Icons.business,
             label: "Buildings",
           ),
-          const CategoryIcon(icon: Icons.event, label: "Events"),
+          CategoryIcon(
+            icon: Icons.event,
+            label: "Events",
+            onTap: () {
+              // Navegar a la pantalla de ver todos los eventos
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SeeAllScreen(
+                    contentType: "event",
+                  ),
+                ),
+              );
+            },
+          ),
           const CategoryIcon(icon: Icons.restaurant, label: "Food & Rest"),
           const CategoryIcon(icon: Icons.school, label: "Study Spaces"),
           const CategoryIcon(icon: Icons.build, label: "Services"),

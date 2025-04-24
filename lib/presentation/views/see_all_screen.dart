@@ -198,6 +198,18 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                                                       ),
                                                     ),
                                                   );
+                                                } else if (widget.contentType ==
+                                                    "event") {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          DetailCard(
+                                                        id: item['event_id'],
+                                                        type: CardType.event,
+                                                      ),
+                                                    ),
+                                                  );
                                                 }
                                               },
                                             );

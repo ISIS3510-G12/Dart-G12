@@ -178,9 +178,9 @@ class NotificacionPage extends StatelessWidget {
                                   itemBuilder: (context, index) {
                                     final event = eventsForSelectedDay[index];
                                     return NotificationCard(
-                                      title: event['title'],
+                                      title: event['name'],
                                       time: DateFormat.jm().format(DateTime.parse(event['start_time'])),
-                                      location: event['description'],
+                                      location: event['description']?? 'No description available',
                                       imageUrl: event['image_url'],
                                     );
                                   },

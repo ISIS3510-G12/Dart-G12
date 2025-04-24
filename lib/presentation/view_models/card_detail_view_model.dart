@@ -43,13 +43,11 @@ class CardDetailViewModel extends ChangeNotifier {
     final wasFav = await favoriteRepository.isFavorite(id);
 
     if (wasFav) {
-      // Pasamos solo el id, no el item completo
       await favoriteRepository.removeFavorite(id);
       log('Favorito eliminado: $id');
     } else {
-      // Guardamos el item completo
       await favoriteRepository.saveFavorite(item);
-      log('Favorito agregado: $id');
+      log('Favorito agregado: $item');
     }
     final current = await favoriteRepository.isFavorite(id);
     log( 'Estado actual del favorito: $current');
@@ -78,28 +76,35 @@ class CardDetailViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> fetchEventDetails(int eventId) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+Future<void> fetchEventDetails(int eventId) async {
+  _isLoading = true;
+  _error = null;
+  notifyListeners();
 
-    try {
-      _event = (await eventRepository.fetchEventById(eventId)).firstOrNull;
-
-      await AnalyticsService.logUserAction(
-        actionType: 'consult_event',
-        eventId: eventId,
-        eventType: _event?['type'],
-        title: _event?['title'],
-        locationId: _event?['location_id'],
-      );
-    } catch (e) {
-      _error = e.toString();
+  try {
+    // Traemos los detalles del evento
+    final eventList = await eventRepository.fetchEventById(eventId);
+    if (eventList.isNotEmpty) {
+      _event = eventList.first;
+    } else {
+      throw Exception('Evento no encontrado.');
     }
 
-    _isLoading = false;
-    notifyListeners();
+    // Registramos la acción del usuario en el servicio de Analytics
+    await AnalyticsService.logUserAction(
+      actionType: 'consult_event',
+      eventId: eventId,
+      eventType: _event?['type'],
+      title: _event?['title'],
+      locationId: _event?['location_id'],
+    );
+  } catch (e) {
+    _error = e.toString();
   }
+
+  _isLoading = false;
+  notifyListeners();
+}
 
   Future<void> fetchBuildingDetails(int buildingId) async {
     _isLoading = true;

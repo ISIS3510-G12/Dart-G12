@@ -1,12 +1,11 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:dart_g12/data/repositories/event_repository.dart';  // Importa tu repositorio
-import 'package:intl/intl.dart';  // Para formatear las fechas
-import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'dart:developer';
+import 'package:dart_g12/data/repositories/favorite_repository.dart';
 
 class NotificacionViewModel extends ChangeNotifier {
-  final EventRepository _eventRepository = EventRepository();
+  final FavoriteRepository _favoriteRepository = FavoriteRepository();
   CalendarFormat calendarFormat = CalendarFormat.month;
   Map<DateTime, List<Map<String, dynamic>>> _events = {};
   DateTime _selectedDay = DateTime.utc(2025, 3, 5);
@@ -15,40 +14,40 @@ class NotificacionViewModel extends ChangeNotifier {
   DateTime get selectedDay => _selectedDay;
 
   NotificacionViewModel() {
-    _loadEvents();
+    _loadFavoriteEvents();
   }
 
-  /// Cargar los eventos desde el repositorio
-  Future<void> _loadEvents() async {
+  Future<void> _loadFavoriteEvents() async {
     try {
-      final events = await _eventRepository.fetchEvents();
+      final allFavorites = await _favoriteRepository.getFavorites();
+      final eventFavorites = allFavorites.where((item) => item['type'] == 'event').toList();
 
+      
       Map<DateTime, List<Map<String, dynamic>>> groupedEvents = {};
 
-      for (var event in events) {
-        DateTime startTime = DateTime.parse(event['start_time']);
+      for (var event in eventFavorites) {
+        if (event['start_time'] == null) continue;
+
+        DateTime startTime = DateTime.tryParse(event['start_time']) ?? DateTime.now();
         DateTime eventDate = DateTime.utc(startTime.year, startTime.month, startTime.day);
 
-        if (!groupedEvents.containsKey(eventDate)) {
-          groupedEvents[eventDate] = [];
-        }
+        groupedEvents.putIfAbsent(eventDate, () => []);
         groupedEvents[eventDate]!.add(event);
       }
 
       _events = groupedEvents;
       notifyListeners();
     } catch (e) {
-      print("Error cargando eventos: $e");
+      log("Error cargando eventos favoritos: $e");
     }
   }
 
-  // Cambiar el día seleccionado
   void setSelectedDay(DateTime selectedDay) {
     _selectedDay = selectedDay;
     notifyListeners();
   }
 
-    void setCalendarFormat(CalendarFormat format) {
+  void setCalendarFormat(CalendarFormat format) {
     calendarFormat = format;
     notifyListeners();
   }

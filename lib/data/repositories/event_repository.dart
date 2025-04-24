@@ -29,7 +29,7 @@ class EventRepository {
     try {
       final response = await supabase
           .from('events')
-          .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type');
+          .select('event_id, name, description, image_url, location_id, start_time, end_time, created_at');
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('events', parsed);
     } catch (e) {
@@ -79,7 +79,7 @@ Future<void> _fetchAndCacheEventById(int id, String cacheKey) async {
   try {
     final response = await supabase
         .from('events')
-        .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type')
+        .select('event_id, name, description, image_url, location_id, start_time, end_time, created_at')
         .eq('event_id', id)
         .maybeSingle();
     if (response != null) {
