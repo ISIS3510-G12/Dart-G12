@@ -90,13 +90,13 @@ class _DetailCardState extends State<DetailCard> {
             ? viewModel.laboratories[0]
             : null;
         return {
-          'image': l?['url_image'],
+          'image': l?['image_url'],
           'title': l?['name'] ?? '',
         };
       case CardType.access:
         final a = viewModel.access.isNotEmpty ? viewModel.access[0] : null;
         return {
-          'image': a?['url_image'],
+          'image': a?['image_url'],
           'title': a?['name'] ?? '',
         };
     }
@@ -228,10 +228,12 @@ class ContentSection extends StatelessWidget {
           _buildTextBlock('Address:', data!['address']),
         if (data?['opening_hours'] != null)
           _buildTextBlock('Opening Hours:', data!['opening_hours']),
-        if (location != null) ...[
-          _buildTextBlock('Location:', location['name'] ?? ''),
-          _buildTextBlock('Block:', location['block'] ?? ''),
-        ],
+        if(location?['name'] != null)
+          _buildTextBlock('Location:', location!['name']),
+        if (location?['block'] != null)
+          _buildTextBlock('Block:', location!['block']),
+        if(data?["location"] !=null)
+          _buildTextBlock('Location:', data!['location']),
         // Mostrar Laboratorios si existen
         if (labs.isNotEmpty && type != CardType.laboratories) ...[
           const SizedBox(height: 16),
