@@ -1,3 +1,4 @@
+import 'package:dart_g12/data/services/analytics_service.dart';
 import 'package:dart_g12/presentation/views/main_screen.dart';
 import 'package:dart_g12/presentation/views/login_page.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,8 @@ class AuthGate extends StatelessWidget {
         final session = snapshot.hasData? snapshot.data!.session : null;
 
         if (session != null) {
+          // if there is an active session, call the analitics service to log an app start
+          AnalyticsService.logAppStarted(user_id: session.user.id);
           return const MainScreen();
         } else {
           return const LoginPage();
