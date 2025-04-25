@@ -52,6 +52,7 @@ class CardDetailViewModel extends ChangeNotifier {
     final current = await favoriteRepository.isFavorite(id);
     log( 'Estado actual del favorito: $current');
     notifyListeners();
+    await AnalyticsService.logFeatureInteraction(feature: "change_favorites");
     return current;
   }
 
@@ -98,6 +99,7 @@ Future<void> fetchEventDetails(int eventId) async {
       title: _event?['title'],
       locationId: _event?['location_id'],
     );
+    await AnalyticsService.logFeatureInteraction(feature: "view_details");
   } catch (e) {
     _error = e.toString();
   }
@@ -121,7 +123,7 @@ Future<void> fetchEventDetails(int eventId) async {
         }
         _buildingCache[buildingId] = _building!;
       }
-
+      await AnalyticsService.logFeatureInteraction(feature: "view_details");
       _laboratories =
           await laboratoriesRepository.fetchLaboratoriesByLocation(buildingId);
       _access = await accessRepository.fetchAccessByLocation(buildingId);
@@ -146,6 +148,7 @@ Future<void> fetchEventDetails(int eventId) async {
       } else {
         throw Exception('Laboratorio no encontrado.');
       }
+      await AnalyticsService.logFeatureInteraction(feature: "view_details");
     } catch (e) {
       _error = e.toString();
     }

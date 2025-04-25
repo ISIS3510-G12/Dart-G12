@@ -1,3 +1,4 @@
+import 'package:dart_g12/data/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:dart_g12/data/services/auth_service.dart';
 
@@ -19,6 +20,11 @@ class ProfileViewModel extends ChangeNotifier {
 
   Future<void> logout() async {
     await _authService.signOut();
+    try {
+      await AnalyticsService.logFeatureInteraction(feature: "log_out");
+    } catch(e){
+      print("Error al registrar el log de cierre de sesion: $e");
+    }
     notifyListeners();
     
   }
