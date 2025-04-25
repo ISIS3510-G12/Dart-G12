@@ -1,3 +1,4 @@
+import 'package:dart_g12/data/repositories/auditoriums_repository.dart';
 import 'package:dart_g12/data/repositories/favorite_repository.dart';
 import 'package:dart_g12/data/repositories/laboratories_repository.dart';
 import 'package:flutter/material.dart';
@@ -9,10 +10,10 @@ import '../../data/repositories/access_repository.dart';
 class SeeAllViewModel extends ChangeNotifier {
   final LocationRepository locationRepository = LocationRepository();
   final EventRepository eventRepository = EventRepository();
-  final LaboratoriesRepository laboratoriesRepository =
-      LaboratoriesRepository();
+  final LaboratoriesRepository laboratoriesRepository =LaboratoriesRepository();
   final AccessRepository accessRepository = AccessRepository();
   final FavoriteRepository favoriteRepository = FavoriteRepository();
+  final AuditoriumRepository auditoriumRepository = AuditoriumRepository();
 
   late String contentType;
   List<Map<String, dynamic>> _allItems = [];
@@ -115,7 +116,22 @@ class SeeAllViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Método común para cargar datos dependiendo del tipo de contenido
+  Future<void> fetchAuditoriums() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _allItems = await auditoriumRepository.fetchAuditoriums();
+      _items = List.from(_allItems);
+    } catch (e) {
+      _error = e.toString();
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
   Future<void> fetchData() async {
     _isLoading = true;
     _error = null;

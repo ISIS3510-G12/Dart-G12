@@ -22,16 +22,26 @@ class AuditoriumRepository {
     } catch (e) {
       log('Error leyendo cache de auditoriums: $e');
     }
-    unawaited(_fetchAndCacheAllAuditoriums());
+
+    if (cached.isEmpty) {
+      await _fetchAndCacheAllAuditoriums();
+      try {
+        cached = await _cache.fetch('auditoriums');
+      } catch (e) {
+        log('Error releyendo cache de auditoriums: $e');
+      }
+    } else {
+      unawaited(_fetchAndCacheAllAuditoriums());
+    }
+
     return cached;
   }
 
-  // Obtener y guardar en caché todos los auditorios
   Future<void> _fetchAndCacheAllAuditoriums() async {
     try {
       final response = await supabase
           .from('auditoriums')
-          .select('auditorium_id, name, location_id');
+          .select('auditorium_id, name, location_id,image_url');
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('auditoriums', parsed);
     } catch (e) {
@@ -48,7 +58,18 @@ class AuditoriumRepository {
     } catch (e) {
       log('Error leyendo cache de auditorium por ID ($id): $e');
     }
-    unawaited(_fetchAndCacheAuditoriumById(id, cacheKey));
+
+    if (cached.isEmpty) {
+      await _fetchAndCacheAuditoriumById(id, cacheKey);
+      try {
+        cached = await _cache.fetch(cacheKey);
+      } catch (e) {
+        log('Error releyendo cache de auditorium por ID ($id): $e');
+      }
+    } else {
+      unawaited(_fetchAndCacheAuditoriumById(id, cacheKey));
+    }
+
     return cached;
   }
 
@@ -56,7 +77,7 @@ class AuditoriumRepository {
     try {
       final response = await supabase
           .from('auditoriums')
-          .select('auditorium_id, name, location_id')
+          .select('auditorium_id, name, location_id,image_url')
           .eq('auditorium_id', id)
           .maybeSingle();
       if (response != null) {
@@ -76,7 +97,18 @@ class AuditoriumRepository {
     } catch (e) {
       log('Error leyendo cache auditoriums por ubicación ($locationId): $e');
     }
-    unawaited(_fetchAndCacheAuditoriumsByLocation(locationId, cacheKey));
+
+    if (cached.isEmpty) {
+      await _fetchAndCacheAuditoriumsByLocation(locationId, cacheKey);
+      try {
+        cached = await _cache.fetch(cacheKey);
+      } catch (e) {
+        log('Error releyendo cache auditoriums por ubicación ($locationId): $e');
+      }
+    } else {
+      unawaited(_fetchAndCacheAuditoriumsByLocation(locationId, cacheKey));
+    }
+
     return cached;
   }
 
@@ -84,7 +116,7 @@ class AuditoriumRepository {
     try {
       final response = await supabase
           .from('auditoriums')
-          .select('auditorium_id, name, location_id')
+          .select('auditorium_id, name, location_id, image_url')
           .eq('location_id', locationId);
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save(cacheKey, parsed);

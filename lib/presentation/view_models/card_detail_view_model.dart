@@ -8,6 +8,7 @@ import '../../data/services/analytics_service.dart';
 import '../../data/repositories/laboratories_repository.dart';
 import '../../data/repositories/access_repository.dart';
 import '../../data/repositories/favorite_repository.dart'; 
+import '../../data/repositories/auditoriums_repository.dart';
 
 class CardDetailViewModel extends ChangeNotifier {
   final EventRepository eventRepository = EventRepository();
@@ -15,12 +16,14 @@ class CardDetailViewModel extends ChangeNotifier {
   final LaboratoriesRepository laboratoriesRepository = LaboratoriesRepository();
   final AccessRepository accessRepository = AccessRepository();
   final FavoriteRepository favoriteRepository = FavoriteRepository();
+  final AuditoriumRepository auditoriumRepository = AuditoriumRepository();
 
   List<Map<String, dynamic>> _events = [];
   Map<String, dynamic>? _event;
   Map<String, dynamic>? _building;
   List<Map<String, dynamic>> _laboratories = [];
   List<Map<String, dynamic>> _access = [];
+  List<Map<String, dynamic>> _auditorium = [];
   bool _isLoading = false;
   String? _error;
   int _selectedIndex = 0;
@@ -34,6 +37,8 @@ class CardDetailViewModel extends ChangeNotifier {
   Map<String, dynamic>? get building => _building;
   List<Map<String, dynamic>> get laboratories => _laboratories;
   List<Map<String, dynamic>> get access => _access;
+  List<Map<String, dynamic>> get autorium => _auditorium;
+
   bool get isLoading => _isLoading;
   String? get error => _error;
   int get selectedIndex => _selectedIndex;
@@ -133,6 +138,8 @@ Future<void> fetchEventDetails(int eventId) async {
     notifyListeners();
   }
 
+  
+
   Future<void> fetchLaboratoryDetails(int laboratoryId) async {
     _isLoading = true;
     _error = null;
@@ -153,6 +160,29 @@ Future<void> fetchEventDetails(int eventId) async {
     _isLoading = false;
     notifyListeners();
   }
+
+Future<void> fetchAuditoriumDetails(int auditoriumId) async {
+  _isLoading = true;
+  _error = null;
+  notifyListeners();
+
+  try {
+    // Traemos los detalles del auditorio
+    final aud = await auditoriumRepository.fetchAuditoriumById(auditoriumId);
+    if (aud.isNotEmpty) {
+      _auditorium = aud;
+    } else {
+      throw Exception('Auditorio no encontrado.');
+    }
+  } catch (e) {
+    _error = e.toString();
+  }
+
+  _isLoading = false;
+  notifyListeners();
+}
+
+
 
   Future<void> fetchAccessDetails(int accessId) async {
     _isLoading = true;

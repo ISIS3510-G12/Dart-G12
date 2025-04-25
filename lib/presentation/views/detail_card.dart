@@ -5,7 +5,7 @@ import 'package:dart_g12/presentation/widgets/transparent_ovals_painter.dart';
 import 'package:dart_g12/presentation/widgets/bottom_navbar.dart';
 import 'package:dart_g12/presentation/widgets/place_card.dart';
 
-enum CardType { event, building, laboratories, access }
+enum CardType { event, building, laboratories, access, auditorium}
 
 class DetailCard extends StatefulWidget {
   final int id;
@@ -42,6 +42,9 @@ class _DetailCardState extends State<DetailCard> {
         break;
       case CardType.access:
         await viewModel.fetchAccessDetails(widget.id);
+        break;
+      case CardType.auditorium:
+        await viewModel.fetchAuditoriumDetails(widget.id); // Agregado para auditorios
         break;
     }
     isFavorite = await viewModel.isFavorite(widget.id.toString());
@@ -93,6 +96,17 @@ class _DetailCardState extends State<DetailCard> {
           'name': a['name'] ?? '',
           'image': a['image_url'],
           'block': a['locations']?['block'],
+        };
+      case CardType.auditorium:
+        final au = viewModel.autorium.isNotEmpty
+            ? viewModel.autorium[0]
+            : {};
+        return {
+          ...au,
+          'type': 'auditorium',
+          'auditorium_id': widget.id,
+          'name': au['name'] ?? '',
+          'image': au['image_url'],
         };
     }
   }
@@ -165,6 +179,13 @@ class _DetailCardState extends State<DetailCard> {
         return {
           'image': a?['image_url'],
           'title': a?['name'] ?? '',
+        };
+      case CardType.auditorium:
+        final au = viewModel.autorium.isNotEmpty ? viewModel.autorium[0] : null;
+        return {
+          'image': au?['image_url'],
+          'title': au?['name'] ?? '',
+
         };
     }
   }
@@ -263,11 +284,13 @@ class ContentSection extends StatelessWidget {
     final building = viewModel.building;
     final labs = viewModel.laboratories;
     final access = viewModel.access;
+    final auditorium = viewModel.autorium;
 
     if ((type == CardType.event && event == null) ||
         (type == CardType.building && building == null) ||
         (type == CardType.laboratories && labs.isEmpty) ||
-        (type == CardType.access && access.isEmpty)) {
+        (type == CardType.access && access.isEmpty) ||
+        (type == CardType.auditorium && auditorium.isEmpty)) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -277,7 +300,9 @@ class ContentSection extends StatelessWidget {
             ? building
             : type == CardType.laboratories
                 ? labs.first
-                : access.first;
+                : type == CardType.access
+                    ? access.first
+                    : auditorium.first;
 
     final Map<String, dynamic>? location = data?['locations'];
 

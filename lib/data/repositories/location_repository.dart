@@ -9,154 +9,61 @@ class LocationRepository {
 
   LocationRepository();
 
-  /// Obtener todas las ubicaciones y ordenarlas por proximidad al usuario
+  /// Obtiene y ordena todas las ubicaciones por cercanía
   Future<List<Map<String, dynamic>>> fetchLocations() async {
     const cacheKey = 'all_locations_sorted';
-    List<Map<String, dynamic>> locations = [];
 
-    // 1. Intento leer de cache
     try {
-      locations = await cache.fetch(cacheKey);
-      if (locations.isNotEmpty) {
-        // Si hay cache, devuelvo enseguida y refresco en background
+      final cached = await cache.fetch(cacheKey);
+      if (cached.isNotEmpty) {
         unawaited(_fetchAndCacheLocationsSorted(cacheKey));
-        return locations;
+        return cached;
       }
-    } catch (_) {
-      // ignorar error de cache
-    }
+    } catch (_) {}
 
-    // 2. Cache vacía o fallo: obtengo datos remotos
-    final response = await supabase
-        .from('locations')
-        .select('location_id, name, description, latitude, longitude, image_url, block');
+    final response = await _fetchLocationsFromRemote();
+    final sorted = await _sortByProximity(response);
 
-    if (response.isEmpty) throw Exception('No se encontraron ubicaciones.');
-
-    locations = List<Map<String, dynamic>>.from(response);
-
-    // 3. Chequeo si el servicio de ubicación está activo
-    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (serviceEnabled) {
-      final pos = await Geolocator.getCurrentPosition(
-        locationSettings: LocationSettings(accuracy: LocationAccuracy.best),
-      );
-      final userLat = pos.latitude;
-      final userLon = pos.longitude;
-
-      locations.sort((a, b) {
-        final distA = Geolocator.distanceBetween(
-            userLat, userLon, a['latitude'], a['longitude']);
-        final distB = Geolocator.distanceBetween(
-            userLat, userLon, b['latitude'], b['longitude']);
-        return distA.compareTo(distB);
-      });
-    }
-    // 4. Guardo en cache y devuelvo
-    await cache.save(cacheKey, locations);
-    return locations;
+    await cache.save(cacheKey, sorted);
+    return sorted;
   }
 
   Future<void> _fetchAndCacheLocationsSorted(String cacheKey) async {
     try {
-      final response = await supabase
-          .from('locations')
-          .select('location_id, name, description, latitude, longitude, image_url, block');
-      var list = List<Map<String, dynamic>>.from(response);
-
-      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (serviceEnabled) {
-        final pos = await Geolocator.getCurrentPosition(
-          locationSettings: LocationSettings(accuracy: LocationAccuracy.best),
-        );
-        final userLat = pos.latitude;
-        final userLon = pos.longitude;
-        list.sort((a, b) {
-          final distA = Geolocator.distanceBetween(
-              userLat, userLon, a['latitude'], a['longitude']);
-          final distB = Geolocator.distanceBetween(
-              userLat, userLon, b['latitude'], b['longitude']);
-          return distA.compareTo(distB);
-        });
-      }
-
-      await cache.save(cacheKey, list);
-    } catch (_) {
-      // fallamos silenciosamente
-    }
+      final response = await _fetchLocationsFromRemote();
+      final sorted = await _sortByProximity(response);
+      await cache.save(cacheKey, sorted);
+    } catch (_) {}
   }
 
-  /// Obtener ubicaciones (todos los edificios)
+  /// Obtiene todas las ubicaciones que representan edificios
   Future<List<Map<String, dynamic>>> fetchBuildings() async {
     const cacheKey = 'buildings';
-    List<Map<String, dynamic>> buildings = [];
 
-    // 1. Intento cache
     try {
-      buildings = await cache.fetch(cacheKey);
-      if (buildings.isNotEmpty) {
+      final cached = await cache.fetch(cacheKey);
+      if (cached.isNotEmpty) {
         unawaited(_fetchAndCacheBuildings(cacheKey));
-        return buildings;
+        return cached;
       }
     } catch (_) {}
 
-    // 2. Fetch remoto
-    final response = await supabase
-        .from('locations')
-        .select('location_id, name, description, latitude, longitude, image_url, block');
-    if (response.isEmpty) throw Exception('No se encontraron ubicaciones.');
+    final response = await _fetchLocationsFromRemote();
+    final sorted = await _sortByProximity(response);
 
-    buildings = List<Map<String, dynamic>>.from(response);
-
-    // 3. Condicional sort por proximidad
-    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (serviceEnabled) {
-      final pos = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-      final userLat = pos.latitude;
-      final userLon = pos.longitude;
-      buildings.sort((a, b) {
-        final distA = Geolocator.distanceBetween(
-            userLat, userLon, a['latitude'], a['longitude']);
-        final distB = Geolocator.distanceBetween(
-            userLat, userLon, b['latitude'], b['longitude']);
-        return distA.compareTo(distB);
-      });
-    }
-
-    await cache.save(cacheKey, buildings);
-    return buildings;
+    await cache.save(cacheKey, sorted);
+    return sorted;
   }
 
   Future<void> _fetchAndCacheBuildings(String cacheKey) async {
     try {
-      final response = await supabase
-          .from('locations')
-          .select('location_id, name, description, latitude, longitude, image_url, block');
-      var list = List<Map<String, dynamic>>.from(response);
-
-      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (serviceEnabled) {
-        final pos = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high,
-        );
-        final userLat = pos.latitude;
-        final userLon = pos.longitude;
-        list.sort((a, b) {
-          final distA = Geolocator.distanceBetween(
-              userLat, userLon, a['latitude'], a['longitude']);
-          final distB = Geolocator.distanceBetween(
-              userLat, userLon, b['latitude'], b['longitude']);
-          return distA.compareTo(distB);
-        });
-      }
-
-      await cache.save(cacheKey, list);
+      final response = await _fetchLocationsFromRemote();
+      final sorted = await _sortByProximity(response);
+      await cache.save(cacheKey, sorted);
     } catch (_) {}
   }
 
-  /// Obtener una ubicación por su ID
+  /// Obtiene una ubicación por su ID
   Future<Map<String, dynamic>?> fetchLocationById(int id) async {
     final cacheKey = 'location_$id';
 
@@ -177,15 +84,13 @@ class LocationRepository {
     return response;
   }
 
-  /// Obtener ubicaciones con paginación
-  Future<List<Map<String, dynamic>>> fetchLocationsPaginated(
-      int page, int limit) async {
+  /// Obtiene ubicaciones con paginación
+  Future<List<Map<String, dynamic>>> fetchLocationsPaginated(int page, int limit) async {
     final cacheKey = 'locations_page_$page';
-    List<Map<String, dynamic>> paginated = [];
 
     try {
-      paginated = await cache.fetch(cacheKey);
-      if (paginated.isNotEmpty) return paginated;
+      final cached = await cache.fetch(cacheKey);
+      if (cached.isNotEmpty) return cached;
     } catch (_) {}
 
     final start = (page - 1) * limit;
@@ -196,8 +101,45 @@ class LocationRepository {
         .select('location_id, name, description, latitude, longitude, image_url, block')
         .range(start, end);
 
-    paginated = List<Map<String, dynamic>>.from(response);
-    await cache.save(cacheKey, paginated);
-    return paginated;
+    final result = List<Map<String, dynamic>>.from(response);
+    await cache.save(cacheKey, result);
+    return result;
+  }
+
+  /// --- Helpers privados ---
+
+  Future<List<Map<String, dynamic>>> _fetchLocationsFromRemote() async {
+    final response = await supabase
+        .from('locations')
+        .select('location_id, name, description, latitude, longitude, image_url, block');
+
+    if (response.isEmpty) throw Exception('No se encontraron ubicaciones.');
+    return List<Map<String, dynamic>>.from(response);
+  }
+
+  Future<List<Map<String, dynamic>>> _sortByProximity(List<Map<String, dynamic>> locations) async {
+    final position = await _getUserPosition();
+    if (position == null) return locations;
+
+    final userLat = position.latitude;
+    final userLon = position.longitude;
+
+    locations.sort((a, b) {
+      final distA = Geolocator.distanceBetween(userLat, userLon, a['latitude'], a['longitude']);
+      final distB = Geolocator.distanceBetween(userLat, userLon, b['latitude'], b['longitude']);
+      return distA.compareTo(distB);
+    });
+
+    return locations;
+  }
+
+  Future<Position?> _getUserPosition() async {
+    try {
+      final enabled = await Geolocator.isLocationServiceEnabled();
+      if (!enabled) return null;
+      return await Geolocator.getCurrentPosition(locationSettings: LocationSettings(accuracy: LocationAccuracy.best));
+    } catch (_) {
+      return null;
+    }
   }
 }
