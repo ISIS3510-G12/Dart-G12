@@ -23,7 +23,6 @@ class HomeRepository {
     }
 
     if (cached.isEmpty) {
-      // No hay cache: esperamos remoto
       try {
         final response = await supabase
             .from('locations')

@@ -7,73 +7,41 @@ class CategoryList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 70,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        children: [
-          CategoryIcon(
-            icon: Icons.business,
-            label: "Buildings",
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SeeAllScreen(
-                    contentType: "building",
-                  ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: 16), // Espacio entre íconos
-          CategoryIcon(
-            icon: Icons.event,
-            label: "Events",
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SeeAllScreen(
-                    contentType: "event",
-                  ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: 16),
-           CategoryIcon(
-            icon: Icons.school,
-            label: "Auditoriums",
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SeeAllScreen(
-                    contentType: "auditorium",
-                  ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: 16),
-          CategoryIcon(
-            icon: Icons.build,
-            label: "Laboratories",
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SeeAllScreen(
-                    contentType: "laboratory",
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+    final categories = [
+      {"icon": Icons.business, "label": "Buildings", "type": "building"},
+      {"icon": Icons.event, "label": "Events", "type": "event"},
+      {"icon": Icons.school, "label": "Auditoriums", "type": "auditorium"},
+      {"icon": Icons.build, "label": "Laboratories", "type": "laboratory"},
+      {"icon": Icons.library_books, "label": "Libraries", "type": "library"},
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double itemWidth = constraints.maxWidth / categories.length;
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: categories.map((category) {
+            return SizedBox(
+              width: itemWidth,
+              child: CategoryIcon(
+                icon: category["icon"] as IconData,
+                label: category["label"] as String,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SeeAllScreen(
+                        contentType: category["type"] as String,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          }).toList(),
+        );
+      },
     );
   }
 }

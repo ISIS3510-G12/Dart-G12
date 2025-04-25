@@ -1,6 +1,7 @@
 import 'package:dart_g12/data/repositories/auditoriums_repository.dart';
 import 'package:dart_g12/data/repositories/favorite_repository.dart';
 import 'package:dart_g12/data/repositories/laboratories_repository.dart';
+import 'package:dart_g12/data/repositories/libraries_repository.dart';
 import 'package:flutter/material.dart';
 import '../../data/repositories/location_repository.dart';
 import '../../data/repositories/event_repository.dart';
@@ -14,6 +15,7 @@ class SeeAllViewModel extends ChangeNotifier {
   final AccessRepository accessRepository = AccessRepository();
   final FavoriteRepository favoriteRepository = FavoriteRepository();
   final AuditoriumRepository auditoriumRepository = AuditoriumRepository();
+  final LibraryRepository libraryRepository = LibraryRepository();
 
   late String contentType;
   List<Map<String, dynamic>> _allItems = [];
@@ -132,6 +134,22 @@ class SeeAllViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> fetchLibraries() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _allItems = await libraryRepository.fetchLibraries();
+      _items = List.from(_allItems);
+    } catch (e) {
+      _error = e.toString();
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
   Future<void> fetchData() async {
     _isLoading = true;
     _error = null;
@@ -148,7 +166,15 @@ class SeeAllViewModel extends ChangeNotifier {
         await fetchAccess(); 
       } else if (contentType == 'favorite') {
         await fetchFavorites();
-      } else {
+      } else if (contentType == 'auditorium') {
+        await fetchAuditoriums();
+      } else if (contentType == 'library') {
+        await fetchLibraries();
+      
+      } else if (contentType == 'none') {
+        _items = List.from(_allItems);
+      }
+      else {
         _error = 'Tipo de contenido no soportado: $contentType';
       }
     } catch (e) {

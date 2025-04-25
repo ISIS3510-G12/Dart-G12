@@ -16,26 +16,38 @@ class LibraryRepository {
 
   // Obtener todas las bibliotecas
   Future<List<Map<String, dynamic>>> fetchLibraries() async {
+    const cacheKey = 'libraries';
     List<Map<String, dynamic>> cached = [];
     try {
-      cached = await _cache.fetch('libraries');
+      cached = await _cache.fetch(cacheKey);
     } catch (e) {
       log('Error leyendo cache de libraries: $e');
     }
-    unawaited(_fetchAndCacheAllLibraries());
-    return cached;
+
+    if (cached.isEmpty) {
+      try {
+        await _fetchAndCacheAllLibraries(cacheKey);
+        return await _cache.fetch(cacheKey);
+      } catch (e) {
+        log('Error al obtener libraries desde red: $e');
+        return [];
+      }
+    } else {
+      unawaited(_fetchAndCacheAllLibraries(cacheKey));
+      return cached;
+    }
   }
 
   // Obtener y guardar en caché todas las bibliotecas
-  Future<void> _fetchAndCacheAllLibraries() async {
+  Future<void> _fetchAndCacheAllLibraries(String cacheKey) async {
     try {
       final response = await supabase
           .from('libraries')
-          .select('library_id, name, location_id');
+          .select('library_id, name, image_url, location_id');
       final parsed = await compute(_parseList, response as List<dynamic>);
-      await _cache.save('libraries', parsed);
+      await _cache.save(cacheKey, parsed);
     } catch (e) {
-      log('Error al obtener libraries desde red: $e');
+      log('Error al obtener libraries desde red (background): $e');
     }
   }
 
@@ -45,25 +57,35 @@ class LibraryRepository {
     List<Map<String, dynamic>> cached = [];
     try {
       cached = await _cache.fetch(cacheKey);
+      if (cached.isNotEmpty) {
+        unawaited(_fetchAndCacheLibraryById(id, cacheKey));
+        return cached;
+      }
     } catch (e) {
       log('Error leyendo cache de library por ID ($id): $e');
     }
-    unawaited(_fetchAndCacheLibraryById(id, cacheKey));
-    return cached;
+
+    try {
+      await _fetchAndCacheLibraryById(id, cacheKey);
+      return await _cache.fetch(cacheKey);
+    } catch (e) {
+      log('Error al obtener library por ID desde red ($id): $e');
+      return [];
+    }
   }
 
   Future<void> _fetchAndCacheLibraryById(int id, String cacheKey) async {
     try {
       final response = await supabase
           .from('libraries')
-          .select('library_id, name, location_id')
+          .select('library_id, name, image_url, location_id')
           .eq('library_id', id)
           .maybeSingle();
       if (response != null) {
         await _cache.save(cacheKey, [response]);
       }
     } catch (e) {
-      log('Error al obtener library por ID desde red ($id): $e');
+      log('Error al obtener library por ID desde red (background) ($id): $e');
     }
   }
 
@@ -76,8 +98,19 @@ class LibraryRepository {
     } catch (e) {
       log('Error leyendo cache libraries por ubicación ($locationId): $e');
     }
-    unawaited(_fetchAndCacheLibrariesByLocation(locationId, cacheKey));
-    return cached;
+
+    if (cached.isEmpty) {
+      try {
+        await _fetchAndCacheLibrariesByLocation(locationId, cacheKey);
+        return await _cache.fetch(cacheKey);
+      } catch (e) {
+        log('Error al obtener libraries por ubicación desde red: $e');
+        return [];
+      }
+    } else {
+      unawaited(_fetchAndCacheLibrariesByLocation(locationId, cacheKey));
+      return cached;
+    }
   }
 
   Future<void> _fetchAndCacheLibrariesByLocation(int locationId, String cacheKey) async {
@@ -89,7 +122,7 @@ class LibraryRepository {
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save(cacheKey, parsed);
     } catch (e) {
-      log('Error al obtener libraries por ubicación desde red ($locationId): $e');
+      log('Error al obtener libraries por ubicación desde red (background) ($locationId): $e');
     }
   }
 }
