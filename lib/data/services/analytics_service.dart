@@ -98,7 +98,6 @@ class AnalyticsService {
 
   }) async {
     try {
-      // Registrar evento en PostHog correctamente
       await Posthog().capture(
         eventName: 'app_started', // Nombre del evento
         properties: {
@@ -112,4 +111,23 @@ class AnalyticsService {
       print('Error registering app started: $error');
     }
   }
+
+  static Future<void> logFeatureInteraction({
+    required String feature,
+  }) async {
+    try {
+      await Posthog().capture(
+        eventName: 'feature_interaction',
+        properties: {
+          'feature': feature,
+          'created_at': DateTime.now().toIso8601String(),
+        },
+      );
+
+      print('Feature interaction registered: $feature');
+    } catch (error) {
+      print('Error registering feature interaction: $error');
+    }
+  }
+
 }
