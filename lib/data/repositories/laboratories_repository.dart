@@ -25,20 +25,14 @@ class LaboratoriesRepository {
     }
 
     if (cached.isEmpty) {
-      // Sin cache: esperamos remoto
       try {
-        final response = await supabase
-            .from('laboratories')
-            .select('laboratories_id, name, image_url, locations(name, block)');
-        final parsed = await compute(_parseList, response as List<dynamic>);
-        await _cache.save(cacheKey, parsed);
-        return parsed;
+        await _fetchAndCacheAllLaboratories(cacheKey);
+        return await _cache.fetch(cacheKey);
       } catch (e) {
         log('Error al obtener laboratorios desde red: $e');
-        return cached;
+        return [];
       }
     } else {
-      // Con cache: devolvemos ya y refrescamos en background
       unawaited(_fetchAndCacheAllLaboratories(cacheKey));
       return cached;
     }
@@ -56,13 +50,12 @@ class LaboratoriesRepository {
     }
   }
 
-  /// Obtener un laboratorio por su ID
+  // Obtener un laboratorio por su ID
   Future<Map<String, dynamic>?> fetchLaboratoryById(int id) async {
     final cacheKey = 'laboratory_$id';
     try {
       final cached = await _cache.fetch(cacheKey);
       if (cached.isNotEmpty) {
-        // Si hay cache, devuélvo y refresco en background
         unawaited(_fetchAndCacheLaboratoryById(id, cacheKey));
         return cached.first;
       }
@@ -70,17 +63,10 @@ class LaboratoriesRepository {
       log('Error leyendo cache de laboratorio por ID ($id): $e');
     }
 
-    // Sin cache: esperamos remoto
     try {
-      final response = await supabase
-          .from('laboratories')
-          .select('laboratories_id, name, location, image_url, description, department_id, location_id, locations(name, block)')
-          .eq('laboratories_id', id)
-          .maybeSingle();
-      if (response != null) {
-        await _cache.save(cacheKey, [response]);
-      }
-      return response;
+      await _fetchAndCacheLaboratoryById(id, cacheKey);
+      final cached = await _cache.fetch(cacheKey);
+      return cached.isNotEmpty ? cached.first : null;
     } catch (e) {
       log('Error al obtener laboratorio por ID desde red ($id): $e');
       return null;
@@ -114,16 +100,11 @@ class LaboratoriesRepository {
 
     if (cached.isEmpty) {
       try {
-        final response = await supabase
-            .from('laboratories')
-            .select('laboratories_id, name, location, image_url, description, department_id, location_id, locations(name, block)')
-            .eq('location_id', locationId);
-        final parsed = await compute(_parseList, response as List<dynamic>);
-        await _cache.save(cacheKey, parsed);
-        return parsed;
+        await _fetchAndCacheLaboratoriesByLocation(locationId, cacheKey);
+        return await _cache.fetch(cacheKey);
       } catch (e) {
         log('Error al obtener laboratorios por ubicación desde red: $e');
-        return cached;
+        return [];
       }
     } else {
       unawaited(_fetchAndCacheLaboratoriesByLocation(locationId, cacheKey));
@@ -144,7 +125,7 @@ class LaboratoriesRepository {
     }
   }
 
-  // Recuperación de laboratorios por departamento
+  // Recuperar laboratorios por departamento
   Future<List<Map<String, dynamic>>> fetchLaboratoriesByDepartment(int departmentId) async {
     final cacheKey = 'laboratories_department_$departmentId';
     List<Map<String, dynamic>> cached = [];
@@ -156,16 +137,11 @@ class LaboratoriesRepository {
 
     if (cached.isEmpty) {
       try {
-        final response = await supabase
-            .from('laboratories')
-            .select('laboratories_id, name, location, image_url, description, department_id, location_id, locations(name, block)')
-            .eq('department_id', departmentId);
-        final parsed = await compute(_parseList, response as List<dynamic>);
-        await _cache.save(cacheKey, parsed);
-        return parsed;
+        await _fetchAndCacheLaboratoriesByDepartment(departmentId, cacheKey);
+        return await _cache.fetch(cacheKey);
       } catch (e) {
         log('Error al obtener laboratorios por departamento desde red: $e');
-        return cached;
+        return [];
       }
     } else {
       unawaited(_fetchAndCacheLaboratoriesByDepartment(departmentId, cacheKey));

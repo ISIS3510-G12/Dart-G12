@@ -43,9 +43,19 @@ class CategoryList extends StatelessWidget {
             },
           ),
           const SizedBox(width: 16),
-          const CategoryIcon(
+           CategoryIcon(
             icon: Icons.school,
-            label: "Study Spaces",
+            label: "Auditoriums",
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SeeAllScreen(
+                    contentType: "auditorium",
+                  ),
+                ),
+              );
+            },
           ),
           const SizedBox(width: 16),
           CategoryIcon(

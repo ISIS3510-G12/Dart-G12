@@ -37,7 +37,10 @@ class SeeAllScreenState extends State<SeeAllScreen> {
       _viewModel.fetchAccess();
     } else if (widget.contentType == "favorite") {
       _viewModel.fetchFavorites();
+    } else if (widget.contentType == "auditorium") {
+      _viewModel.fetchAuditoriums();
     }
+
   }
 
   @override
@@ -75,7 +78,9 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                                       ? "Access Points"
                                       : widget.contentType == "favorite"
                                           ? "Favorites"
-                                          : "Unknown",
+                                          : widget.contentType == "auditorium"
+                                              ? "Auditoriums"
+                                              : "Unknown",
                       style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -215,6 +220,19 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                                                           DetailCard(
                                                         id: item['event_id'],
                                                         type: CardType.event,
+                                                      ),
+                                                    ),
+                                                  );
+                                                } else if (widget.contentType ==
+                                                    "auditorium" || (widget.contentType ==
+                                                    "favorite" && (item['type'] ?? '') == 'auditorium') ) {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          DetailCard(
+                                                        id: item['auditorium_id'],
+                                                        type: CardType.auditorium,
                                                       ),
                                                     ),
                                                   );

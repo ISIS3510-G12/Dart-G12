@@ -25,20 +25,14 @@ class AccessRepository {
     }
 
     if (cached.isEmpty) {
-      // Si no hay cache, esperamos la llamada remota
       try {
-        final response = await supabase
-            .from('access')
-            .select('access_id, name, location_id, image_url, locations(name, block)');
-        final parsed = await compute(_parseList, response as List<dynamic>);
-        await _cache.save(cacheKey, parsed);
-        return parsed;
+        await _fetchAndCacheAllAccess(cacheKey);
+        return await _cache.fetch(cacheKey);
       } catch (e) {
         log('Error al obtener accesos desde red: $e');
-        return cached;
+        return [];
       }
     } else {
-      // Si hay cache, devolvemos ya y refrescamos en background
       unawaited(_fetchAndCacheAllAccess(cacheKey));
       return cached;
     }
@@ -68,20 +62,12 @@ class AccessRepository {
 
     if (cached.isEmpty) {
       try {
-        final response = await supabase
-            .from('access')
-            .select('access_id, name, location_id, image_url, locations(name, block)')
-            .eq('access_id', accessId)
-            .maybeSingle();
-        if (response != null) {
-          final list = [response];
-          await _cache.save(cacheKey, list);
-          return list;
-        }
+        await _fetchAndCacheAccessById(accessId, cacheKey);
+        return await _cache.fetch(cacheKey);
       } catch (e) {
         log('Error al obtener acceso por ID desde red ($accessId): $e');
+        return [];
       }
-      return cached;
     } else {
       unawaited(_fetchAndCacheAccessById(accessId, cacheKey));
       return cached;
@@ -115,16 +101,11 @@ class AccessRepository {
 
     if (cached.isEmpty) {
       try {
-        final response = await supabase
-            .from('access')
-            .select('access_id, name, location_id, image_url, locations(name, block)')
-            .eq('location_id', locationId);
-        final parsed = await compute(_parseList, response as List<dynamic>);
-        await _cache.save(cacheKey, parsed);
-        return parsed;
+        await _fetchAndCacheAccessByLocation(locationId, cacheKey);
+        return await _cache.fetch(cacheKey);
       } catch (e) {
         log('Error al obtener accesos por ubicación desde red: $e');
-        return cached;
+        return [];
       }
     } else {
       unawaited(_fetchAndCacheAccessByLocation(locationId, cacheKey));
