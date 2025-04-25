@@ -91,4 +91,43 @@ class AnalyticsService {
       print('Error registering location search: $error');
     }
   }
+
+  // Función separada para registrar búsquedas de ubicación
+  static Future<void> logAppStarted({
+    String user_id = "0",
+
+  }) async {
+    try {
+      await Posthog().capture(
+        eventName: 'app_started', // Nombre del evento
+        properties: {
+          'user_id': user_id,
+          'created_at': DateTime.now().toIso8601String(),
+        },
+      );
+
+      print('App start registered');
+    } catch (error) {
+      print('Error registering app started: $error');
+    }
+  }
+
+  static Future<void> logFeatureInteraction({
+    required String feature,
+  }) async {
+    try {
+      await Posthog().capture(
+        eventName: 'feature_interaction',
+        properties: {
+          'feature': feature,
+          'created_at': DateTime.now().toIso8601String(),
+        },
+      );
+
+      print('Feature interaction registered: $feature');
+    } catch (error) {
+      print('Error registering feature interaction: $error');
+    }
+  }
+
 }

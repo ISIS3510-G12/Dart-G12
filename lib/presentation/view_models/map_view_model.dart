@@ -87,6 +87,8 @@ Future<void> fetchRoute() async {
   if (fromId == null || toId == null) return;
 
   try {
+    // Registrar el uso de la feature para buscar una ruta
+    await AnalyticsService.logFeatureInteraction(feature: "calculate_route");
     // Llamada a la función que devuelve un mapa con total_cost y path
     final shortestPath = await repository.fetchShortestPath(fromId, toId);
     log('Respuesta fetchShortestPath: $shortestPath');

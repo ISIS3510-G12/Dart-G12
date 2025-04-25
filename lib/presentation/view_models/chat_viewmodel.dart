@@ -1,3 +1,4 @@
+import 'package:dart_g12/data/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:dart_g12/data/services/chat_service.dart';
 
@@ -8,6 +9,7 @@ class ChatViewModel extends ChangeNotifier {
   List<Map<String, String>> get messages => List.unmodifiable(_messages);
 
   Future<void> sendMessage(String message) async {
+    await AnalyticsService.logFeatureInteraction(feature: "chat_smart_feature");
     String userMessage = message.trim();
     if (userMessage.isEmpty) return;
 
