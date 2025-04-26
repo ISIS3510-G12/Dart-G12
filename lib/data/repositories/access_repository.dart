@@ -4,6 +4,7 @@ import 'package:dart_g12/data/services/supabase_service.dart';
 import 'package:dart_g12/data/services/local_storage_service.dart';
 import 'dart:async';
 
+// Helper para parsear la respuesta en un List<Map<String, dynamic>>
 List<Map<String, dynamic>> _parseList(List<dynamic> response) {
   return List<Map<String, dynamic>>.from(response);
 }
@@ -26,6 +27,7 @@ class AccessRepository {
 
     if (cached.isEmpty) {
       try {
+        // Cargar accesos en segundo plano
         await _fetchAndCacheAllAccess(cacheKey);
         return await _cache.fetch(cacheKey);
       } catch (e) {
@@ -33,6 +35,7 @@ class AccessRepository {
         return [];
       }
     } else {
+      // Actualizar caché en segundo plano sin bloquear la UI
       unawaited(_fetchAndCacheAllAccess(cacheKey));
       return cached;
     }
@@ -125,4 +128,5 @@ class AccessRepository {
       log('Error fetching accesos por ubicación from network (background) ($locationId): $e');
     }
   }
+
 }

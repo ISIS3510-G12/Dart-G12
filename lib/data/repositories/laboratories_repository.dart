@@ -14,20 +14,25 @@ class LaboratoriesRepository {
 
   LaboratoriesRepository();
 
+  // Helper para manejar la lectura del cache de manera centralizada
+  Future<List<Map<String, dynamic>>> _loadFromCache(String cacheKey) async {
+    try {
+      return await _cache.fetch(cacheKey);
+    } catch (e) {
+      log('Error leyendo cache de $cacheKey: $e');
+      return [];
+    }
+  }
+
   // Recuperar todos los laboratorios con su "block" asociado
   Future<List<Map<String, dynamic>>> fetchLaboratories() async {
     const cacheKey = 'laboratories';
-    List<Map<String, dynamic>> cached = [];
-    try {
-      cached = await _cache.fetch(cacheKey);
-    } catch (e) {
-      log('Error leyendo cache de laboratorios: $e');
-    }
+    final cached = await _loadFromCache(cacheKey);
 
     if (cached.isEmpty) {
       try {
         await _fetchAndCacheAllLaboratories(cacheKey);
-        return await _cache.fetch(cacheKey);
+        return await _loadFromCache(cacheKey);
       } catch (e) {
         log('Error al obtener laboratorios desde red: $e');
         return [];
@@ -53,19 +58,15 @@ class LaboratoriesRepository {
   // Obtener un laboratorio por su ID
   Future<Map<String, dynamic>?> fetchLaboratoryById(int id) async {
     final cacheKey = 'laboratory_$id';
-    try {
-      final cached = await _cache.fetch(cacheKey);
-      if (cached.isNotEmpty) {
-        unawaited(_fetchAndCacheLaboratoryById(id, cacheKey));
-        return cached.first;
-      }
-    } catch (e) {
-      log('Error leyendo cache de laboratorio por ID ($id): $e');
+    final cached = await _loadFromCache(cacheKey);
+    if (cached.isNotEmpty) {
+      unawaited(_fetchAndCacheLaboratoryById(id, cacheKey));
+      return cached.first;
     }
 
     try {
       await _fetchAndCacheLaboratoryById(id, cacheKey);
-      final cached = await _cache.fetch(cacheKey);
+      final cached = await _loadFromCache(cacheKey);
       return cached.isNotEmpty ? cached.first : null;
     } catch (e) {
       log('Error al obtener laboratorio por ID desde red ($id): $e');
@@ -91,17 +92,12 @@ class LaboratoriesRepository {
   // Recuperar laboratorios por ubicación
   Future<List<Map<String, dynamic>>> fetchLaboratoriesByLocation(int locationId) async {
     final cacheKey = 'laboratories_location_$locationId';
-    List<Map<String, dynamic>> cached = [];
-    try {
-      cached = await _cache.fetch(cacheKey);
-    } catch (e) {
-      log('Error leyendo cache de laboratorios por ubicación ($locationId): $e');
-    }
+    final cached = await _loadFromCache(cacheKey);
 
     if (cached.isEmpty) {
       try {
         await _fetchAndCacheLaboratoriesByLocation(locationId, cacheKey);
-        return await _cache.fetch(cacheKey);
+        return await _loadFromCache(cacheKey);
       } catch (e) {
         log('Error al obtener laboratorios por ubicación desde red: $e');
         return [];
@@ -128,17 +124,12 @@ class LaboratoriesRepository {
   // Recuperar laboratorios por departamento
   Future<List<Map<String, dynamic>>> fetchLaboratoriesByDepartment(int departmentId) async {
     final cacheKey = 'laboratories_department_$departmentId';
-    List<Map<String, dynamic>> cached = [];
-    try {
-      cached = await _cache.fetch(cacheKey);
-    } catch (e) {
-      log('Error leyendo cache de laboratorios por departamento ($departmentId): $e');
-    }
+    final cached = await _loadFromCache(cacheKey);
 
     if (cached.isEmpty) {
       try {
         await _fetchAndCacheLaboratoriesByDepartment(departmentId, cacheKey);
-        return await _cache.fetch(cacheKey);
+        return await _loadFromCache(cacheKey);
       } catch (e) {
         log('Error al obtener laboratorios por departamento desde red: $e');
         return [];
