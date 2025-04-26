@@ -1,4 +1,6 @@
 import 'dart:math';
+import 'package:provider/provider.dart';
+
 
 import 'package:dart_g12/presentation/widgets/filter.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +9,7 @@ import '../widgets/ovals_painter_home.dart';
 import '../widgets/place_card.dart';
 import '../widgets/bottom_navbar.dart';
 import 'detail_card.dart';
+
 
 class SeeAllScreen extends StatefulWidget {
   final int initialIndex;
@@ -110,14 +113,14 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                               icon: const Icon(Icons.filter_list),
                               onPressed: () {
                                 FocusScope.of(context).unfocus();
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => FilterScreen(
-                                      contentType: widget.contentType,
-                                    ),
-                                  ),
-                                );
+                                showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      builder: (_) => ChangeNotifierProvider.value(
+                                        value: _viewModel,
+                                        child: FilterScreen(contentType: widget.contentType),
+                                      ),
+                                    );
                               },
                             )
                           : IconButton(
