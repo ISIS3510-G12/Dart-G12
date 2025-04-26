@@ -8,7 +8,7 @@ class NotificacionViewModel extends ChangeNotifier {
   final FavoriteRepository _favoriteRepository = FavoriteRepository();
   CalendarFormat calendarFormat = CalendarFormat.month;
   Map<DateTime, List<Map<String, dynamic>>> _events = {};
-  DateTime _selectedDay = DateTime.utc(2025, 3, 5);
+  DateTime _selectedDay = DateTime.now();
 
   Map<DateTime, List<Map<String, dynamic>>> get events => _events;
   DateTime get selectedDay => _selectedDay;

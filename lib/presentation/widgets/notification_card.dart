@@ -15,7 +15,7 @@ class NotificationCard extends StatelessWidget {
     required this.location,
     required this.time,
     required this.imageUrl,
-    required this.id,  // Recibimos el id del evento
+    required this.id,  
   }) : super(key: key);
 
   @override

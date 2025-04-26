@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dart_g12/presentation/views/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -85,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: CircleAvatar(
               radius: 24,
               backgroundImage: vm.avatarUrl != null
-                  ? NetworkImage(vm.avatarUrl!)
+                  ? CachedNetworkImageProvider(vm.avatarUrl!)
                   : const AssetImage('assets/images/profile.jpg') as ImageProvider,
             ),
           ),

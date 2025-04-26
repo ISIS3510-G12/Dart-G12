@@ -49,7 +49,7 @@ class NotificacionPage extends StatelessWidget {
                             child: TableCalendar<Map<String, dynamic>>(
                               firstDay: DateTime.utc(2020, 1, 1),
                               lastDay: DateTime.utc(2030, 12, 31),
-                              focusedDay: viewModel.selectedDay,
+                              focusedDay: viewModel.selectedDay ,
                               calendarFormat: CalendarFormat.month,
                               eventLoader: (day) {
                                 return viewModel.events[DateTime.utc(day.year, day.month, day.day)] ?? [];

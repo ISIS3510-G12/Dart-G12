@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:dart_g12/presentation/view_models/card_detail_view_model.dart';
 import 'package:dart_g12/presentation/widgets/transparent_ovals_painter.dart';
@@ -198,12 +199,16 @@ class _DetailCardState extends State<DetailCard> {
       child: Container(
         height: isEvent ? 280 : 260,
         decoration: BoxDecoration(
-          image: imageUrl != null
-              ? DecorationImage(
-                  image: NetworkImage(imageUrl), fit: BoxFit.cover)
-              : null,
           color: Colors.grey[300],
         ),
+        child: imageUrl != null
+            ? CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
+              )
+            : null,
       ),
     );
   }
