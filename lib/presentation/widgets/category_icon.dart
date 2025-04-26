@@ -42,7 +42,7 @@ class CategoryIcon extends StatelessWidget {
             Text(
               label,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 10,
                 fontWeight: FontWeight.bold, // Texto en negrita
               ),
             ),

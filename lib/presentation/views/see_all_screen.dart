@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import '../view_models/see_all_view_model.dart';
 import '../widgets/ovals_painter_home.dart';
@@ -39,7 +41,9 @@ class SeeAllScreenState extends State<SeeAllScreen> {
       _viewModel.fetchFavorites();
     } else if (widget.contentType == "auditorium") {
       _viewModel.fetchAuditoriums();
-    }
+    } else if (widget.contentType == "library") {
+      _viewModel.fetchLibraries();
+    } 
 
   }
 
@@ -80,7 +84,9 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                                           ? "Favorites"
                                           : widget.contentType == "auditorium"
                                               ? "Auditoriums"
-                                              : "Unknown",
+                                              : widget.contentType == "library"
+                                                  ? "Libraries"
+                                                  : "Unknown",
                       style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -236,7 +242,20 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                                                       ),
                                                     ),
                                                   );
-                                                }
+                                                } else if (widget.contentType ==
+                                                    "library" || (widget.contentType ==
+                                                    "favorite" && (item['type'] ?? '') == 'library') ) {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          DetailCard(
+                                                        id: item['library_id'],
+                                                        type: CardType.library,
+                                                      ),
+                                                    ),
+                                                  );
+                                                } 
                                               },
                                             );
                                           }).toList(),

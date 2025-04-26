@@ -9,6 +9,7 @@ import '../../data/repositories/laboratories_repository.dart';
 import '../../data/repositories/access_repository.dart';
 import '../../data/repositories/favorite_repository.dart'; 
 import '../../data/repositories/auditoriums_repository.dart';
+import '../../data/repositories/libraries_repository.dart';
 
 class CardDetailViewModel extends ChangeNotifier {
   final EventRepository eventRepository = EventRepository();
@@ -17,6 +18,7 @@ class CardDetailViewModel extends ChangeNotifier {
   final AccessRepository accessRepository = AccessRepository();
   final FavoriteRepository favoriteRepository = FavoriteRepository();
   final AuditoriumRepository auditoriumRepository = AuditoriumRepository();
+  final LibraryRepository libraryRepository = LibraryRepository();
 
   List<Map<String, dynamic>> _events = [];
   Map<String, dynamic>? _event;
@@ -24,6 +26,7 @@ class CardDetailViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> _laboratories = [];
   List<Map<String, dynamic>> _access = [];
   List<Map<String, dynamic>> _auditorium = [];
+  List<Map<String, dynamic>> _library = [];
   bool _isLoading = false;
   String? _error;
   int _selectedIndex = 0;
@@ -38,6 +41,7 @@ class CardDetailViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> get laboratories => _laboratories;
   List<Map<String, dynamic>> get access => _access;
   List<Map<String, dynamic>> get autorium => _auditorium;
+  List<Map<String, dynamic>> get library => _library;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -203,6 +207,23 @@ Future<void> fetchAuditoriumDetails(int auditoriumId) async {
     _isLoading = false;
     notifyListeners();
   }
+
+  Future<void> fetchLibraryDetails(int libraryId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final libList = await libraryRepository.fetchLibraryById(libraryId);
+      _library = libList;
+    } catch (e) {
+      _error = e.toString();
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+  
 
   // Actualizar el índice seleccionado
   void updateSelectedIndex(int index) {
