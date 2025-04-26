@@ -73,7 +73,13 @@ class _FilterScreenState extends State<FilterScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        viewModel.filterItems(_searchController.text);
+
+                        if (_searchController.text.trim().isEmpty && viewModel.selectedBlock != null) {
+                          viewModel.filterByBlock(viewModel.selectedBlock!);
+                        } else {
+
+                          viewModel.filterItems(_searchController.text);
+                        }
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
