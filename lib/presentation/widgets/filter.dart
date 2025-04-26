@@ -49,11 +49,12 @@ class _FilterScreenState extends State<FilterScreen> {
             ),
             const SizedBox(height: 16),
             // Filtros específicos para contentType
-            if (widget.contentType == 'building' || widget.contentType == 'access')
-              _buildBlockFilter(viewModel),
-            if (widget.contentType == 'event') _buildDateFilter(viewModel),
-            if (widget.contentType == 'laboratory' || widget.contentType == 'access')
-              _buildLocationFilter(viewModel),
+            if (widget.contentType == 'building') _buildBlockFilter(viewModel),
+            if (widget.contentType == 'event') _buildEventFilters(viewModel),
+            if (widget.contentType == 'laboratory') _buildLocationFilter(viewModel),
+            if (widget.contentType == 'access') _buildLocationFilter(viewModel),
+            if (widget.contentType == 'auditorium') _buildLocationFilter(viewModel),
+            if (widget.contentType == 'library') _buildLocationFilter(viewModel), // Aquí añadimos el filtro para la librería.
             const Spacer(),
             ElevatedButton(
               onPressed: () {
@@ -68,6 +69,7 @@ class _FilterScreenState extends State<FilterScreen> {
     );
   }
 
+  // Filtro por bloque (para contenido tipo 'building')
   Widget _buildBlockFilter(SeeAllViewModel viewModel) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,6 +94,41 @@ class _FilterScreenState extends State<FilterScreen> {
     );
   }
 
+  // Filtros específicos para el tipo de contenido 'event'
+  Widget _buildEventFilters(SeeAllViewModel viewModel) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Filter by Date'),
+        Row(
+          children: [
+            ElevatedButton(
+              onPressed: () => _selectDate(context, viewModel, true),
+              child: const Text('Start Date'),
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: () => _selectDate(context, viewModel, false),
+              child: const Text('End Date'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        const Text('Filter by Event ID'),
+        TextField(
+          onChanged: (value) {
+            viewModel.filterItems(value);
+          },
+          decoration: const InputDecoration(
+            labelText: 'Search by Event ID',
+            border: OutlineInputBorder(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Filtro por ubicación (común a varios tipos de contenido)
   Widget _buildLocationFilter(SeeAllViewModel viewModel) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,28 +153,7 @@ class _FilterScreenState extends State<FilterScreen> {
     );
   }
 
-  Widget _buildDateFilter(SeeAllViewModel viewModel) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Filter by Date'),
-        Row(
-          children: [
-            ElevatedButton(
-              onPressed: () => _selectDate(context, viewModel, true),
-              child: const Text('Start Date'),
-            ),
-            const SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: () => _selectDate(context, viewModel, false),
-              child: const Text('End Date'),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
+  // Selección de fechas (inicio o fin)
   Future<void> _selectDate(BuildContext context, SeeAllViewModel viewModel, bool isStartDate) async {
     final DateTime? selectedDate = await showDatePicker(
       context: context,

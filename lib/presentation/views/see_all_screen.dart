@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:dart_g12/presentation/widgets/filter.dart';
 import 'package:flutter/material.dart';
 import '../view_models/see_all_view_model.dart';
 import '../widgets/ovals_painter_home.dart';
@@ -50,6 +51,7 @@ class SeeAllScreenState extends State<SeeAllScreen> {
   @override
   void dispose() {
     _viewModel.removeListener(_updateState);
+    _searchCtrl.removeListener(() {});
     _searchCtrl.dispose();
     super.dispose();
   }
@@ -104,7 +106,20 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                       fillColor: Colors.white,
                       prefixIcon: const Icon(Icons.search),
                       suffixIcon: _searchCtrl.text.isEmpty
-                          ? const Icon(Icons.filter_list)
+                          ? IconButton(
+                              icon: const Icon(Icons.filter_list),
+                              onPressed: () {
+                                FocusScope.of(context).unfocus();
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => FilterScreen(
+                                      contentType: widget.contentType,
+                                    ),
+                                  ),
+                                );
+                              },
+                            )
                           : IconButton(
                               icon: const Icon(Icons.clear),
                               onPressed: () {

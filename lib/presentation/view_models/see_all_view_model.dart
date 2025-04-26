@@ -23,6 +23,10 @@ class SeeAllViewModel extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   int _selectedIndex = 0;
+  String? _selectedBlock;
+  String? _selectedLocation;
+  DateTime? _startDate;
+  DateTime? _endDate; 
 
   SeeAllViewModel();
 
@@ -31,6 +35,10 @@ class SeeAllViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   int get selectedIndex => _selectedIndex;
+  String? get selectedBlock => _selectedBlock;
+  String? get selectedLocation => _selectedLocation;
+  DateTime? get startDate => _startDate;
+  DateTime? get endDate => _endDate;
 
   // Método para obtener los edificios desde Supabase
   Future<void> fetchBuildings() async {
@@ -211,4 +219,47 @@ class SeeAllViewModel extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  void filterByLocation(String location) {
+  _items = _allItems.where((item) {
+    final itemLocation = (item['locations']?['name'] ?? '').toLowerCase();
+    return itemLocation.contains(location.toLowerCase());
+  }).toList();
+  notifyListeners();
+}
+
+void filterByDate(DateTime startDate, DateTime endDate) {
+  _items = _allItems.where((item) {
+    final startTime = DateTime.parse(item['start_time']);
+    final endTime = DateTime.parse(item['end_time']);
+    return startTime.isAfter(startDate) && endTime.isBefore(endDate);
+  }).toList();
+  notifyListeners();
+}
+
+void setSelectedBlock(String? block) {
+  _selectedBlock = block;
+  notifyListeners();
+}
+void setSelectedLocation(String? location) {
+  _selectedLocation = location;
+  notifyListeners();
+}
+void setStartDate(DateTime? startDate) {
+  _startDate = startDate;
+  notifyListeners();
+}
+void setEndDate(DateTime? endDate) {
+  _endDate = endDate;
+  notifyListeners();
+}
+
+void clearFilters() {
+  _selectedBlock = null;
+  _selectedLocation = null;
+  _startDate = null;
+  _endDate = null;
+  notifyListeners();
+}
+
 }
