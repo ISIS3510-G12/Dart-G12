@@ -69,7 +69,7 @@ class HomeRepository {
       try {
         final response = await supabase
             .from('most_popular_user_interactions')
-            .select('event_id,location_id,title_or_name,image_url')
+            .select('name, description, image_url, type, information_id, block') 
             .limit(10);
         final parsed = await compute(_parseList, response as List<dynamic>);
         await _cache.save('mostSearchedLocations', parsed);
@@ -88,7 +88,7 @@ class HomeRepository {
     try {
       final response = await supabase
           .from('most_popular_user_interactions')
-          .select('event_id,location_id,title_or_name,image_url')
+          .select('name, description, image_url, type, information_id, block') 
           .limit(10);
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('mostSearchedLocations', parsed);

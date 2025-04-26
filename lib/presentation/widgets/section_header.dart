@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-
 class SectionHeader extends StatelessWidget {
   final String title;
-  final Widget destinationScreen; // Cambiado a Widget
+  final Widget destinationScreen;
+  final bool showSeeAll;
 
   const SectionHeader({
     required this.title,
     required this.destinationScreen,
+    this.showSeeAll = true,
     super.key,
   });
 
@@ -21,18 +22,19 @@ class SectionHeader extends StatelessWidget {
             title,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => destinationScreen),
-              );
-            },
-            child: const Text(
-              "See all",
-              style: TextStyle(fontSize: 14, color: Color(0xFFEA1D5D)),
+          if (showSeeAll) // 👈 solo muestra el botón si showSeeAll es true
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => destinationScreen),
+                );
+              },
+              child: const Text(
+                "See all",
+                style: TextStyle(fontSize: 14, color: Color(0xFFEA1D5D)),
+              ),
             ),
-          ),
         ],
       ),
     );

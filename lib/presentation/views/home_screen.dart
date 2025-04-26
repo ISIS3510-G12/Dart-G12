@@ -77,19 +77,21 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const MainScreen(initialIndex: 4)),
-              );
-            },
-            child: CircleAvatar(
-              radius: 24,
-              backgroundImage: vm.avatarUrl != null
-                  ? CachedNetworkImageProvider(vm.avatarUrl!)
-                  : const AssetImage('assets/images/profile.jpg') as ImageProvider,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const MainScreen(initialIndex: 4)),
+                );
+              },
+              child: CircleAvatar(
+                radius: 24,
+                backgroundImage: vm.avatarUrl != null
+                    ? CachedNetworkImageProvider(vm.avatarUrl!)
+                    : const AssetImage('assets/images/profile.jpg')
+                        as ImageProvider,
+              ),
             ),
-          ),
           ],
         );
       },
@@ -103,8 +105,9 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _buildSection(
             "Most Popular",
-            SeeAllScreen(contentType: "building"),
+            SeeAllScreen(contentType: "popular"),
             (vm) => _buildHorizontalList(vm.mostSearchedLocations),
+            showSeeAll: false, // solo esto cambia
           ),
           _buildSection(
             "Buildings",
@@ -129,12 +132,17 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildSection(
     String title,
     Widget destinationScreen,
-    Widget Function(HomeViewModel) builder,
-  ) {
+    Widget Function(HomeViewModel) builder, {
+    bool showSeeAll = true, //
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionHeader(title: title, destinationScreen: destinationScreen),
+        SectionHeader(
+          title: title,
+          destinationScreen: destinationScreen,
+          showSeeAll: showSeeAll,
+        ),
         Consumer<HomeViewModel>(
           builder: (context, vm, child) {
             return builder(vm);
@@ -172,8 +180,61 @@ class _HomeScreenState extends State<HomeScreen> {
             subtitle: subtitle ?? '',
             title: item['name'] ?? 'Unknown Location',
             block: block,
-            onTap: () {
-              if (item['location_id'] != null) {
+            onTap: () async {
+              if (item['type'] == 'building') {
+                final locationId = item['information_id'];
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailCard(
+                      id: locationId,
+                      type: CardType.building,
+                    ),
+                  ),
+                );
+              } else if (item['type'] == 'laboratory') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailCard(
+                      id: item['information_id'],
+                      type: CardType.laboratories,
+                    ),
+                  ),
+                );
+              } else if (item['type'] == 'access') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailCard(
+                      id: item['information_id'],
+                      type: CardType.access,
+                    ),
+                  ),
+                );
+              } else if (item['type'] == 'event') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailCard(
+                      id: item['information_id'],
+                      type: CardType.event,
+                    ),
+                  ),
+                );
+              } else if (item['type'] == 'library') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailCard(
+                      id: item['information_id'],
+                      type: CardType.library,
+                    ),
+                  ),
+                );
+              }
+              else if (item['location_id'] != null) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
