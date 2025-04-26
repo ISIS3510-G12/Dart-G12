@@ -1,6 +1,8 @@
+import 'package:dart_g12/presentation/widgets/bottom_navbar.dart';
 import 'package:flutter/material.dart';
 import '../view_models/edit_profile_view_model.dart';
 import '../widgets/ovals_painter.dart';
+import '../view_models/profile_view_model.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -14,6 +16,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   late EditProfile _profile;
+  final ProfileViewModel viewModel = ProfileViewModel();
 
   @override
   void initState() {
@@ -168,6 +171,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: BottomNavbar(
+        currentIndex: viewModel.selectedIndex,
+        onTap: (index) => viewModel.onItemTapped(context, index),
       ),
     );
   }
