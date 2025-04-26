@@ -78,7 +78,7 @@ class LaboratoriesRepository {
     try {
       final response = await supabase
           .from('laboratories')
-          .select('laboratories_id, name, location, image_url, description, department_id, location_id, locations(name, block)')
+          .select('laboratories_id, name, location, image_url, description, department_id, location_id, locations(name, block), departments(name)')
           .eq('laboratories_id', id)
           .maybeSingle();
       if (response != null) {

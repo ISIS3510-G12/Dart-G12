@@ -88,6 +88,7 @@ class _DetailCardState extends State<DetailCard> {
           'name': l['name'] ?? '',
           'image': l['image_url'],
           'block': l['locations']?['block'],
+          'department': l['departments']?['name'],
         };
       case CardType.access:
         final a = viewModel.access.isNotEmpty ? viewModel.access[0] : {};
@@ -333,6 +334,7 @@ class ContentSection extends StatelessWidget {
                         : library.first;
 
     final Map<String, dynamic>? location = data?['locations'];
+    final Map<String, dynamic>? department = data?['departments'];
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -354,6 +356,8 @@ class ContentSection extends StatelessWidget {
           _buildTextBlock('Address:', data!['address']),
         if (data?['opening_hours'] != null)
           _buildTextBlock('Opening Hours:', data!['opening_hours']),
+        if (department?['name'] != null)
+          _buildTextBlock('Department:', department!['name']),
         // Mostrar Laboratorios si existen
         if (labs.isNotEmpty && type != CardType.laboratories) ...[
           const SizedBox(height: 16),
