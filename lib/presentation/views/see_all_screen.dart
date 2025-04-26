@@ -102,16 +102,6 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                       hintText: "Where to go?",
                       filled: true,
                       fillColor: Colors.white,
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: _searchCtrl.text.isEmpty
-                          ? const Icon(Icons.filter_list)
-                          : IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                _searchCtrl.clear();
-                                _viewModel.filterItems('');
-                              },
-                            ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25),
                         borderSide: BorderSide.none,
