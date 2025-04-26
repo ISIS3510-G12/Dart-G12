@@ -41,7 +41,7 @@ class AuditoriumRepository {
     try {
       final response = await supabase
           .from('auditoriums')
-          .select('auditorium_id, name, location_id, image_url');
+          .select('auditorium_id, name, location_id, image_url, locations (name, block)');
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('auditoriums', parsed);
     } catch (e) {
@@ -77,7 +77,7 @@ class AuditoriumRepository {
     try {
       final response = await supabase
           .from('auditoriums')
-          .select('auditorium_id, name, location_id, image_url')
+          .select('auditorium_id, name, location_id, image_url, locations (name, block)')
           .eq('auditorium_id', id)
           .maybeSingle();
       if (response != null) {
@@ -116,7 +116,7 @@ class AuditoriumRepository {
     try {
       final response = await supabase
           .from('auditoriums')
-          .select('auditorium_id, name, location_id, image_url')
+          .select('auditorium_id, name, location_id, image_url, locations (name, block)')
           .eq('location_id', locationId);
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save(cacheKey, parsed);

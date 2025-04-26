@@ -28,7 +28,7 @@ class EventRepository {
       try {
         final response = await supabase
             .from('events')
-            .select('event_id, name, description, image_url, location_id, start_time, end_time, created_at');
+            .select('event_id, name, description, image_url, location_id, start_time, end_time, created_at, locations (name, block), departments(name)');
         final parsed = await compute(_parseList, response as List<dynamic>);
         await _cache.save(cacheKey, parsed);
         return parsed;
@@ -46,7 +46,7 @@ class EventRepository {
     try {
       final response = await supabase
           .from('events')
-          .select('event_id, name, description, image_url, location_id, start_time, end_time, created_at');
+          .select('event_id, name, description, image_url, location_id, start_time, end_time, created_at, locations (name, block), departments(name)');
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save(cacheKey, parsed);
     } catch (e) {
@@ -68,7 +68,7 @@ class EventRepository {
       try {
         final response = await supabase
             .from('events')
-            .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type')
+            .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type, locations (name, block), departments(name)')
             .eq('type', type);
         final parsed = await compute(_parseList, response as List<dynamic>);
         await _cache.save(cacheKey, parsed);
@@ -87,7 +87,7 @@ class EventRepository {
     try {
       final response = await supabase
           .from('events')
-          .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type')
+          .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type, locations (name, block), departments(name)')
           .eq('type', type);
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save(cacheKey, parsed);
@@ -113,7 +113,7 @@ class EventRepository {
     try {
       final response = await supabase
           .from('events')
-          .select('event_id, name, description, image_url, location_id, start_time, end_time, created_at')
+          .select('event_id, name, description, image_url, location_id, start_time, end_time, created_at, locations (name, block), departments(name)')
           .eq('event_id', id)
           .maybeSingle();
       if (response != null) {
@@ -130,7 +130,7 @@ class EventRepository {
     try {
       final response = await supabase
           .from('events')
-          .select('event_id, name, description, image_url, location_id, start_time, end_time, created_at')
+          .select('event_id, name, description, image_url, location_id, start_time, end_time, created_at, locations (name, block), departments(name)')
           .eq('event_id', id)
           .maybeSingle();
       if (response != null) {
@@ -155,7 +155,7 @@ class EventRepository {
       try {
         final response = await supabase
             .from('events')
-            .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type')
+            .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type, locations (name, block), departments(name)')
             .eq('location_id', locationId);
         final parsed = await compute(_parseList, response as List<dynamic>);
         await _cache.save(cacheKey, parsed);
@@ -174,7 +174,7 @@ class EventRepository {
     try {
       final response = await supabase
           .from('events')
-          .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type')
+          .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type, locations (name, block), departments(name)')
           .eq('location_id', locationId);
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save(cacheKey, parsed);
@@ -190,7 +190,7 @@ class EventRepository {
     try {
       final response = await supabase
           .from('events')
-          .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type')
+          .select('event_id, title, description, image_url, location_id, start_time, end_time, created_at, type, locations (name, block), departments(name)')
           .range(start, end);
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
