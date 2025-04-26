@@ -1,3 +1,4 @@
+import 'package:dart_g12/data/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:dart_g12/data/services/auth_service.dart';
 
@@ -46,6 +47,8 @@ class LoginViewModel extends ChangeNotifier {
 
     try {
       await _authService.signInWithEmailPassword(email, password);
+      // Log the login feature
+      await AnalyticsService.logFeatureInteraction(feature: "log_in");
     } catch (e) {
       if (context.mounted) {
         String errorMessage = _handleAuthError(e.toString());

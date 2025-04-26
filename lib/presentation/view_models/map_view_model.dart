@@ -3,13 +3,13 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../data/repositories/map_repository.dart';
 import '../../data/services/analytics_service.dart';
+import 'dart:developer';
 
 class MapViewModel extends ChangeNotifier {
   final MapRepository repository = MapRepository();
   GoogleMapController? mapController;
 
   LatLng? fromLocation;
-  
   LatLng? toLocation;
   String? fromLocationName;
   String? toLocationName;
@@ -25,9 +25,8 @@ class MapViewModel extends ChangeNotifier {
 
   MapViewModel() {
     fetchLocations();
-    getCurrentLocation(); 
+    getCurrentLocation();
   }
-
 
   Future<bool> checkLocationPermission() async {
     LocationPermission permission = await Geolocator.checkPermission();
@@ -41,7 +40,6 @@ class MapViewModel extends ChangeNotifier {
            permission == LocationPermission.always;
   }
 
-
   Future<void> getCurrentLocation() async {
     final hasPermission = await checkLocationPermission();
     if (!hasPermission) {
@@ -53,18 +51,14 @@ class MapViewModel extends ChangeNotifier {
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      // Actualiza solo la ubicación actual para centrar el mapa
       fromLocation = LatLng(position.latitude, position.longitude);
-      
-      // NOTA: No se asigna un nombre ni se agrega al mapa "locations"
       notifyListeners();
 
     } catch (e) {
-      print("Error obteniendo la ubicación: $e");
+      print("Error obteniendo la ubicación: \$e");
     }
   }
 
-  /// Carga las ubicaciones desde el repositorio (de Supabase).
   Future<void> fetchLocations() async {
     try {
       final response = await repository.fetchLocations();
@@ -72,8 +66,8 @@ class MapViewModel extends ChangeNotifier {
       locationIds.clear();
 
       for (var location in response) {
-        final name = location['name'] as String;
-        final id = location['id'] as int;
+        final name = location['block'] as String;
+        final id = location['location_id'] as int;
         final lat = location['latitude'] as double;
         final lng = location['longitude'] as double;
         locations[name] = LatLng(lat, lng);
@@ -81,96 +75,84 @@ class MapViewModel extends ChangeNotifier {
       }
       notifyListeners();
     } catch (e) {
-      print("Error obteniendo ubicaciones: $e");
+      print("Error obteniendo ubicaciones: \$e");
     }
   }
 
-  // El resto del código se mantiene igual...
-  /// Carga la ruta seleccionada y actualiza polylines y circles.
-  Future<void> fetchRoute() async {
-    if (fromLocationName == null || toLocationName == null) return;
+Future<void> fetchRoute() async {
+  if (fromLocationName == null || toLocationName == null) return;
 
-    final fromId = locationIds[fromLocationName!];
-    final toId = locationIds[toLocationName!];
-    if (fromId == null || toId == null) return;
+  final fromId = locationIds[fromLocationName!];
+  final toId = locationIds[toLocationName!];
+  if (fromId == null || toId == null) return;
 
-    try {
-      final routeResponse = await repository.fetchRouteData(fromId, toId);
-      if (routeResponse == null) return;
+  try {
+    // Registrar el uso de la feature para buscar una ruta
+    await AnalyticsService.logFeatureInteraction(feature: "calculate_route");
+    // Llamada a la función que devuelve un mapa con total_cost y path
+    final shortestPath = await repository.fetchShortestPath(fromId, toId);
+    log('Respuesta fetchShortestPath: $shortestPath');
+    if (shortestPath == null) return;
 
-      final routeId = routeResponse['id'];
+    // Como fetchShortestPath devuelve un Map, no una lista, accedemos directo
+    final pathIds = (shortestPath['path'] as List<dynamic>)
+        .map((e) => e is int ? e : int.tryParse(e.toString()) ?? 0)
+        .toList();
+    final totalCost = shortestPath['total_cost']*10000; // Convertir a metros
 
-      final startLocResponse =
-          await repository.fetchLocationById(routeResponse['start_location_id']);
-      final endLocResponse =
-          await repository.fetchLocationById(routeResponse['end_location_id']);
-      final intermediateNodes = await repository.fetchRouteNodes(routeId);
+    log('Path IDs: $pathIds, totalCost: $totalCost');
 
-      if (startLocResponse == null || endLocResponse == null) return;
+    // Excluir el primer y último nodo de la lista
+    final intermediateNodeIds = pathIds.sublist(1, pathIds.length - 1);
 
-      final startNode = {
-        'latitude': startLocResponse['latitude'],
-        'longitude': startLocResponse['longitude'],
-        'node_name': startLocResponse['name'] ?? 'Inicio',
-        'node_index': 0,
-      };
+    // Obtener los datos de los nodos intermedios
+    final fullNodes = await repository.fetchNodesByIds(intermediateNodeIds);
 
-      final endNode = {
-        'latitude': endLocResponse['latitude'],
-        'longitude': endLocResponse['longitude'],
-        'node_name': endLocResponse['name'] ?? 'Final',
-        'node_index': -1,
-      };
+    stepNodes = fullNodes;
 
-      final fullNodes = <Map<String, dynamic>>[];
-      fullNodes.add(startNode);
-      fullNodes.addAll(intermediateNodes);
-      fullNodes.add(endNode);
-      fullNodes.last['node_index'] = fullNodes.length - 1;
+    final routePoints = fullNodes
+        .map((n) => LatLng(n['lat'], n['lng']))
+        .toList();
 
-      stepNodes = fullNodes;
-      final routePoints = fullNodes
-          .map((n) => LatLng(n['latitude'], n['longitude']))
-          .toList();
+    polylines = {
+      Polyline(
+        polylineId: const PolylineId('route'),
+        color: Colors.red,
+        width: 4,
+        points: routePoints,
+        patterns: [PatternItem.dash(10), PatternItem.gap(5)],
+      ),
+    };
 
-      polylines = {
-        Polyline(
-          polylineId: const PolylineId('route'),
-          color: Colors.red,
-          width: 4,
-          points: routePoints,
-          patterns: [PatternItem.dash(10), PatternItem.gap(5)],
-        ),
-      };
+    circles = routePoints.asMap().entries.map((entry) {
+      final index = entry.key;
+      final point = entry.value;
+      Color fillColor;
+      if (index == 0) {
+        fillColor = Colors.pink;
+      } else if (index == routePoints.length - 1) {
+        fillColor = Colors.green;
+      } else {
+        fillColor = Colors.black;
+      }
+      return Circle(
+        circleId: CircleId('node_$index'),
+        center: point,
+        radius: 4,
+        fillColor: fillColor,
+        strokeColor: Colors.white,
+        strokeWidth: 1,
+      );
+    }).toSet();
 
-      circles = routePoints.asMap().entries.map((entry) {
-        final index = entry.key;
-        final point = entry.value;
-        Color fillColor;
-        if (index == 0) {
-          fillColor = Colors.pink;
-        } else if (index == routePoints.length - 1) {
-          fillColor = Colors.green;
-        } else {
-          fillColor = Colors.black;
-        }
-        return Circle(
-          circleId: CircleId('node_$index'),
-          center: point,
-          radius: 5.5,
-          fillColor: fillColor,
-          strokeColor: Colors.white,
-          strokeWidth: 1,
-        );
-      }).toSet();
-
-      notifyListeners();
-    } catch (e) {
-      print("Error obteniendo la ruta: $e");
-    }
+    distance = totalCost is num ? totalCost.toDouble() : null;
+    notifyListeners();
+  } catch (e) {
+    log("Error obteniendo la ruta más corta: $e");
   }
+}
 
-  /// Actualiza las ubicaciones de inicio o destino.
+
   void updateLocation(bool isFrom, String locationName) {
     if (isFrom) {
       fromLocation = locations[locationName];
@@ -178,22 +160,14 @@ class MapViewModel extends ChangeNotifier {
     } else {
       toLocation = locations[locationName];
       toLocationName = locationName;
-
-      // Registrar búsqueda de ubicación de destino
-      final int? locId = locationIds[locationName];
-      if (locId != null) {
-        AnalyticsService.logLocationSearch(
-          locationId: locId,
-          locationName: locationName,
-        );
-      }
+      final locId = locationIds[locationName];
+      if (locId != null) AnalyticsService.logLocationSearch(locationId: locId, locationName: locationName);
     }
     calculateDistance();
     fetchRoute();
     notifyListeners();
   }
 
-  /// Calcula la distancia entre dos ubicaciones.
   void calculateDistance() {
     if (fromLocation != null && toLocation != null) {
       distance = Geolocator.distanceBetween(
@@ -206,22 +180,18 @@ class MapViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Intercambia las ubicaciones de inicio y destino.
   void swapLocations() {
-    final tempLocation = fromLocation;
+    final tmpLoc = fromLocation;
     fromLocation = toLocation;
-    toLocation = tempLocation;
-
-    final tempName = fromLocationName;
+    toLocation = tmpLoc;
+    final tmpName = fromLocationName;
     fromLocationName = toLocationName;
-    toLocationName = tempName;
-
+    toLocationName = tmpName;
     calculateDistance();
     fetchRoute();
     notifyListeners();
   }
 
-  /// Muestra/oculta la tarjeta de pasos.
   void toggleSteps() {
     showSteps = !showSteps;
     notifyListeners();

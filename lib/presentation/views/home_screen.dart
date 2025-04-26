@@ -1,34 +1,41 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dart_g12/presentation/views/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/home_view_model.dart';
-import '../widgets/ovals_painter.dart';
+import '../widgets/ovals_painter_home.dart';
 import '../widgets/section_header.dart';
 import '../widgets/place_card.dart';
-import '../widgets/category_list.dart'; 
+import '../widgets/category_list.dart';
+import '../widgets/chat_widget.dart';
 import 'see_all_screen.dart';
+import 'detail_card.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late HomeViewModel viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    viewModel = HomeViewModel();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) {
-        final viewModel = HomeViewModel();
-        viewModel.loadUserName();
-        viewModel.loadUserAvatar();
-        viewModel.loadLocations();
-        viewModel.loadRecommendations();
-        viewModel.loadMostSearchedLocation();
-        return viewModel;
-      },
+    return ChangeNotifierProvider<HomeViewModel>.value(
+      value: viewModel,
       child: Scaffold(
         body: Stack(
           children: [
             Positioned.fill(
-              child: CustomPaint(
-                painter: OvalsPainter(),
-              ),
+              child: CustomPaint(painter: OvalsPainterHome()),
             ),
             SafeArea(
               child: Padding(
@@ -36,152 +43,14 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Saludo y foto de perfil
-                    Consumer<HomeViewModel>(
-                      builder: (context, viewModel, child) {
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Hi, ${viewModel.userName}',
-                              style: const TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            CircleAvatar(
-                              radius: 24,
-                              backgroundImage: viewModel.avatarUrl != null
-                                  ? NetworkImage(viewModel.avatarUrl!)
-                                  : const AssetImage('assets/profile.jpg')
-                                      as ImageProvider,
-                            ),
-                          ],
-                        );
-                      },
-                    ),
+                    _buildHeader(),
                     const SizedBox(height: 16),
-
-                    // Barra de búsqueda
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: "Where to go?",
-                        filled: true,
-                        fillColor: Colors.white,
-                        prefixIcon: const Icon(Icons.search),
-                        suffixIcon: const Icon(Icons.filter_list),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Categorías
+                    const ChatWidget(),
+                    const SizedBox(height: 25),
                     const CategoryList(),
                     const SizedBox(height: 16),
-
-                    // ScrollView
                     Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Sección Most Popular
-                            const SectionHeader(
-                                title: "Most Popular",
-                                destinationScreen: SeeAllScreen()),
-                            SizedBox(
-                              height: 180,
-                              child: Consumer<HomeViewModel>(
-                                builder: (context, viewModel, child) {
-                                  final location =
-                                      viewModel.mostSearchedLocation;
-
-                                  if (location == null) {
-                                    return const SizedBox();
-                                  }
-
-                                  return PlaceCard(
-                                    imagePath: location['image_url'] ??
-                                        'assets/default_image.png',
-                                    title: location['location_name'] ??
-                                        'Unknown Location',
-                                    subtitle: location['description'] ??
-                                        'No description available',
-                                  );
-                                },
-                              ),
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // Sección Buildings
-                            const SectionHeader(
-                                title: "Buildings",
-                                destinationScreen: SeeAllScreen()),
-                            SizedBox(
-                              height: 180,
-                              child: Consumer<HomeViewModel>(
-                                builder: (context, viewModel, child) {
-                                  if (viewModel.locations.isEmpty) {
-                                    return const Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  }
-                                  return ListView(
-                                    scrollDirection: Axis.horizontal,
-                                    children:
-                                        viewModel.locations.map((location) {
-                                      return PlaceCard(
-                                        imagePath: location['image_url'],
-                                        title: location['name'],
-                                        subtitle: location['description'],
-                                      );
-                                    }).toList(),
-                                  );
-                                },
-                              ),
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // Sección Recommendations
-                            const SectionHeader(
-                                title: "Recommendations",
-                                destinationScreen: SeeAllScreen()),
-                            SizedBox(
-                              height: 180,
-                              child: Consumer<HomeViewModel>(
-                                builder: (context, viewModel, child) {
-                                  if (viewModel.recommendations.isEmpty) {
-                                    return const Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  }
-                                  return ListView(
-                                    scrollDirection: Axis.horizontal,
-                                    children: viewModel.recommendations
-                                        .map((recommendation) {
-                                      return PlaceCard(
-                                        imagePath: recommendation['image_url'],
-                                        title: recommendation['title'],
-                                        subtitle: recommendation['description'],
-                                        onTap: () {
-                                          viewModel.onRecommendationTap(
-                                              recommendation);
-                                        },
-                                      );
-                                    }).toList(),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: _buildContent(),
                     ),
                   ],
                 ),
@@ -189,6 +58,230 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Consumer<HomeViewModel>(
+      builder: (context, vm, child) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Hi, ${vm.userName}',
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const MainScreen(initialIndex: 4)),
+                );
+              },
+              child: CircleAvatar(
+                radius: 24,
+                backgroundImage: vm.avatarUrl != null
+                    ? CachedNetworkImageProvider(vm.avatarUrl!)
+                    : const AssetImage('assets/images/profile.jpg')
+                        as ImageProvider,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildContent() {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSection(
+            "Most Popular",
+            SeeAllScreen(contentType: "popular"),
+            (vm) => _buildHorizontalList(vm.mostSearchedLocations),
+            showSeeAll: false, // solo esto cambia
+          ),
+          _buildSection(
+            "Buildings",
+            SeeAllScreen(contentType: "building"),
+            (vm) => _buildHorizontalList(vm.locations),
+          ),
+          _buildSection(
+            "Events",
+            SeeAllScreen(contentType: "event"),
+            (vm) => _buildHorizontalList(vm.events),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSection(
+    String title,
+    Widget destinationScreen,
+    Widget Function(HomeViewModel) builder, {
+    bool showSeeAll = true, //
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(
+          title: title,
+          destinationScreen: destinationScreen,
+          showSeeAll: showSeeAll,
+        ),
+        Consumer<HomeViewModel>(
+          builder: (context, vm, child) {
+            return builder(vm);
+          },
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  Widget _buildHorizontalList(List<dynamic> items) {
+    if (items.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return SizedBox(
+      height: 180,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: items.map((item) {
+          String? subtitle;
+          String? block;
+
+          if (item['locations'] != null) {
+            subtitle = item['locations']['name'];
+            block = item['locations']['block'];
+          }
+          if (item['block'] != null && subtitle == null) {
+            subtitle = '';
+            block = item['block'];
+          }
+
+          return PlaceCard(
+            imagePath: item['image_url'] ?? 'assets/images/default_image.jpg',
+            subtitle: subtitle ?? '',
+            title: item['name'] ?? 'Unknown Location',
+            block: block,
+            onTap: () async {
+              if (item['type'] == 'building') {
+                final locationId = item['information_id'];
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailCard(
+                      id: locationId,
+                      type: CardType.building,
+                    ),
+                  ),
+                );
+              } else if (item['type'] == 'laboratory') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailCard(
+                      id: item['information_id'],
+                      type: CardType.laboratories,
+                    ),
+                  ),
+                );
+              } else if (item['type'] == 'access') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailCard(
+                      id: item['information_id'],
+                      type: CardType.access,
+                    ),
+                  ),
+                );
+              } else if (item['type'] == 'event') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailCard(
+                      id: item['information_id'],
+                      type: CardType.event,
+                    ),
+                  ),
+                );
+              } else if (item['type'] == 'library') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailCard(
+                      id: item['information_id'],
+                      type: CardType.library,
+                    ),
+                  ),
+                );
+              } else if (item['type'] == 'auditorium') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailCard(
+                      id: item['information_id'],
+                      type: CardType.auditorium,
+                    ),
+                  ),
+                );
+              } else if (item['location_id'] != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailCard(
+                      id: item['location_id'],
+                      type: CardType.building,
+                    ),
+                  ),
+                );
+              } else if (item['event_id'] != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailCard(
+                      id: item['event_id'],
+                      type: CardType.event,
+                    ),
+                  ),
+                );
+              } else if (item['laboratories_id'] != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailCard(
+                      id: item['laboratories_id'],
+                      type: CardType.laboratories,
+                    ),
+                  ),
+                );
+              } else if (item['access_id'] != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailCard(
+                      id: item['access_id'],
+                      type: CardType.access,
+                    ),
+                  ),
+                );
+              }
+            },
+          );
+        }).toList(),
       ),
     );
   }

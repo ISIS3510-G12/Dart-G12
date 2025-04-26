@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
-class TransparentOvalsPainter extends CustomPainter {
+
+class OvalsPainterHome extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
 
     final fixedWidth = 420.0;  
-    final fixedHeight = 400.0;  
+    final fixedHeight = 765.0;  
     final paint = Paint()..style = PaintingStyle.fill;
 
 
@@ -16,9 +17,9 @@ class TransparentOvalsPainter extends CustomPainter {
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        const Color(0xAAEA1D5D), 
-        const Color(0x882E1F54), 
-        const Color(0x55050F2C), 
+        const Color(0xFFEA1D5D), 
+        const Color(0xFF2E1F54), 
+        const Color(0xFF050F2C), 
       ],
     );
 
@@ -43,3 +44,4 @@ class TransparentOvalsPainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
+

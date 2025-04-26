@@ -1,7 +1,9 @@
+import 'package:dart_g12/presentation/views/started_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dart_g12/presentation/view_models/profile_view_model.dart';
 import '../widgets/ovals_painter.dart';
+import 'edit_profile.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -18,23 +20,25 @@ class ProfilePage extends StatelessWidget {
                 Positioned.fill(child: CustomPaint(painter: OvalsPainter())),
                 Column(
                   children: [
-                    const SizedBox(height: 50),
+                    const SizedBox(height: 70),
                     const Text(
                       'Account',
                       style: TextStyle(
-                          fontSize: 24,
+                          fontSize: 30,
                           fontWeight: FontWeight.bold,
                           color: Colors.white),
                     ),
-                    const SizedBox(height: 120),
+                    const SizedBox(height: 80),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       child: Row(
                         children: [
-                          const CircleAvatar(
-                            radius: 40,
-                            backgroundImage:
-                                NetworkImage('https://placekitten.com/200/200'),
+                          CircleAvatar(
+                            radius: 24,
+                            backgroundImage: viewModel.avatarUrl != null
+                                ? NetworkImage(viewModel.avatarUrl!)
+                                : const AssetImage('assets/images/profile.jpg')
+                                    as ImageProvider,
                           ),
                           const SizedBox(width: 15),
                           Column(
@@ -47,7 +51,8 @@ class ProfilePage extends StatelessWidget {
                               ),
                               const Text(
                                 'Student',
-                                style: TextStyle(fontSize: 14, color: Colors.grey),
+                                style:
+                                    TextStyle(fontSize: 14, color: Colors.grey),
                               ),
                             ],
                           ),
@@ -71,11 +76,29 @@ class ProfilePage extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                          _buildMenuItem(Icons.edit, 'Edit profile'),
-                          _buildMenuItem(Icons.language, 'Language'),
-                          _buildMenuItem(Icons.notifications, 'Notifications'),
-                          _buildMenuItem(Icons.logout, 'Sign out', 
-                            onTap: () => viewModel.logout()),
+                          _buildMenuItem(
+                            Icons.edit,
+                            'Edit profile',
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ProfileScreen()),
+                              );
+                            },
+                          ),
+                          _buildMenuItem(
+                            Icons.logout,
+                            'Sign out',
+                            onTap: () {
+                              viewModel.logout();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const WelcomePage()),
+                              );
+                            },
+                          ),
                         ],
                       ),
                     ),

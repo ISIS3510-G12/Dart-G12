@@ -1,25 +1,47 @@
 import 'package:flutter/material.dart';
 
-// Clase para dibujar los círculos
+
 class OvalsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint = Paint()..style = PaintingStyle.fill;
-    List<Color> colors = [ const Color(0xFFEA1D5D), const Color(0xFF2E1F54),const Color(0xFF050F2C)];
-    List<double> yPositions = [-25,-75,-115];
-    List<double> rotations = [0, 0, 0.4]; // Ángulos de rotación en radianes
-    List<double> opacities = [1.0, 1.0, 1.0]; // Opacidad al máximo para evitar mezcla
+
+    final fixedWidth = 420.0;  
+    final fixedHeight = 500.0;  
+    final paint = Paint()..style = PaintingStyle.fill;
+
+
+    final Rect rect = Rect.fromLTWH(0, 0, fixedWidth, fixedHeight);
     
-    for (int i = 0; i < colors.length; i++) {
-      paint.color = colors[i].withOpacity(opacities[i]);
-      canvas.save();
-      canvas.translate(size.width / 2, yPositions[i]);
-      canvas.rotate(rotations[i]);
-      canvas.drawOval(Rect.fromCenter(center: Offset(0, 0), width: 504, height: 418), paint);
-      canvas.restore();
-    }
+
+    final Gradient gradient = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        const Color(0xFFEA1D5D), 
+        const Color(0xFF2E1F54), 
+        const Color(0xFF050F2C), 
+      ],
+    );
+
+    paint.shader = gradient.createShader(rect);
+
+    final path = Path();
+    path.lineTo(0, fixedHeight * 0.25); 
+    path.quadraticBezierTo(
+      fixedWidth * 0.2, fixedHeight * 0.4, 
+      fixedWidth * 0.5, fixedHeight * 0.3,
+    );
+    path.quadraticBezierTo(
+      fixedWidth * 0.8, fixedHeight * 0.2, 
+      fixedWidth, fixedHeight * 0.3,
+    );
+    path.lineTo(fixedWidth, 0);
+    path.close();
+
+    canvas.drawPath(path, paint);
   }
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
+

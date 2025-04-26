@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class PlaceCard extends StatelessWidget {
   final String imagePath;
   final String title;
   final String subtitle;
-  final VoidCallback? onTap; // Agregamos el callback opcional
+  final String? block; // 👈 NUEVO: subtítulo opcional
+  final VoidCallback? onTap;
 
   const PlaceCard({
     required this.imagePath,
     required this.title,
     required this.subtitle,
-    this.onTap, // parámetro opcional
+    this.block, // 👈 parámetro opcional
+    this.onTap,
     super.key,
   });
 
@@ -19,7 +22,7 @@ class PlaceCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 8.0),
       child: GestureDetector(
-        onTap: onTap, // Ejecuta el callback al tocar la tarjeta
+        onTap: onTap,
         child: Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -29,30 +32,20 @@ class PlaceCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Imagen
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                  child: Image.network(
-                    imagePath, // Carga la imagen desde la URL
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(12)),
+                  child: CachedNetworkImage(
+                    imageUrl: imagePath,
+                    placeholder: (context, url) =>
+                        const Center(child: CircularProgressIndicator()),
+                    errorWidget: (context, url, error) => Image.asset(
+                      'assets/images/default_image.jpg',
+                      fit: BoxFit.cover,
+                    ),
                     fit: BoxFit.cover,
                     height: 100,
                     width: 150,
-                    loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                      if (loadingProgress == null) {
-                        return child;
-                      } else {
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
-                                : null,
-                          ),
-                        );
-                      }
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Center(child: Icon(Icons.error)); // Muestra un icono de error si falla la carga
-                    },
                   ),
                 ),
                 Padding(
@@ -60,20 +53,31 @@ class PlaceCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Título
                       Text(
                         title,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      // Subtítulo
                       Text(
                         subtitle,
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
-                        maxLines: 2,
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize: 12,
+                        ),
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      if (block != null && block!.isNotEmpty)
+                        Text(
+                          'Bloque: $block', // Mostrar "Bloque: " y luego el block
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                     ],
                   ),
                 ),
@@ -85,3 +89,4 @@ class PlaceCard extends StatelessWidget {
     );
   }
 }
+

@@ -1,5 +1,4 @@
 import 'package:dart_g12/presentation/view_models/auth_gate.dart';
-import 'package:dart_g12/presentation/views/login_page.dart';
 import 'package:flutter/material.dart';
 
 class WelcomePage extends StatelessWidget {
@@ -14,25 +13,6 @@ class WelcomePage extends StatelessWidget {
             child: Image.asset(
               "assets/images/andes.jpg", // Asegúrate de tener esta imagen
               fit: BoxFit.cover,
-            ),
-          ),
-          Positioned(
-            top: 60,
-            right: 20,
-            child: DropdownButton<String>(
-              value: 'English',
-              items: const [
-                DropdownMenuItem(
-                  value: 'English',
-                  child: Text('English', style: TextStyle(color: Colors.white)),
-                ),
-                DropdownMenuItem(
-                  value: 'Español',
-                  child: Text('Español', style: TextStyle(color: Colors.white)),
-                ),
-              ],
-              onChanged: (value) {},
-              dropdownColor: Colors.black,
             ),
           ),
           Positioned(

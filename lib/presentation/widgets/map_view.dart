@@ -26,6 +26,7 @@ class MapView extends StatelessWidget {
       circles: circles,
       onMapCreated: onMapCreated,
       myLocationEnabled: true,
+      minMaxZoomPreference: const MinMaxZoomPreference(17.5,20),
     );
   }
 }
