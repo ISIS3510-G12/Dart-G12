@@ -5,9 +5,6 @@ import 'package:dart_g12/presentation/views/main_screen.dart';
 class ProfileViewModel extends ChangeNotifier {
   final AuthService _authService = AuthService();
 
-  int _selectedIndex = 4;
-  
-  int get selectedIndex => _selectedIndex;
 
   String? currentUsername;
   String? avatarUrl;
@@ -36,15 +33,5 @@ class ProfileViewModel extends ChangeNotifier {
     }
   }
 
-  void onItemTapped(BuildContext context, int index) {
-    _selectedIndex = index;
-    notifyListeners();
-    Navigator.popUntil(context, (route) => route.isFirst);
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MainScreen(initialIndex: index),
-      ),
-    );
-  }
+
 }

@@ -16,7 +16,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   late EditProfile _profile;
-  final ProfileViewModel viewModel = ProfileViewModel();
 
   @override
   void initState() {
@@ -173,8 +172,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
       bottomNavigationBar: BottomNavbar(
-        currentIndex: viewModel.selectedIndex,
-        onTap: (index) => viewModel.onItemTapped(context, index),
+        currentIndex: _profile.selectedIndex,
+        onTap: (index) => _profile.onItemTapped(context, index),
       ),
     );
   }

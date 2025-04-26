@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dart_g12/data/services/supabase_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:dart_g12/presentation/views/main_screen.dart';
 
 class EditProfile with ChangeNotifier {
   final _supabase = SupabaseService().client;
@@ -9,7 +10,10 @@ class EditProfile with ChangeNotifier {
   String _lastName = '';
   String _email = '';
   String _avatarUrl = '';
-
+  int _selectedIndex = 4;
+  
+  
+  int get selectedIndex => _selectedIndex;
   String get name => _name;
   String get lastName => _lastName;
   String get email => _email;
@@ -60,5 +64,17 @@ class EditProfile with ChangeNotifier {
   // Actualizar los metadatos del usuario en Supabase
   Future<void> _updateUserMetadata(Map<String, dynamic> data) async {
     await _supabase.auth.updateUser(UserAttributes(data: data));
+  }
+
+  void onItemTapped(BuildContext context, int index) {
+    _selectedIndex = index;
+    notifyListeners();
+    Navigator.popUntil(context, (route) => route.isFirst);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MainScreen(initialIndex: index),
+      ),
+    );
   }
 }
