@@ -4,9 +4,11 @@ import 'package:dart_g12/data/services/supabase_service.dart';
 import 'package:dart_g12/data/services/local_storage_service.dart';
 import 'dart:async';
 
+/// Helper to parse a dynamic list into a typed List<Map>.
 List<Map<String, dynamic>> _parseList(List<dynamic> response) {
   return List<Map<String, dynamic>>.from(response);
 }
+
 
 class HomeRepository {
   final supabase = SupabaseService().client;
@@ -19,7 +21,7 @@ class HomeRepository {
     try {
       cached = await _cache.fetch('locations');
     } catch (e) {
-      log('Error leyendo cache locations: $e');
+      log('Error leyendo cache locations: \$e');
     }
 
     if (cached.isEmpty) {
@@ -32,11 +34,11 @@ class HomeRepository {
         await _cache.save('locations', parsed);
         return parsed;
       } catch (e) {
-        log('Error fetching locations from network: $e');
+        log('Error fetching locations from network: \$e');
         return cached;
       }
     } else {
-      // Hay cache: lo devolvemos y refrescamos en segundo plano
+      // Return cache immediately and refresh in background
       unawaited(_fetchAndCacheLocations());
       return cached;
     }
@@ -51,7 +53,7 @@ class HomeRepository {
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('locations', parsed);
     } catch (e) {
-      log('Error fetching locations from network (background): $e');
+      log('Error fetching locations from network (background): \$e');
     }
   }
 
@@ -60,7 +62,7 @@ class HomeRepository {
     try {
       cached = await _cache.fetch('mostSearchedLocations');
     } catch (e) {
-      log('Error leyendo cache most searched: $e');
+      log('Error leyendo cache most searched: \$e');
     }
 
     if (cached.isEmpty) {
@@ -73,7 +75,7 @@ class HomeRepository {
         await _cache.save('mostSearchedLocations', parsed);
         return parsed;
       } catch (e) {
-        log('Error fetching most searched from network: $e');
+        log('Error fetching most searched from network: \$e');
         return cached;
       }
     } else {
@@ -91,7 +93,7 @@ class HomeRepository {
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('mostSearchedLocations', parsed);
     } catch (e) {
-      log('Error fetching most searched from network (background): $e');
+      log('Error fetching most searched from network (background): \$e');
     }
   }
 
@@ -100,7 +102,7 @@ class HomeRepository {
     try {
       cached = await _cache.fetch('laboratories');
     } catch (e) {
-      log('Error leyendo cache laboratories: $e');
+      log('Error leyendo cache laboratories: \$e');
     }
 
     if (cached.isEmpty) {
@@ -113,7 +115,7 @@ class HomeRepository {
         await _cache.save('laboratories', parsed);
         return parsed;
       } catch (e) {
-        log('Error fetching laboratories from network: $e');
+        log('Error fetching laboratories from network: \$e');
         return cached;
       }
     } else {
@@ -131,7 +133,7 @@ class HomeRepository {
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('laboratories', parsed);
     } catch (e) {
-      log('Error fetching laboratories from network (background): $e');
+      log('Error fetching laboratories from network (background): \$e');
     }
   }
 
@@ -140,7 +142,7 @@ class HomeRepository {
     try {
       cached = await _cache.fetch('accesses');
     } catch (e) {
-      log('Error leyendo cache accesses: $e');
+      log('Error leyendo cache accesses: \$e');
     }
 
     if (cached.isEmpty) {
@@ -153,7 +155,7 @@ class HomeRepository {
         await _cache.save('accesses', parsed);
         return parsed;
       } catch (e) {
-        log('Error fetching accesses from network: $e');
+        log('Error fetching accesses from network: \$e');
         return cached;
       }
     } else {
@@ -171,11 +173,19 @@ class HomeRepository {
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('accesses', parsed);
     } catch (e) {
-      log('Error fetching accesses from network (background): $e');
+      log('Error fetching accesses from network (background): \$e');
     }
   }
 
-  // ✅ Combinamos todo
+  Future<Map<String, List<Map<String, dynamic>>>> fetchEverythingInBackground(
+    dynamic _) async {
+  final repo = HomeRepository();
+  return await repo.fetchAllData();
+}
+
+
+  /// Combines all fetch methods into one.
+  /// NOTE: To run this on a background isolate, call via compute().
   Future<Map<String, List<Map<String, dynamic>>>> fetchAllData() async {
     final results = await Future.wait([
       fetchLocations(),
@@ -191,4 +201,10 @@ class HomeRepository {
       'access': results[3],
     };
   }
+}
+
+
+Future<Map<String, List<Map<String, dynamic>>>> fetchAllDataIsolate(
+    dynamic _) async {
+  return await HomeRepository().fetchAllData();
 }

@@ -3,6 +3,7 @@ import 'package:dart_g12/data/services/local_storage_service.dart';
 import 'dart:developer';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'dart:developer';
 
 
 List<Map<String, dynamic>> parseList(List<dynamic> response) {
@@ -119,7 +120,7 @@ Future<List<Map<String, dynamic>>> fetchNodesByIds(List<int> nodeIds) async {
       }
     }
   } catch (e) {
-    print("Error al obtener los nodos: $e");
+    log("Error al obtener los nodos: $e");
   }
 
   return nodes;

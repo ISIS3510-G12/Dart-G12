@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../data/services/auth_service.dart';
 import '../../data/repositories/home_repository.dart';
-import '../../data/services/analytics_service.dart';
 import 'dart:developer';
 
 class HomeViewModel extends ChangeNotifier {
-  late final AuthService _authService;
-  late final HomeRepository _homeRepository;
+  final AuthService _authService = AuthService();
+  final HomeRepository _homeRepository = HomeRepository();
 
   String _userName = "Guest";
   String? _avatarUrl;
@@ -14,7 +13,8 @@ class HomeViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> _mostSearchedLocations = [];
   List<Map<String, dynamic>> _laboratories = []; 
   List<Map<String, dynamic>> _access = [];
-
+  bool _isLoading = false;
+  String? _error;
 
   String get userName => _userName;
   String? get avatarUrl => _avatarUrl;
@@ -22,47 +22,74 @@ class HomeViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> get mostSearchedLocations => _mostSearchedLocations;
   List<Map<String, dynamic>> get laboratories => _laboratories; 
   List<Map<String, dynamic>> get access => _access; 
+  bool get isLoading => _isLoading;
+  String? get error => _error;
 
   HomeViewModel() {
-    _authService = AuthService();
-    _homeRepository = HomeRepository();
     _initialize();
   }
 
   void _initialize() {
-    loadUserName();
-    loadUserAvatar();
-    loadAllData();
+    _loadUserData();
+    _loadAllData();
   }
 
-  void loadUserName() {
-    final fullName = _authService.getCurrentUsername();
-    if (fullName != null && fullName.isNotEmpty) {
-      _userName = fullName.split(' ')[0];
-      notifyListeners();
-    }
-  }
-
-  void loadUserAvatar() {
-    final avatar = _authService.getUserAvatar();
-    if (avatar != null && avatar.isNotEmpty) {
-      _avatarUrl = avatar;
-      notifyListeners();
-    }
-  }
-
-  Future<void> loadAllData() async {
-    try {
-      final data = await _homeRepository.fetchAllData();
-      _locations = data['locations'] ?? [];
-      _mostSearchedLocations = data['mostSearched'] ?? [];
-      _laboratories = data['laboratories'] ?? [];
-      _access = data['access'] ?? []; 
-    } catch (error) {
-      log('Error cargando los datos del home: $error');
-    }
+  void _loadUserData() {
+    _userName = _authService.getCurrentUsername()?.split(' ').first ?? "Guest";
+    _avatarUrl = _authService.getUserAvatar();
     notifyListeners();
   }
 
-}
+  Future<void> _loadAllData() async {
+    _startLoading();
+    try {
+      final data = await _homeRepository.fetchAllData();
+      _updateData(data);
+      _clearError();
+    } catch (error, stackTrace) {
+      log('Error loading home data', error: error, stackTrace: stackTrace);
+      _setError('Error loading data. Please try again later.');
+    } finally {
+      _stopLoading();
+    }
+  }
 
+  void _startLoading() {
+    _isLoading = true;
+    notifyListeners();
+  }
+
+  void _stopLoading() {
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  void _updateData(Map<String, List<Map<String, dynamic>>> data) {
+    _locations = data['locations'] ?? [];
+    _mostSearchedLocations = data['mostSearched'] ?? [];
+    _laboratories = data['laboratories'] ?? [];
+    _access = data['access'] ?? [];
+    notifyListeners();
+  }
+
+  void _setError(String message) {
+    _error = message;
+    notifyListeners();
+  }
+
+  void _clearError() {
+    _error = null;
+    notifyListeners();
+  }
+
+  Future<void> refreshData() async {
+    await _homeRepository.fetchEverythingInBackground(null);
+    await _loadAllData();
+  }
+
+  // Métodos adicionales para operaciones específicas
+  Future<void> updateUserProfile() async {
+    _loadUserData();
+    notifyListeners();
+  }
+}

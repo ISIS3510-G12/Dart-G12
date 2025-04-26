@@ -41,7 +41,7 @@ class AuditoriumRepository {
     try {
       final response = await supabase
           .from('auditoriums')
-          .select('auditorium_id, name, location_id,image_url');
+          .select('auditorium_id, name, location_id, image_url');
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('auditoriums', parsed);
     } catch (e) {
@@ -77,7 +77,7 @@ class AuditoriumRepository {
     try {
       final response = await supabase
           .from('auditoriums')
-          .select('auditorium_id, name, location_id,image_url')
+          .select('auditorium_id, name, location_id, image_url')
           .eq('auditorium_id', id)
           .maybeSingle();
       if (response != null) {
@@ -95,7 +95,7 @@ class AuditoriumRepository {
     try {
       cached = await _cache.fetch(cacheKey);
     } catch (e) {
-      log('Error leyendo cache auditoriums por ubicación ($locationId): $e');
+      log('Error leyendo cache de auditoriums por ubicación ($locationId): $e');
     }
 
     if (cached.isEmpty) {
@@ -103,7 +103,7 @@ class AuditoriumRepository {
       try {
         cached = await _cache.fetch(cacheKey);
       } catch (e) {
-        log('Error releyendo cache auditoriums por ubicación ($locationId): $e');
+        log('Error releyendo cache de auditoriums por ubicación ($locationId): $e');
       }
     } else {
       unawaited(_fetchAndCacheAuditoriumsByLocation(locationId, cacheKey));
@@ -124,4 +124,6 @@ class AuditoriumRepository {
       log('Error al obtener auditoriums por ubicación desde red ($locationId): $e');
     }
   }
+
+
 }
