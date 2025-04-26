@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dart_g12/presentation/view_models/profile_view_model.dart';
 import '../widgets/ovals_painter.dart';
+import 'edit_profile.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -32,13 +33,13 @@ class ProfilePage extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       child: Row(
                         children: [
-                            CircleAvatar(
-                              radius: 24,
-                              backgroundImage: viewModel.avatarUrl != null
-                                  ? NetworkImage(viewModel.avatarUrl!)
-                                  : const AssetImage('assets/images/profile.jpg')
-                                      as ImageProvider,
-                            ),
+                          CircleAvatar(
+                            radius: 24,
+                            backgroundImage: viewModel.avatarUrl != null
+                                ? NetworkImage(viewModel.avatarUrl!)
+                                : const AssetImage('assets/images/profile.jpg')
+                                    as ImageProvider,
+                          ),
                           const SizedBox(width: 15),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,7 +51,8 @@ class ProfilePage extends StatelessWidget {
                               ),
                               const Text(
                                 'Student',
-                                style: TextStyle(fontSize: 14, color: Colors.grey),
+                                style:
+                                    TextStyle(fontSize: 14, color: Colors.grey),
                               ),
                             ],
                           ),
@@ -74,16 +76,29 @@ class ProfilePage extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                          _buildMenuItem(Icons.edit, 'Edit profile'),
-                          _buildMenuItem(Icons.logout, 'Sign out', 
+                          _buildMenuItem(
+                            Icons.edit,
+                            'Edit profile',
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ProfileScreen()),
+                              );
+                            },
+                          ),
+                          _buildMenuItem(
+                            Icons.logout,
+                            'Sign out',
                             onTap: () {
                               viewModel.logout();
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const WelcomePage()
-                                )
-                                );
-                            }),
+                                MaterialPageRoute(
+                                    builder: (context) => const WelcomePage()),
+                              );
+                            },
+                          ),
                         ],
                       ),
                     ),

@@ -1,10 +1,12 @@
 import 'package:dart_g12/data/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:dart_g12/data/services/auth_service.dart';
+import 'package:dart_g12/presentation/views/main_screen.dart';
 
 class ProfileViewModel extends ChangeNotifier {
   final AuthService _authService = AuthService();
-  
+
+
   String? currentUsername;
   String? avatarUrl;
 
@@ -36,4 +38,6 @@ class ProfileViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+
 }
