@@ -59,12 +59,12 @@ class _FilterScreenState extends State<FilterScreen> {
 
                   // Filtros específicos
                   if (widget.contentType == 'building') _buildBlockFilter(viewModel),
-                  if (widget.contentType == 'event') _buildEventFilters(viewModel),
-                  if (widget.contentType == 'laboratory' ||
-                      widget.contentType == 'access' ||
-                      widget.contentType == 'auditorium' ||
-                      widget.contentType == 'library')
-                    _buildLocationFilter(viewModel),
+                  //if (widget.contentType == 'event') _buildEventFilters(viewModel),
+                  //if (widget.contentType == 'laboratory' ||
+                      //widget.contentType == 'access' ||
+                      //widget.contentType == 'auditorium' ||
+                      //widget.contentType == 'library')
+                    //_buildLocationFilter(viewModel),
 
                   const Spacer(),
 
@@ -108,19 +108,19 @@ class _FilterScreenState extends State<FilterScreen> {
       children: [
         const Text('Filter by Block', style: TextStyle(color: Colors.black)),
         const SizedBox(height: 8),
-        DropdownButton<String>(
-          value: vm.selectedBlock,
-          hint: const Text('Select Block'),
-          isExpanded: true,
+        TextField(
+          decoration: const InputDecoration(
+            hintText: 'Block name (ML)',
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(),
+          ),
           onChanged: vm.setSelectedBlock,
-          dropdownColor: Colors.white,
-          items: <String>['Block 1', 'Block 2', 'Block 3']
-              .map((b) => DropdownMenuItem(value: b, child: Text(b)))
-              .toList(),
         ),
       ],
     );
   }
+
 
   Widget _buildEventFilters(SeeAllViewModel vm) {
     return Column(

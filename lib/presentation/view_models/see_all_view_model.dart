@@ -239,6 +239,7 @@ void filterByDate(DateTime startDate, DateTime endDate) {
 
 void setSelectedBlock(String? block) {
   _selectedBlock = block;
+  filterByBlock(block!);
   notifyListeners();
 }
 void setSelectedLocation(String? location) {
@@ -265,6 +266,20 @@ void clearFilters() {
 String formatDate(DateTime date) {
   return "${date.day}/${date.month}/${date.year}";
 }
+
+  void filterByBlock(String block) {
+    if (block.trim().isEmpty) {
+      _items = List.from(_allItems);  // Si no hay filtro, mostrar todos los elementos
+    } else {
+      final b = block.toLowerCase();
+      _items = _allItems.where((item) {
+        final itemBlock = (item['block'] ?? '').toString().toLowerCase();
+        return itemBlock.contains(b);  // Compara el valor del bloque
+      }).toList();
+    }
+    notifyListeners();
+  }
+
 
 
 }
