@@ -115,14 +115,9 @@ class _HomeScreenState extends State<HomeScreen> {
             (vm) => _buildHorizontalList(vm.locations),
           ),
           _buildSection(
-            "Laboratories",
-            SeeAllScreen(contentType: "laboratory"),
-            (vm) => _buildHorizontalList(vm.laboratories),
-          ),
-          _buildSection(
-            "Access points",
-            SeeAllScreen(contentType: "access"),
-            (vm) => _buildHorizontalList(vm.access),
+            "Events",
+            SeeAllScreen(contentType: "event"),
+            (vm) => _buildHorizontalList(vm.events),
           ),
         ],
       ),
@@ -233,14 +228,33 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 );
-              }
-              else if (item['location_id'] != null) {
+              } else if (item['type'] == 'auditorium') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailCard(
+                      id: item['information_id'],
+                      type: CardType.auditorium,
+                    ),
+                  ),
+                );
+              } else if (item['location_id'] != null) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => DetailCard(
                       id: item['location_id'],
                       type: CardType.building,
+                    ),
+                  ),
+                );
+              } else if (item['event_id'] != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DetailCard(
+                      id: item['event_id'],
+                      type: CardType.event,
                     ),
                   ),
                 );

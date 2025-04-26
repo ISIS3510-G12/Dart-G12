@@ -9,7 +9,6 @@ List<Map<String, dynamic>> _parseList(List<dynamic> response) {
   return List<Map<String, dynamic>>.from(response);
 }
 
-
 class HomeRepository {
   final supabase = SupabaseService().client;
   final LocalStorageService _cache = LocalStorageService();
@@ -69,7 +68,7 @@ class HomeRepository {
       try {
         final response = await supabase
             .from('most_popular_user_interactions')
-            .select('name, description, image_url, type, information_id, block') 
+            .select('name, description, image_url, type, information_id, block')
             .limit(10);
         final parsed = await compute(_parseList, response as List<dynamic>);
         await _cache.save('mostSearchedLocations', parsed);
@@ -88,7 +87,7 @@ class HomeRepository {
     try {
       final response = await supabase
           .from('most_popular_user_interactions')
-          .select('name, description, image_url, type, information_id, block') 
+          .select('name, description, image_url, type, information_id, block')
           .limit(10);
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save('mostSearchedLocations', parsed);
@@ -178,17 +177,58 @@ class HomeRepository {
   }
 
   Future<Map<String, List<Map<String, dynamic>>>> fetchEverythingInBackground(
-    dynamic _) async {
-  final repo = HomeRepository();
-  return await repo.fetchAllData();
-}
+      dynamic _) async {
+    final repo = HomeRepository();
+    return await repo.fetchAllData();
+  }
 
+  Future<List<Map<String, dynamic>>> fetchEvents() async {
+    List<Map<String, dynamic>> cached = [];
+    try {
+      cached = await _cache.fetch('events');
+    } catch (e) {
+      log('Error leyendo cache events: \$e');
+    }
 
-  /// Combines all fetch methods into one.
-  /// NOTE: To run this on a background isolate, call via compute().
+    if (cached.isEmpty) {
+      try {
+        final response = await supabase
+            .from('events')
+            .select(
+                'event_id, name, image_url, locations (name, block)')
+            .limit(10);
+        final parsed = await compute(_parseList, response as List<dynamic>);
+        await _cache.save('events', parsed);
+        return parsed;
+      } catch (e) {
+        log('Error fetching events from network: \$e');
+        return cached;
+      }
+    } else {
+      // Return cache immediately and refresh in background
+      unawaited(_fetchAndCacheEvents());
+      return cached;
+    }
+  }
+
+  Future<void> _fetchAndCacheEvents() async {
+    try {
+      final response = await supabase
+          .from('events')
+          .select(
+              'event_id, name, image_url, locations (name, block)')
+          .limit(10);
+      final parsed = await compute(_parseList, response as List<dynamic>);
+      await _cache.save('events', parsed);
+    } catch (e) {
+      log('Error fetching events from network (background): \$e');
+    }
+  }
+
   Future<Map<String, List<Map<String, dynamic>>>> fetchAllData() async {
     final results = await Future.wait([
       fetchLocations(),
+      fetchEvents(),
       fetchMostSearchedLocations(),
       fetchLaboratories(),
       fetchAccess(),
@@ -196,13 +236,13 @@ class HomeRepository {
 
     return {
       'locations': results[0],
-      'mostSearched': results[1],
-      'laboratories': results[2],
-      'access': results[3],
+      'events': results[1],
+      'mostSearched': results[2],
+      'laboratories': results[3],
+      'access': results[4],
     };
   }
 }
-
 
 Future<Map<String, List<Map<String, dynamic>>>> fetchAllDataIsolate(
     dynamic _) async {

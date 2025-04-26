@@ -10,8 +10,9 @@ class HomeViewModel extends ChangeNotifier {
   String _userName = "Guest";
   String? _avatarUrl;
   List<Map<String, dynamic>> _locations = [];
+  List<Map<String, dynamic>> _events = [];
   List<Map<String, dynamic>> _mostSearchedLocations = [];
-  List<Map<String, dynamic>> _laboratories = []; 
+  List<Map<String, dynamic>> _laboratories = [];
   List<Map<String, dynamic>> _access = [];
   bool _isLoading = false;
   String? _error;
@@ -19,9 +20,10 @@ class HomeViewModel extends ChangeNotifier {
   String get userName => _userName;
   String? get avatarUrl => _avatarUrl;
   List<Map<String, dynamic>> get locations => _locations;
-  List<Map<String, dynamic>> get mostSearchedLocations => _mostSearchedLocations;
-  List<Map<String, dynamic>> get laboratories => _laboratories; 
-  List<Map<String, dynamic>> get access => _access; 
+  List<Map<String, dynamic>> get events => _events;
+  List<Map<String, dynamic>> get mostSearchedLocations =>_mostSearchedLocations;
+  List<Map<String, dynamic>> get laboratories => _laboratories;
+  List<Map<String, dynamic>> get access => _access;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -66,6 +68,7 @@ class HomeViewModel extends ChangeNotifier {
 
   void _updateData(Map<String, List<Map<String, dynamic>>> data) {
     _locations = data['locations'] ?? [];
+    _events = data['events'] ?? [];
     _mostSearchedLocations = data['mostSearched'] ?? [];
     _laboratories = data['laboratories'] ?? [];
     _access = data['access'] ?? [];

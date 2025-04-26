@@ -5,8 +5,9 @@ import 'package:dart_g12/presentation/view_models/card_detail_view_model.dart';
 import 'package:dart_g12/presentation/widgets/transparent_ovals_painter.dart';
 import 'package:dart_g12/presentation/widgets/bottom_navbar.dart';
 import 'package:dart_g12/presentation/widgets/place_card.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-enum CardType { event, building, laboratories, access, auditorium, library}
+enum CardType { event, building, laboratories, access, auditorium, library }
 
 class DetailCard extends StatefulWidget {
   final int id;
@@ -29,7 +30,6 @@ class _DetailCardState extends State<DetailCard> {
     _loadData();
   }
 
-
   Future<void> _loadData() async {
     switch (widget.type) {
       case CardType.event:
@@ -45,17 +45,17 @@ class _DetailCardState extends State<DetailCard> {
         await viewModel.fetchAccessDetails(widget.id);
         break;
       case CardType.auditorium:
-        await viewModel.fetchAuditoriumDetails(widget.id); 
+        await viewModel.fetchAuditoriumDetails(widget.id);
         break;
       case CardType.library:
-        await viewModel.fetchLibraryDetails(widget.id); 
+        await viewModel.fetchLibraryDetails(widget.id);
         break;
     }
     isFavorite = await viewModel.isFavorite(widget.id.toString());
     setState(() {});
   }
 
- Map<String, dynamic> _prepareFavoriteItem() {
+  Map<String, dynamic> _prepareFavoriteItem() {
     switch (widget.type) {
       case CardType.event:
         final e = viewModel.event ?? {};
@@ -66,6 +66,7 @@ class _DetailCardState extends State<DetailCard> {
           'title': e['name'] ?? '',
           'image': e['image_url'],
           'start_time': e['start_time'],
+          'block': e['locations']?['block'],
         };
       case CardType.building:
         final b = viewModel.building ?? {};
@@ -78,9 +79,8 @@ class _DetailCardState extends State<DetailCard> {
           'block': b['block'],
         };
       case CardType.laboratories:
-        final l = viewModel.laboratories.isNotEmpty
-            ? viewModel.laboratories[0]
-            : {};
+        final l =
+            viewModel.laboratories.isNotEmpty ? viewModel.laboratories[0] : {};
         return {
           ...l,
           'type': 'laboratories',
@@ -90,9 +90,7 @@ class _DetailCardState extends State<DetailCard> {
           'block': l['locations']?['block'],
         };
       case CardType.access:
-        final a = viewModel.access.isNotEmpty
-            ? viewModel.access[0]
-            : {};
+        final a = viewModel.access.isNotEmpty ? viewModel.access[0] : {};
         return {
           ...a,
           'type': 'access',
@@ -102,26 +100,25 @@ class _DetailCardState extends State<DetailCard> {
           'block': a['locations']?['block'],
         };
       case CardType.auditorium:
-        final au = viewModel.autorium.isNotEmpty
-            ? viewModel.autorium[0]
-            : {};
+        final au = viewModel.autorium.isNotEmpty ? viewModel.autorium[0] : {};
         return {
           ...au,
           'type': 'auditorium',
           'auditorium_id': widget.id,
           'name': au['name'] ?? '',
           'image': au['image_url'],
+          'block': au['locations']?['block'],
+
         };
       case CardType.library:
-        final lib = viewModel.library.isNotEmpty
-            ? viewModel.library[0]
-            : {};
+        final lib = viewModel.library.isNotEmpty ? viewModel.library[0] : {};
         return {
           ...lib,
           'type': 'library',
           'library_id': widget.id,
           'name': lib['name'] ?? '',
           'image': lib['image_url'],
+          'block': lib['locations']?['block'],
         };
     }
   }
@@ -151,7 +148,8 @@ class _DetailCardState extends State<DetailCard> {
       body: Stack(
         children: [
           _buildHeaderImage(imageUrl, isEvent),
-          Positioned.fill(child: CustomPaint(painter: TransparentOvalsPainter())),
+          Positioned.fill(
+              child: CustomPaint(painter: TransparentOvalsPainter())),
           _buildTitle(title),
           Positioned(
               top: isEvent ? 220 : 200, left: 16, child: _buildActionButtons()),
@@ -200,7 +198,6 @@ class _DetailCardState extends State<DetailCard> {
         return {
           'image': au?['image_url'],
           'title': au?['name'] ?? '',
-
         };
       case CardType.library:
         final lib = viewModel.library.isNotEmpty ? viewModel.library[0] : null;
@@ -212,6 +209,7 @@ class _DetailCardState extends State<DetailCard> {
   }
 
   Widget _buildHeaderImage(String? imageUrl, bool isEvent) {
+    final String defaultImage = 'assets/images/default_image.jpg';
     return Positioned(
       top: 0,
       left: 0,
@@ -221,14 +219,16 @@ class _DetailCardState extends State<DetailCard> {
         decoration: BoxDecoration(
           color: Colors.grey[300],
         ),
-        child: imageUrl != null
+        child: imageUrl != null && imageUrl.isNotEmpty
             ? CachedNetworkImage(
                 imageUrl: imageUrl,
                 fit: BoxFit.cover,
-                placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
+                placeholder: (context, url) =>
+                    const Center(child: CircularProgressIndicator()),
+                errorWidget: (context, url, error) =>
+                    Image.asset(defaultImage, fit: BoxFit.cover),
               )
-            : null,
+            : Image.asset(defaultImage, fit: BoxFit.cover),
       ),
     );
   }
@@ -263,10 +263,9 @@ class _DetailCardState extends State<DetailCard> {
         ),
         const SizedBox(width: 12),
         _ActionButton(
-          icon: isFavorite ? Icons.favorite : Icons.favorite_border,
-          label: isFavorite ? 'Favorited' : 'Favorites',
-          onTap: _toggleFavorite
-        ),
+            icon: isFavorite ? Icons.favorite : Icons.favorite_border,
+            label: isFavorite ? 'Favorited' : 'Favorites',
+            onTap: _toggleFavorite),
       ],
     );
   }
@@ -332,13 +331,18 @@ class ContentSection extends StatelessWidget {
                     : type == CardType.auditorium
                         ? auditorium.first
                         : library.first;
-                        
 
     final Map<String, dynamic>? location = data?['locations'];
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        if (location?['name'] != null)
+          _buildTextBlock('Location:', location!['name']),
+        if (location?['block'] != null && type != CardType.laboratories)
+          _buildTextBlock('Block:', location!['block']),
+        if (data?["location"] != null)
+          _buildTextBlock('Classroom:', data!['location']),
         if (type == CardType.event &&
             event?['start_time'] != null &&
             event?['end_time'] != null)
@@ -350,12 +354,6 @@ class ContentSection extends StatelessWidget {
           _buildTextBlock('Address:', data!['address']),
         if (data?['opening_hours'] != null)
           _buildTextBlock('Opening Hours:', data!['opening_hours']),
-        if(location?['name'] != null)
-          _buildTextBlock('Location:', location!['name']),
-        if (location?['block'] != null)
-          _buildTextBlock('Block:', location!['block']),
-        if(data?["location"] !=null)
-          _buildTextBlock('Location:', data!['location']),
         // Mostrar Laboratorios si existen
         if (labs.isNotEmpty && type != CardType.laboratories) ...[
           const SizedBox(height: 16),
@@ -400,7 +398,7 @@ class ContentSection extends StatelessWidget {
                   },
                   child: PlaceCard(
                     imagePath:
-                        lab['url_image'] ?? 'assets/images/default_image.jpg',
+                        lab['image_url'] ?? 'assets/images/default_image.jpg',
                     title: lab['name'] ?? 'Unknown Lab',
                     subtitle: loc['name'] ?? '',
                     block: loc['block'],
@@ -438,8 +436,85 @@ class ContentSection extends StatelessWidget {
                   },
                   child: PlaceCard(
                     imagePath:
-                        acc['url_image'] ?? 'assets/images/default_image.jpg',
+                        acc['image_url'] ?? 'assets/images/default_image.jpg',
                     title: acc['name'] ?? 'Unknown Access Point',
+                    subtitle: loc['name'] ?? '',
+                    block: loc['block'],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+        // Mostrar Auditoriums si existen
+        if (auditorium.isNotEmpty && type != CardType.auditorium) ...[
+          const SizedBox(height: 16),
+          _buildTextBlock('Auditoriums:', ''),
+          SizedBox(
+            height: 180,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: auditorium.length,
+              itemBuilder: (context, index) {
+                final aud = auditorium[index];
+                final loc = aud['locations'] ?? {};
+                return GestureDetector(
+                  onTap: () {
+                    if (aud['auditorium_id'] != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailCard(
+                            id: aud['auditorium_id'],
+                            type: CardType.auditorium,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  child: PlaceCard(
+                    imagePath:
+                        aud['image_url'] ?? 'assets/images/default_image.jpg',
+                    title: aud['name'] ?? 'Unknown Auditorium',
+                    subtitle: loc['name'] ?? '',
+                    block: loc['block'],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+
+      // Mostrar Libraries si existen
+        if (library.isNotEmpty && type != CardType.library) ...[
+          const SizedBox(height: 16),
+          _buildTextBlock('Libraries:', ''),
+          SizedBox(
+            height: 180,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: library.length,
+              itemBuilder: (context, index) {
+                final lib = library[index];
+                final loc = lib['locations'] ?? {};
+                return GestureDetector(
+                  onTap: () {
+                    if (lib['library_id'] != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailCard(
+                            id: lib['library_id'],
+                            type: CardType.library,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  child: PlaceCard(
+                    imagePath:
+                        lib['image_url'] ?? 'assets/images/default_image.jpg',
+                    title: lib['name'] ?? 'Unknown Library',
                     subtitle: loc['name'] ?? '',
                     block: loc['block'],
                   ),
@@ -451,6 +526,8 @@ class ContentSection extends StatelessWidget {
       ]), // End of Column
     );
   }
+
+  
 
   String _formatDate(String date) {
     try {
@@ -469,8 +546,23 @@ class ContentSection extends StatelessWidget {
         Text(title,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 6),
-        Text(content, style: const TextStyle(fontSize: 16)),
-        const SizedBox(height: 16),
+        if (type == CardType.event && content.contains('http'))
+          GestureDetector(
+            onTap: () {
+              final Uri url = Uri.parse(content);
+              launch(url.toString());
+            },
+            child: Text(
+              content,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.blue,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          )
+        else
+          Text(content, style: const TextStyle(fontSize: 16)),
       ],
     );
   }
