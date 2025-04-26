@@ -1,5 +1,5 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
+import 'supabase_service.dart';
 
 class AnalyticsService {
   static Future<void> logUserAction({
@@ -10,15 +10,6 @@ class AnalyticsService {
     String? title
   }) async {
     try {
-      final user = Supabase.instance.client.auth.currentUser;
-      await Supabase.instance.client.from('user_actions').insert({
-        'user_id': user?.id,
-        'action_type': actionType,
-        'event_id': eventId,
-        'event_type': eventType,
-        'location_id': locationId,
-        'created_at': DateTime.now().toIso8601String(),
-      });
 
       // Si el tipo de acción es 'consult_event', registramos el evento en PostHog
       if (actionType == 'consult_event') {
@@ -57,16 +48,7 @@ class AnalyticsService {
     required String locationName,
   }) async {
     try {
-      final user = Supabase.instance.client.auth.currentUser;
-      await Supabase.instance.client.from('user_actions').insert({
-        'user_id': user?.id,
-        'action_type': 'search_location',
-        'event_type': 'search_location',
-        'location_id': locationId,
-        'created_at': DateTime.now().toIso8601String(),
-      });
-
-      // Registrar evento en PostHog correctamente
+      // Registar evento en PostHog correctamente
       await Posthog().capture(
         eventName: 'location_searched', // Nombre del evento
         properties: {
@@ -129,5 +111,23 @@ class AnalyticsService {
       print('Error registering feature interaction: $error');
     }
   }
+
+  static Future<void> logCustomAction({
+    String? type, // Nuevo campo para 'type'
+    String? enterp, // Nuevo campo para 'enterp'
+  }) async {
+    try {
+      await SupabaseService().client.from('user_actions').insert({
+        'type': type,  
+        'information_id': enterp,  
+      });
+
+      print('Custom action registered: type: $type, enterp: $enterp');
+    } catch (error) {
+      print('Error registering custom action: $error');
+    }
+  }
+
+
 
 }

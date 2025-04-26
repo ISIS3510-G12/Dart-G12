@@ -53,10 +53,8 @@ class CardDetailViewModel extends ChangeNotifier {
 
     if (wasFav) {
       await favoriteRepository.removeFavorite(id);
-      log('Favorito eliminado: $id');
     } else {
       await favoriteRepository.saveFavorite(item);
-      log('Favorito agregado: $item');
     }
     final current = await favoriteRepository.isFavorite(id);
     log( 'Estado actual del favorito: $current');
@@ -86,32 +84,37 @@ class CardDetailViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-Future<void> fetchEventDetails(int eventId) async {
-  _isLoading = true;
-  _error = null;
-  notifyListeners();
+  Future<void> fetchEventDetails(int eventId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
 
-  try {
-    // Traemos los detalles del evento
-    final eventList = await eventRepository.fetchEventById(eventId);
-    if (eventList.isNotEmpty) {
-      _event = eventList.first;
-    } else {
-      throw Exception('Evento no encontrado.');
+    try {
+      // Traemos los detalles del evento
+      final eventList = await eventRepository.fetchEventById(eventId);
+      if (eventList.isNotEmpty) {
+        _event = eventList.first;
+      } else {
+        throw Exception('Evento no encontrado.');
+      }
+
+      await AnalyticsService.logCustomAction(
+        type: 'event',
+        enterp: eventId.toString(),
+      );
+
+      // Registramos la acción del usuario en el servicio de Analytics
+      await AnalyticsService.logUserAction(
+        actionType: 'consult_event',
+        eventId: eventId,
+        eventType: _event?['type'],
+        title: _event?['title'],
+        locationId: _event?['location_id'],
+      );
+      await AnalyticsService.logFeatureInteraction(feature: "view_details");
+    } catch (e) {
+      _error = e.toString();
     }
-
-    // Registramos la acción del usuario en el servicio de Analytics
-    await AnalyticsService.logUserAction(
-      actionType: 'consult_event',
-      eventId: eventId,
-      eventType: _event?['type'],
-      title: _event?['title'],
-      locationId: _event?['location_id'],
-    );
-    await AnalyticsService.logFeatureInteraction(feature: "view_details");
-  } catch (e) {
-    _error = e.toString();
-  }
 
   _isLoading = false;
   notifyListeners();
@@ -132,6 +135,11 @@ Future<void> fetchEventDetails(int eventId) async {
         }
         _buildingCache[buildingId] = _building!;
       }
+
+      await AnalyticsService.logCustomAction(
+        type: 'building',
+        enterp: buildingId.toString(),
+      );
       await AnalyticsService.logFeatureInteraction(feature: "view_details");
       _laboratories =
           await laboratoriesRepository.fetchLaboratoriesByLocation(buildingId);
@@ -159,6 +167,11 @@ Future<void> fetchEventDetails(int eventId) async {
       } else {
         throw Exception('Laboratorio no encontrado.');
       }
+      await AnalyticsService.logCustomAction(
+        type: 'laboratory',
+        enterp: laboratoryId.toString(),
+      );
+
       await AnalyticsService.logFeatureInteraction(feature: "view_details");
     } catch (e) {
       _error = e.toString();
@@ -185,6 +198,11 @@ Future<void> fetchAuditoriumDetails(int auditoriumId) async {
     _error = e.toString();
   }
 
+  await AnalyticsService.logCustomAction(
+    type: 'auditorium',
+    enterp: auditoriumId.toString(),
+  );
+
   _isLoading = false;
   notifyListeners();
 }
@@ -204,6 +222,11 @@ Future<void> fetchAuditoriumDetails(int auditoriumId) async {
       _error = e.toString();
     }
 
+    await AnalyticsService.logCustomAction(
+      type: 'access',
+      enterp: accessId.toString(),
+    );
+
     _isLoading = false;
     notifyListeners();
   }
@@ -219,6 +242,11 @@ Future<void> fetchAuditoriumDetails(int auditoriumId) async {
     } catch (e) {
       _error = e.toString();
     }
+
+    await AnalyticsService.logCustomAction(
+      type: 'library',
+      enterp: libraryId.toString(),
+    );
 
     _isLoading = false;
     notifyListeners();
