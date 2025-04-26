@@ -267,8 +267,8 @@ String formatDate(DateTime date) {
   return "${date.day}/${date.month}/${date.year}";
 }
 
-  void filterByBlock(String block) {
-    if (block.trim().isEmpty) {
+void filterByBlock(String block) {
+  if (block.trim().isEmpty) {
       _items = List.from(_allItems);  // Si no hay filtro, mostrar todos los elementos
     } else {
       final b = block.toLowerCase();
@@ -278,7 +278,7 @@ String formatDate(DateTime date) {
       }).toList();
     }
     notifyListeners();
-  }
+}
 
 
 
