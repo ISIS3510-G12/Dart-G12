@@ -78,7 +78,7 @@ class LibraryRepository {
     try {
       final response = await supabase
           .from('libraries')
-          .select('library_id, name, image_url, location_id')
+          .select('library_id, name, image_url, location_id, locations (name, block)')
           .eq('library_id', id)
           .maybeSingle();
       if (response != null) {
@@ -117,7 +117,7 @@ class LibraryRepository {
     try {
       final response = await supabase
           .from('libraries')
-          .select('library_id, name, location_id')
+          .select('library_id, name, image_url, location_id, locations (name, block)')
           .eq('location_id', locationId);
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save(cacheKey, parsed);

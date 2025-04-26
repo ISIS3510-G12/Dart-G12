@@ -144,6 +144,9 @@ class CardDetailViewModel extends ChangeNotifier {
       _laboratories =
           await laboratoriesRepository.fetchLaboratoriesByLocation(buildingId);
       _access = await accessRepository.fetchAccessByLocation(buildingId);
+      _auditorium = await auditoriumRepository.fetchAuditoriumsByLocation(buildingId);
+      _library = await libraryRepository.fetchLibrariesByLocation(buildingId);
+
     } catch (e) {
       _error = e.toString();
     }
