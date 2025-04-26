@@ -361,22 +361,6 @@ class ContentSection extends StatelessWidget {
         // Mostrar Laboratorios si existen
         if (labs.isNotEmpty && type != CardType.laboratories) ...[
           const SizedBox(height: 16),
-          TextField(
-            controller: _searchCtrl,
-            readOnly: true,
-            decoration: InputDecoration(
-              hintText: "Where to go?",
-              filled: true,
-              fillColor: Colors.white,
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: const Icon(Icons.filter_list),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(25),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
           _buildTextBlock('Laboratories:', ''),
           SizedBox(
             height: 180,
