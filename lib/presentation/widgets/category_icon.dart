@@ -17,7 +17,7 @@ class CategoryIcon extends StatelessWidget {
     return GestureDetector(
       onTap: onTap, // 📌 Ejecuta la función cuando se toque el icono
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 7.0),
+        padding: const EdgeInsets.symmetric(horizontal: 1.0),
         child: Column(
           children: [
             Container(
@@ -42,7 +42,7 @@ class CategoryIcon extends StatelessWidget {
             Text(
               label,
               style: const TextStyle(
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: FontWeight.bold, // Texto en negrita
               ),
             ),
