@@ -111,6 +111,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         onPressed: () {
                           nameController.text = _profile.name;
                           lastNameController.text = _profile.lastName;
+                          Navigator.of(context).pop();
                         },
                         child: const Text('Cancel'),
                         style: OutlinedButton.styleFrom(
