@@ -1,61 +1,55 @@
-import 'dart:developer';
-
-import '../services/local_storage_service.dart';
+import 'dart:convert';
+import '../services/sqlite_service.dart';
 
 class FavoriteRepository {
-  static const String _key = 'favorites';
-
-  final LocalStorageService _storage = LocalStorageService();
+  final SQLiteService _db = SQLiteService();
 
   Future<List<Map<String, dynamic>>> getFavorites() async {
-    return await _storage.fetch(_key);
+    final result = await _db.fetchAll('favorites');
+
+    return result.map((e) {
+      final rawData = e['data'];
+      if (rawData is String) {
+        try {
+          final decoded = jsonDecode(rawData);
+          if (decoded is Map<String, dynamic>) {
+            return decoded;
+          }
+        } catch (e) {
+          return <String, dynamic>{}; 
+        }
+      }
+      return <String, dynamic>{};
+    }).where((item) => item.isNotEmpty).toList();
   }
 
-  /// Guarda la lista completa de favoritos.
-  Future<void> _saveAll(List<Map<String, dynamic>> items) async {
-    await _storage.save(_key, items);
-  }
-
-  /// Agrega un nuevo favorito (si no está ya).
   Future<void> saveFavorite(Map<String, dynamic> item) async {
-    final current = await getFavorites();
-    final itemId = item['id'].toString(); 
-    final exists = current.any((f) => f['id'].toString() == itemId);
-
-    if (!exists) {
-      current.add(item);
-      await _saveAll(current);
-      log('Favorito agregado: $itemId');
-    }
+    final itemId = item['id'].toString();
+    await _db.insert('favorites', {
+      'id': itemId,
+      'data': jsonEncode(item),
+    });
   }
 
-  /// Elimina un favorito según su 'id'.
   Future<void> removeFavorite(dynamic id) async {
-    final current = await getFavorites();
-    final idStr = id.toString(); // Aseguramos comparación por string
-    current.removeWhere((f) => f['id'].toString() == idStr);
-    await _saveAll(current);
-    log('Favorito eliminado: $idStr');
+    final idStr = id.toString();
+    await _db.delete('favorites', 'id = ?', [idStr]);
   }
 
-  /// Alterna un favorito: si existe lo quita, si no lo agrega.
-  /// Devuelve la lista actualizada.
-  Future<List<Map<String, dynamic>>> toggleFavorite(
-      Map<String, dynamic> item) async {
-    final current = await getFavorites();
-    final exists = current.any((f) => f['id'] == item['id']);
+  Future<List<Map<String, dynamic>>> toggleFavorite(Map<String, dynamic> item) async {
+    final id = item['id'].toString();
+    final exists = await isFavorite(id);
     if (exists) {
-      current.removeWhere((f) => f['id'] == item['id']);
+      await removeFavorite(id);
     } else {
-      current.add(item);
+      await saveFavorite(item);
     }
-    await _saveAll(current);
-    return current;
+    return await getFavorites();
   }
 
-  /// Verifica si un elemento con [id] está en favoritos.
   Future<bool> isFavorite(dynamic id) async {
-    final current = await getFavorites();
-    return current.any((f) => f['id'] == (id is String ? int.tryParse(id) : id));
+    final idStr = id.toString();
+    final result = await _db.query('favorites', where: 'id = ?', whereArgs: [idStr]);
+    return result.isNotEmpty;
   }
 }
