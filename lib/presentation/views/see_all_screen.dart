@@ -1,11 +1,14 @@
+import 'dart:io';
 import 'dart:math';
 
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import '../view_models/see_all_view_model.dart';
 import '../widgets/ovals_painter_home.dart';
 import '../widgets/place_card.dart';
 import '../widgets/bottom_navbar.dart';
 import 'detail_card.dart';
+import 'filter_page.dart';
 
 class SeeAllScreen extends StatefulWidget {
   final int initialIndex;
@@ -102,6 +105,29 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                       hintText: "Where to go?",
                       filled: true,
                       fillColor: Colors.white,
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchCtrl.text.isEmpty
+                          ? IconButton(
+                            icon: const Icon(Icons.filter_alt_outlined),
+                            onPressed: () {
+                              FocusScope.of(context).unfocus();
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                builder: (_) => ChangeNotifierProvider.value(
+                                value: _viewModel,
+                                child: FilterScreen(contentType: widget.contentType),
+                                ),
+                                );
+                              },
+                          )
+                          : IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchCtrl.clear();
+                                _viewModel.filterItems('');
+                              },
+                            ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25),
                         borderSide: BorderSide.none,
