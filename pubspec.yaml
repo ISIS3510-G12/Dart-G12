@@ -54,6 +54,8 @@ dependencies:
   table_calendar: ^3.2.0
   url_launcher: ^6.0.9
   crypto: ^3.0.3
+  image_picker: ^0.8.7+4
+  connectivity_plus: ^5.0.2
 
 dev_dependencies:
   flutter_test:

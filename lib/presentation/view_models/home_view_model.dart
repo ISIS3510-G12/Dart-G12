@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/services/auth_service.dart';
 import '../../data/repositories/home_repository.dart';
 import 'dart:developer';
@@ -36,9 +37,10 @@ class HomeViewModel extends ChangeNotifier {
     _loadAllData();
   }
 
-  void _loadUserData() {
+  Future<void> _loadUserData() async {
     _userName = _authService.getCurrentUsername()?.split(' ').first ?? "Guest";
-    _avatarUrl = _authService.getUserAvatar();
+    final prefs = await SharedPreferences.getInstance();
+    _avatarUrl = prefs.getString('avatar_path') ?? ''; 
     notifyListeners();
   }
 

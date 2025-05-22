@@ -1,4 +1,5 @@
 import 'package:dart_g12/data/services/supabase_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthService {
@@ -37,11 +38,10 @@ class AuthService {
     return user?.userMetadata?['display_name'];
   }
 
-  // Get user avatar URL
-  String? getUserAvatar() {
-    final session = _supabase.auth.currentSession;
-    final user = session?.user;
-    return user?.userMetadata?['avatar_url'];
-  }
+Future<String?> getUserAvatar() async {
+  final prefs = await SharedPreferences.getInstance();
+  final path = prefs.getString('avatar_path');
+  return (path != null && path.isNotEmpty) ? path : null;
+}
 
 }
