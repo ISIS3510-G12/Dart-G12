@@ -1,7 +1,8 @@
 import 'package:dart_g12/data/services/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:dart_g12/data/services/auth_service.dart';
-import 'package:dart_g12/presentation/views/main_screen.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileViewModel extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -12,11 +13,11 @@ class ProfileViewModel extends ChangeNotifier {
 
   ProfileViewModel() {
     _loadUserData();
+    loadUserAvatar();
   }
 
-  void _loadUserData() {
+  Future<void> _loadUserData() async {
     currentUsername = _authService.getCurrentUsername();
-    avatarUrl = _authService.getUserAvatar();
     notifyListeners();
   }
 
@@ -31,12 +32,10 @@ class ProfileViewModel extends ChangeNotifier {
     
   }
 
-  void loadUserAvatar() {
-    final avatar = _authService.getUserAvatar();
-    if (avatar != null && avatar.isNotEmpty) {
-      avatarUrl = avatar;
-      notifyListeners();
-    }
+  Future<void> loadUserAvatar() async {
+    final prefs = await SharedPreferences.getInstance();
+    avatarUrl = prefs.getString('avatar_path') ?? ''; 
+    notifyListeners();
   }
 
 
