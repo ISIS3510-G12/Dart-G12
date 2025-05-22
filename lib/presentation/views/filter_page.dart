@@ -54,6 +54,7 @@ class _FilterScreenState extends State<FilterScreen> {
                   TextField(
                     controller: _searchCtrl,
                     onChanged: vm.filterItems,
+                    maxLength: 20,
                     decoration: InputDecoration(
                       hintText: 'Search',
                       prefixIcon: const Icon(Icons.search),
@@ -207,6 +208,7 @@ class _FilterScreenState extends State<FilterScreen> {
   Widget _buildLocationFilter(SeeAllViewModel vm) {
     return TextField(
       onChanged: vm.setSelectedLocation,
+      maxLength: 20,
       decoration: const InputDecoration(
         hintText: 'Location Name',
         filled: true,

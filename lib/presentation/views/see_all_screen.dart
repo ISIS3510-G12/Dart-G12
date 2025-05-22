@@ -101,6 +101,7 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                   TextField(
                     controller: _searchCtrl,
                     onChanged: _viewModel.filterItems,
+                    maxLength: 20,
                     decoration: InputDecoration(
                       hintText: "Where to go?",
                       filled: true,
