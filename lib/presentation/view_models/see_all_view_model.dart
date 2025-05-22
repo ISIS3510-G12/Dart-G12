@@ -23,6 +23,16 @@ class SeeAllViewModel extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   int _selectedIndex = 0;
+  //String? favoriteType;
+  //String? selectedLocation;
+  String? selectedBlock;
+  //DateTime? startDate;
+  //DateTime? endDate;
+  // temporales para filtrar
+  String? tempFavoriteType;
+  String? tempSelectedLocation;
+  DateTime? tempStartDate;
+  DateTime? tempEndDate;
 
   SeeAllViewModel();
 
@@ -205,10 +215,98 @@ class SeeAllViewModel extends ChangeNotifier {
       final q = query.toLowerCase();
       _items = _allItems.where((item) {
         final text =
-            (item['title'] ?? item['name'] ?? '').toString().toLowerCase();
+            (item['name'] ?? '').toString().toLowerCase();
         return text.contains(q);
       }).toList();
     }
     notifyListeners();
   }
+
+  void setFavoriteType(String? type) {
+    tempFavoriteType = type;
+    notifyListeners();
+  }
+
+  void setSelectedLocation(String? location) {
+    tempSelectedLocation = location;
+    notifyListeners();
+  }
+
+  void setSelectedBlock(String? block) {
+    selectedBlock = block;
+    if (block == null || block.isEmpty) {
+      _items = List.from(_allItems);
+    } else {
+      _items = _allItems.where((item) {
+        final b = item['block'] ?? item['locations']?['block'];
+        return b != null && b.toString().toLowerCase().contains(block.toLowerCase());
+      }).toList();
+    }
+    notifyListeners();
+  }
+
+  void setStartDate(DateTime? date) {
+    tempStartDate = date;
+    notifyListeners();
+  }
+
+  void setEndDate(DateTime? date) {
+    tempEndDate = date;
+    notifyListeners();
+  }
+
+  void applyAllFilters(String query) {
+  // 1. Filtro por nombre
+  var filtered = _allItems.where((item) {
+    final name = (item['name'] ??'').toString().toLowerCase();
+    final block = (item['block'] ??'').toString().toLowerCase();
+    return name.contains(query.toLowerCase()) || block.contains(query.toLowerCase());
+  }).toList();
+
+  // 2. Filtro por tipo favorito
+  if (tempFavoriteType != null && tempFavoriteType!.isNotEmpty) {
+    filtered = filtered.where((item) =>
+      (item['type'] ?? '').toString().toLowerCase() == tempFavoriteType!.toLowerCase()
+    ).toList();
+  }
+
+  // 3. Filtro por ubicación
+  if (tempSelectedLocation != null && tempSelectedLocation!.isNotEmpty) {
+    filtered = filtered.where((item) {
+      final locName = item['locations']?['name'] ?? item['location'] ?? '';
+      return locName.toString().toLowerCase().contains(tempSelectedLocation!.toLowerCase());
+    }).toList();
+  }
+
+  // 4. Filtro por fechas
+  if (tempStartDate != null || tempEndDate != null) {
+    filtered = filtered.where((item) {
+      final eventDateStr = item['date'] ?? item['start_date'];
+      if (eventDateStr == null) return false;
+      final eventDate = DateTime.tryParse(eventDateStr.toString());
+      if (eventDate == null) return false;
+      final afterStart = tempStartDate == null || eventDate.isAfter(tempStartDate!) || eventDate.isAtSameMomentAs(tempStartDate!);
+      final beforeEnd = tempEndDate == null || eventDate.isBefore(tempEndDate!) || eventDate.isAtSameMomentAs(tempEndDate!);
+      return afterStart && beforeEnd;
+    }).toList();
+  }
+
+  _items = filtered;
+  notifyListeners();
+}
+
+  String formatDate(DateTime date) {
+    return "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+  } 
+
+  void clearAllFilters() {
+    tempFavoriteType = null;
+    tempSelectedLocation = null;
+    tempStartDate = null;
+    tempEndDate = null;
+    notifyListeners();
+  }
+// ...existing code...
+
+
 }
