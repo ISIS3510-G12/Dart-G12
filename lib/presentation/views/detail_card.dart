@@ -7,7 +7,7 @@ import 'package:dart_g12/presentation/widgets/bottom_navbar.dart';
 import 'package:dart_g12/presentation/widgets/place_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-enum CardType { event, building, laboratories, access, auditorium, library }
+enum CardType { event, building, laboratories, access, auditorium, library, services }
 
 class DetailCard extends StatefulWidget {
   final int id;
@@ -49,6 +49,9 @@ class _DetailCardState extends State<DetailCard> {
         break;
       case CardType.library:
         await viewModel.fetchLibraryDetails(widget.id);
+        break;
+      case CardType.services:
+        await viewModel.fetchServicesDetails(widget.id);
         break;
     }
     isFavorite = await viewModel.isFavorite(widget.id.toString());
@@ -120,6 +123,16 @@ class _DetailCardState extends State<DetailCard> {
           'name': lib['name'] ?? '',
           'image': lib['image_url'],
           'block': lib['locations']?['block'],
+        };
+      case CardType.services:
+        final s = viewModel.services.isNotEmpty ? viewModel.services[0] : {};
+        return {
+          ...s,
+          'type': 'services',
+          'service_id': widget.id,
+          'name': s['name'] ?? '',
+          'image': s['image_url'],
+          'block': s['locations']?['block'],
         };
     }
   }
@@ -205,6 +218,12 @@ class _DetailCardState extends State<DetailCard> {
         return {
           'image': lib?['image_url'],
           'title': lib?['name'] ?? '',
+        };
+      case CardType.services:
+        final s = viewModel.services.isNotEmpty ? viewModel.services[0] : null;
+        return {
+          'image': s?['image_url'],
+          'title': s?['name'] ?? '',
         };
     }
   }
@@ -311,13 +330,15 @@ class ContentSection extends StatelessWidget {
     final access = viewModel.access;
     final auditorium = viewModel.autorium;
     final library = viewModel.library;
+    final servic = viewModel.services;
 
     if ((type == CardType.event && event == null) ||
         (type == CardType.building && building == null) ||
         (type == CardType.laboratories && labs.isEmpty) ||
         (type == CardType.access && access.isEmpty) ||
         (type == CardType.auditorium && auditorium.isEmpty) ||
-        (type == CardType.library && library.isEmpty)) {
+        (type == CardType.library && library.isEmpty) ||
+        (type == CardType.services && servic.isEmpty)) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -331,7 +352,9 @@ class ContentSection extends StatelessWidget {
                     ? access.first
                     : type == CardType.auditorium
                         ? auditorium.first
-                        : library.first;
+                        : type == CardType.library
+                            ? library.first
+                            : servic.first;
 
     final Map<String, dynamic>? location = data?['locations'];
     final Map<String, dynamic>? department = data?['departments'];

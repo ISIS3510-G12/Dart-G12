@@ -13,6 +13,7 @@ class CategoryList extends StatelessWidget {
       {"icon": Icons.school, "label": "Auditoriums", "type": "auditorium"},
       {"icon": Icons.build, "label": "Laboratories", "type": "laboratory"},
       {"icon": Icons.library_books, "label": "Libraries", "type": "library"},
+      {"icon": Icons.miscellaneous_services, "label": "Services", "type": "services"},
     ];
 
     return LayoutBuilder(

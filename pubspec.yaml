@@ -53,8 +53,8 @@ dependencies:
   shared_preferences: ^2.0.17
   table_calendar: ^3.2.0
   url_launcher: ^6.0.9
-  lru: 1.0.2
-  
+  crypto: ^3.0.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
