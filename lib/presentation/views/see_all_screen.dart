@@ -43,7 +43,9 @@ class SeeAllScreenState extends State<SeeAllScreen> {
       _viewModel.fetchAuditoriums();
     } else if (widget.contentType == "library") {
       _viewModel.fetchLibraries();
-    } 
+    } else if (widget.contentType == "services") {
+      _viewModel.fetchServices();
+    }
 
   }
 
@@ -86,7 +88,9 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                                               ? "Auditoriums"
                                               : widget.contentType == "library"
                                                   ? "Libraries"
-                                                  : "Unknown",
+                                                : widget.contentType == "services"
+                                                    ? "Services"
+                                                    : "Unknown",
                       style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -245,7 +249,20 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                                                       ),
                                                     ),
                                                   );
-                                                } 
+                                                } else if (widget.contentType ==
+                                                    "services" || (widget.contentType ==
+                                                    "favorite" && (item['type'] ?? '') == 'services') ) {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          DetailCard(
+                                                        id: item['service_id'],
+                                                        type: CardType.services,
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
                                               },
                                             );
                                           }).toList(),

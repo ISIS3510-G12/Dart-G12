@@ -7,6 +7,7 @@ import '../../data/repositories/location_repository.dart';
 import '../../data/repositories/event_repository.dart';
 import '../views/main_screen.dart';
 import '../../data/repositories/access_repository.dart';
+import '../../data/repositories/services_repository.dart';
 
 class SeeAllViewModel extends ChangeNotifier {
   final LocationRepository locationRepository = LocationRepository();
@@ -16,6 +17,8 @@ class SeeAllViewModel extends ChangeNotifier {
   final FavoriteRepository favoriteRepository = FavoriteRepository();
   final AuditoriumRepository auditoriumRepository = AuditoriumRepository();
   final LibraryRepository libraryRepository = LibraryRepository();
+  final ServicesRepository servicesRepository = ServicesRepository();
+
 
   late String contentType;
   List<Map<String, dynamic>> _allItems = [];
@@ -150,6 +153,24 @@ class SeeAllViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+
+Future<void> fetchServices() async {
+  _isLoading = true;
+  _error = null;
+  notifyListeners();
+
+  try {
+    _allItems = await servicesRepository.fetchServices();
+    _items = List.from(_allItems);
+  } catch (e) {
+    _error = e.toString();
+  }
+
+  _isLoading = false;
+  notifyListeners();
+}
+
+
   Future<void> fetchData() async {
     _isLoading = true;
     _error = null;
@@ -170,7 +191,8 @@ class SeeAllViewModel extends ChangeNotifier {
         await fetchAuditoriums();
       } else if (contentType == 'library') {
         await fetchLibraries();
-      
+      } else if (contentType == 'service') {
+        await fetchServices();
       } else if (contentType == 'none') {
         _items = List.from(_allItems);
       }

@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:dart_g12/data/repositories/services_repository.dart';
 import 'package:flutter/material.dart';
 import '../../data/repositories/event_repository.dart';
 import '../../data/repositories/location_repository.dart';
@@ -19,6 +20,7 @@ class CardDetailViewModel extends ChangeNotifier {
   final FavoriteRepository favoriteRepository = FavoriteRepository();
   final AuditoriumRepository auditoriumRepository = AuditoriumRepository();
   final LibraryRepository libraryRepository = LibraryRepository();
+  final ServicesRepository servicesRepository = ServicesRepository();
 
   List<Map<String, dynamic>> _events = [];
   Map<String, dynamic>? _event;
@@ -27,6 +29,7 @@ class CardDetailViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> _access = [];
   List<Map<String, dynamic>> _auditorium = [];
   List<Map<String, dynamic>> _library = [];
+  List<Map<String, dynamic>> _services = [];
   bool _isLoading = false;
   String? _error;
   int _selectedIndex = 0;
@@ -42,6 +45,7 @@ class CardDetailViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> get access => _access;
   List<Map<String, dynamic>> get autorium => _auditorium;
   List<Map<String, dynamic>> get library => _library;
+  List<Map<String, dynamic>> get services => _services;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -183,6 +187,29 @@ class CardDetailViewModel extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
+
+Future<void> fetchServicesDetails(int serviceId) async {
+  _isLoading = true;
+  _error = null;
+  notifyListeners();
+
+  try {
+    _services = await servicesRepository.fetchServiceDetail(serviceId);
+
+    await AnalyticsService.logCustomAction(
+      type: 'services',
+      enterp: serviceId.toString(),
+    );
+
+    await AnalyticsService.logFeatureInteraction(feature: "view_details");
+  } catch (e) {
+    _error = e.toString();
+  }
+
+  _isLoading = false;
+  notifyListeners();
+}
+
 
 Future<void> fetchAuditoriumDetails(int auditoriumId) async {
   _isLoading = true;
