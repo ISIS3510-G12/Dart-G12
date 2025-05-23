@@ -208,20 +208,6 @@ class SeeAllViewModel extends ChangeNotifier {
     );
   }
 
-  void filterItems(String query) {
-    if (query.trim().isEmpty) {
-      _items = List.from(_allItems);
-    } else {
-      final q = query.toLowerCase();
-      _items = _allItems.where((item) {
-        final text =
-            (item['name'] ?? '').toString().toLowerCase();
-        return text.contains(q);
-      }).toList();
-    }
-    notifyListeners();
-  }
-
   void setFavoriteType(String? type) {
     tempFavoriteType = type;
     notifyListeners();
@@ -255,49 +241,80 @@ class SeeAllViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  String formatDate(DateTime date) {
+    return "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+  } 
+
+// =======================================================
+// =============== FILTER METHODS SECTION ================
+// =======================================================
+
+  void filterItems(String query) {
+    if (query.trim().isEmpty) {
+      _items = List.from(_allItems);
+    } else {
+      final q = query.toLowerCase();
+      _items = _allItems.where((item) {
+        final text =
+            (item['name'] ?? '').toString().toLowerCase();
+        return text.contains(q);
+      }).toList();
+    }
+    notifyListeners();
+  }
+
   void applyAllFilters(String query) {
   // 1. Filtro por nombre
   var filtered = _allItems.where((item) {
-    final name = (item['name'] ??'').toString().toLowerCase();
-    final block = (item['block'] ??'').toString().toLowerCase();
+    final name = (item['name'] ?? '').toString().toLowerCase();
+    final block = (item['block'] ?? '').toString().toLowerCase();
     return name.contains(query.toLowerCase()) || block.contains(query.toLowerCase());
   }).toList();
 
-  // 2. Filtro por tipo favorito
+  // 2. Filtro por tipo favorito TODO arreglar por como funcionan los favoritos
   if (tempFavoriteType != null && tempFavoriteType!.isNotEmpty) {
-    filtered = filtered.where((item) =>
-      (item['type'] ?? '').toString().toLowerCase() == tempFavoriteType!.toLowerCase()
-    ).toList();
+    filtered = filtered.where((item) {
+      return (item['type'] ?? '').toString().toLowerCase() ==
+          tempFavoriteType!.toLowerCase();
+    }).toList();
+
   }
 
   // 3. Filtro por ubicación
   if (tempSelectedLocation != null && tempSelectedLocation!.isNotEmpty) {
     filtered = filtered.where((item) {
-      final locName = item['locations']?['name'] ?? item['location'] ?? '';
-      return locName.toString().toLowerCase().contains(tempSelectedLocation!.toLowerCase());
+      final locName = item['locations']?['name'] ?? '';
+      final locBlock = item['locations']?['block'] ?? '';
+      return locName.toString().toLowerCase().contains(tempSelectedLocation!.toLowerCase()) || 
+        locBlock.toString().toLowerCase().contains(tempSelectedLocation!.toLowerCase());
     }).toList();
   }
 
-  // 4. Filtro por fechas
+  // 4. Date filter: custom logic for start/end
   if (tempStartDate != null || tempEndDate != null) {
-    filtered = filtered.where((item) {
-      final eventDateStr = item['date'] ?? item['start_date'];
-      if (eventDateStr == null) return false;
-      final eventDate = DateTime.tryParse(eventDateStr.toString());
-      if (eventDate == null) return false;
-      final afterStart = tempStartDate == null || eventDate.isAfter(tempStartDate!) || eventDate.isAtSameMomentAs(tempStartDate!);
-      final beforeEnd = tempEndDate == null || eventDate.isBefore(tempEndDate!) || eventDate.isAtSameMomentAs(tempEndDate!);
-      return afterStart && beforeEnd;
-    }).toList();
-  }
+  // Si solo hay fecha de inicio, la fecha de fin es 2030
+    final start = tempStartDate ?? DateTime(2020, 1, 1);
+    final end = tempEndDate ?? DateTime(2030, 12, 31);
 
-  _items = filtered;
-  notifyListeners();
+    filtered = filtered.where((item) {
+      final startStr = item['start_time'];
+      final endStr = item['end_time'];
+      if (startStr == null || endStr == null) return false;
+
+      final eventStart = DateTime.tryParse(startStr.toString());
+      final eventEnd = DateTime.tryParse(endStr.toString());
+      if (eventStart == null || eventEnd == null) return false;
+
+      // El evento debe empezar después o igual a start y terminar antes o igual a end
+      return (eventStart.isAfter(start) || eventStart.isAtSameMomentAs(start)) &&
+           (eventEnd.isBefore(end) || eventEnd.isAtSameMomentAs(end));
+    }).toList();
 }
 
-  String formatDate(DateTime date) {
-    return "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-  } 
+    _items = filtered;
+    notifyListeners();
+}
+
 
   void clearAllFilters() {
     tempFavoriteType = null;
@@ -306,7 +323,5 @@ class SeeAllViewModel extends ChangeNotifier {
     tempEndDate = null;
     notifyListeners();
   }
-// ...existing code...
-
 
 }

@@ -77,17 +77,6 @@ class _FilterScreenState extends State<FilterScreen> {
                         "Filters",
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          _searchCtrl.clear();
-                          vm.clearAllFilters(); // Debes implementar este método en tu ViewModel
-                          setState(() {}); // Para refrescar la UI si es necesario
-                        },
-                        child: const Text(
-                          "Clear All",
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -138,7 +127,7 @@ class _FilterScreenState extends State<FilterScreen> {
       children: [
         if (widget.contentType == 'favorite') _buildDropdown("Filter Favorites", _buildFavoriteFilter(vm), "favorites"),
         if (widget.contentType == 'event') _buildDropdown("Date", _buildDateFilter(vm), "date"),
-        if (widget.contentType != 'favorite') _buildDropdown("Places", _buildLocationFilter(vm), "places"),
+        if (widget.contentType != 'favorite' && widget.contentType != 'building') _buildDropdown("Places", _buildLocationFilter(vm), "places"),
       ],
     );
   }
