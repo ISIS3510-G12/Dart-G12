@@ -207,6 +207,7 @@ Future<void> fetchServicesDetails(int serviceId) async {
     );
 
     await AnalyticsService.logFeatureInteraction(feature: "view_details");
+    await AnalyticsService.logConsultService(name: _services[0]["name"]);
   } catch (e) {
     _error = e.toString();
   }
