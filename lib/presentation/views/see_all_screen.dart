@@ -3,6 +3,7 @@ import '../view_models/see_all_view_model.dart';
 import '../widgets/ovals_painter_home.dart';
 import '../widgets/place_card.dart';
 import '../widgets/bottom_navbar.dart';
+import '../../data/services/analytics_service.dart';
 import 'detail_card.dart';
 
 class SeeAllScreen extends StatefulWidget {
@@ -26,6 +27,8 @@ class SeeAllScreenState extends State<SeeAllScreen> {
     _viewModel = SeeAllViewModel();
     _viewModel.contentType = widget.contentType;
     _viewModel.addListener(_updateState);
+
+    AnalyticsService.logConsultSeeAll(content_Type: widget.contentType);
 
     if (widget.contentType == "building") {
       _viewModel.fetchBuildings();
