@@ -1,10 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:dart_g12/presentation/views/profile_page.dart';
 import 'package:dart_g12/presentation/views/see_all_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:dart_g12/presentation/views/notificacion_page.dart';
 import 'package:dart_g12/presentation/widgets/bottom_navbar.dart';
 import 'package:dart_g12/presentation/views/map_page.dart';
-import '../views/home_screen.dart';
+import 'package:dart_g12/presentation/views/home_screen.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -17,24 +17,27 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   late int _currentIndex;
 
+  final List<Widget> _pages = const [
+    HomeScreen(),
+    SeeAllScreen(contentType: "favorite"),
+    MapPage(),
+    NotificacionPage(),
+    ProfilePage(),
+  ];
+
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
   }
 
-  final List<Widget> _pages = [
-    const HomeScreen(),
-    const SeeAllScreen(contentType:"favorite"),
-    const MapPage(),
-    const NotificacionPage(),
-    const ProfilePage(),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_currentIndex],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
+      ),
       bottomNavigationBar: BottomNavbar(
         currentIndex: _currentIndex,
         onTap: (index) {

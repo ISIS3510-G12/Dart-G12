@@ -1,13 +1,14 @@
 import 'dart:io';
-import 'package:dart_g12/presentation/views/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../view_models/home_view_model.dart';
 import '../widgets/ovals_painter_home.dart';
 import '../widgets/section_header.dart';
 import '../widgets/place_card.dart';
 import '../widgets/category_list.dart';
 import '../widgets/chat_widget.dart';
+import 'main_screen.dart';
 import 'see_all_screen.dart';
 import 'detail_card.dart';
 
@@ -29,13 +30,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<HomeViewModel>.value(
+    return ChangeNotifierProvider.value(
       value: viewModel,
       child: Scaffold(
         body: Stack(
           children: [
             Positioned.fill(
-              child: CustomPaint(painter: OvalsPainterHome()),
+                child: RepaintBoundary(
+                  child: CustomPaint(painter: OvalsPainterHome()),
+                ),
             ),
             SafeArea(
               child: Padding(
@@ -49,9 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 25),
                     const CategoryList(),
                     const SizedBox(height: 16),
-                    Expanded(
-                      child: _buildContent(),
-                    ),
+                    Expanded(child: _buildContent()),
                   ],
                 ),
               ),
@@ -64,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHeader() {
     return Consumer<HomeViewModel>(
-      builder: (context, vm, child) {
+      builder: (context, vm, _) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -81,14 +82,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const MainScreen(initialIndex: 4)),
+                    builder: (_) => const MainScreen(initialIndex: 4),
+                  ),
                 );
               },
               child: CircleAvatar(
                 radius: 24,
                 backgroundImage: vm.avatarUrl != null
-                          ? FileImage(File(vm.avatarUrl!))
-                          : const AssetImage('assets/profile.jpg') as ImageProvider,
+                    ? FileImage(File(vm.avatarUrl!))
+                    : const AssetImage('assets/profile.jpg') as ImageProvider,
               ),
             ),
           ],
@@ -103,31 +105,31 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSection(
-            "Most Popular",
-            SeeAllScreen(contentType: "popular"),
-            (vm) => _buildHorizontalList(vm.mostSearchedLocations),
-            showSeeAll: false, // solo esto cambia
+            title: "Most Popular",
+            destinationScreen: SeeAllScreen(contentType: "popular"),
+            builder: (vm) => _buildHorizontalList(vm.mostSearchedLocations),
+            showSeeAll: false,
           ),
           _buildSection(
-            "Buildings",
-            SeeAllScreen(contentType: "building"),
-            (vm) => _buildHorizontalList(vm.locations),
+            title: "Buildings",
+            destinationScreen: SeeAllScreen(contentType: "building"),
+            builder: (vm) => _buildHorizontalList(vm.locations),
           ),
           _buildSection(
-            "Events",
-            SeeAllScreen(contentType: "event"),
-            (vm) => _buildHorizontalList(vm.events),
+            title: "Events",
+            destinationScreen: SeeAllScreen(contentType: "event"),
+            builder: (vm) => _buildHorizontalList(vm.events),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSection(
-    String title,
-    Widget destinationScreen,
-    Widget Function(HomeViewModel) builder, {
-    bool showSeeAll = true, //
+  Widget _buildSection({
+    required String title,
+    required Widget destinationScreen,
+    required Widget Function(HomeViewModel) builder,
+    bool showSeeAll = true,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,11 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
           destinationScreen: destinationScreen,
           showSeeAll: showSeeAll,
         ),
-        Consumer<HomeViewModel>(
-          builder: (context, vm, child) {
-            return builder(vm);
-          },
-        ),
+        Consumer<HomeViewModel>(builder: (_, vm, __) => builder(vm)),
         const SizedBox(height: 16),
       ],
     );
@@ -157,131 +155,67 @@ class _HomeScreenState extends State<HomeScreen> {
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: items.map((item) {
-          String? subtitle;
-          String? block;
-
-          if (item['locations'] != null) {
-            subtitle = item['locations']['name'];
-            block = item['locations']['block'];
-          }
-          if (item['block'] != null && subtitle == null) {
-            subtitle = '';
-            block = item['block'];
-          }
+          final location = item['locations'];
+          final subtitle = location != null ? location['name'] ?? '' : '';
+          final block = location?['block'] ?? item['block'];
 
           return PlaceCard(
             imagePath: item['image_url'] ?? 'assets/images/default_image.jpg',
-            subtitle: subtitle ?? '',
             title: item['name'] ?? 'Unknown Location',
+            subtitle: subtitle,
             block: block,
-            onTap: () async {
-              if (item['type'] == 'building') {
-                final locationId = item['information_id'];
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => DetailCard(
-                      id: locationId,
-                      type: CardType.building,
-                    ),
-                  ),
-                );
-              } else if (item['type'] == 'laboratory') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => DetailCard(
-                      id: item['information_id'],
-                      type: CardType.laboratories,
-                    ),
-                  ),
-                );
-              } else if (item['type'] == 'access') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => DetailCard(
-                      id: item['information_id'],
-                      type: CardType.access,
-                    ),
-                  ),
-                );
-              } else if (item['type'] == 'event') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => DetailCard(
-                      id: item['information_id'],
-                      type: CardType.event,
-                    ),
-                  ),
-                );
-              } else if (item['type'] == 'library') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => DetailCard(
-                      id: item['information_id'],
-                      type: CardType.library,
-                    ),
-                  ),
-                );
-              } else if (item['type'] == 'auditorium') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => DetailCard(
-                      id: item['information_id'],
-                      type: CardType.auditorium,
-                    ),
-                  ),
-                );
-              } else if (item['location_id'] != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => DetailCard(
-                      id: item['location_id'],
-                      type: CardType.building,
-                    ),
-                  ),
-                );
-              } else if (item['event_id'] != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => DetailCard(
-                      id: item['event_id'],
-                      type: CardType.event,
-                    ),
-                  ),
-                );
-              } else if (item['laboratories_id'] != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => DetailCard(
-                      id: item['laboratories_id'],
-                      type: CardType.laboratories,
-                    ),
-                  ),
-                );
-              } else if (item['access_id'] != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => DetailCard(
-                      id: item['access_id'],
-                      type: CardType.access,
-                    ),
-                  ),
-                );
-              }
-            },
+            onTap: () => _navigateToDetail(item),
           );
         }).toList(),
       ),
     );
+  }
+
+  void _navigateToDetail(Map<String, dynamic> item) {
+    final typeMap = {
+      'building': CardType.building,
+      'laboratory': CardType.laboratories,
+      'access': CardType.access,
+      'event': CardType.event,
+      'library': CardType.library,
+      'auditorium': CardType.auditorium,
+    };
+
+    for (final entry in typeMap.entries) {
+      if (item['type'] == entry.key) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => DetailCard(
+              id: item['information_id'],
+              type: entry.value,
+            ),
+          ),
+        );
+        return;
+      }
+    }
+
+    final idFields = {
+      'location_id': CardType.building,
+      'event_id': CardType.event,
+      'laboratories_id': CardType.laboratories,
+      'access_id': CardType.access,
+    };
+
+    for (final entry in idFields.entries) {
+      if (item[entry.key] != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => DetailCard(
+              id: item[entry.key],
+              type: entry.value,
+            ),
+          ),
+        );
+        return;
+      }
+    }
   }
 }
