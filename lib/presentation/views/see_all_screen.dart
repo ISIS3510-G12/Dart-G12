@@ -98,7 +98,8 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  TextField(
+                  if (widget.contentType != "favorite")
+                    TextField(
                     controller: _searchCtrl,
                     onChanged: _viewModel.filterItems,
                     maxLength: 20,
