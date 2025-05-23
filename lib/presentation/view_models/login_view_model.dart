@@ -56,7 +56,10 @@ class LoginViewModel extends ChangeNotifier {
       }
     } finally {
       _isLoading = false;
-      notifyListeners();
+      if (context.mounted) {
+        notifyListeners();
+      }
+
     }
   }
 

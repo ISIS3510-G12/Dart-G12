@@ -8,6 +8,7 @@ import '../../data/repositories/event_repository.dart';
 import '../views/main_screen.dart';
 import '../../data/repositories/access_repository.dart';
 import '../../data/repositories/services_repository.dart';
+import 'package:dart_g12/data/repositories/faculties_repository.dart';
 
 class SeeAllViewModel extends ChangeNotifier {
   final LocationRepository locationRepository = LocationRepository();
@@ -18,7 +19,7 @@ class SeeAllViewModel extends ChangeNotifier {
   final AuditoriumRepository auditoriumRepository = AuditoriumRepository();
   final LibraryRepository libraryRepository = LibraryRepository();
   final ServicesRepository servicesRepository = ServicesRepository();
-
+  final FacultyRepository facultiesRepository = FacultyRepository();
 
   late String contentType;
   List<Map<String, dynamic>> _allItems = [];
@@ -87,6 +88,24 @@ class SeeAllViewModel extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
+
+    // Método para obtener los eventos desde Supabase
+  Future<void> fetchFaculties() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _allItems = await facultiesRepository.fetchFaculties();
+      _items = List.from(_allItems);
+    } catch (e) {
+      _error = e.toString();
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
 
   // Método para obtener los access points desde Supabase
   Future<void> fetchAccess() async {
@@ -193,6 +212,8 @@ Future<void> fetchServices() async {
         await fetchLibraries();
       } else if (contentType == 'service') {
         await fetchServices();
+      } else if (contentType == 'faculty') {
+        await fetchFaculties();
       } else if (contentType == 'none') {
         _items = List.from(_allItems);
       }
