@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dart_g12/presentation/views/started_page.dart';
 import 'package:flutter/material.dart';
 import 'package:dart_g12/data/services/supabase_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -57,19 +58,24 @@ class EditProfile with ChangeNotifier {
         UserAttributes(password: newPassword),
       );
 
-      // Comprobar si el usuario es null para detectar errores
+      // Si no retorna usuario, algo falló
       if (response.user == null) {
         throw Exception('No se pudo cambiar la contraseña.');
       }
 
-      // (Opcional) Cierra sesión si quieres forzar re-login
+      // (Opcional) Cierra sesión para forzar re-login
       await _supabase.auth.signOut();
       notifyListeners();
+    } on AuthException catch (e) {
+      // Errores específicos de Supabase
+      String mensaje = traducirError(e.message);
+      throw Exception(mensaje);
     } catch (e) {
-      print('Error al cambiar la contraseña: $e');
-      rethrow; // para propagar el error si es necesario
+      // Cualquier otro error inesperado
+      throw Exception('Ocurrió un error: $e');
     }
   }
+
 
   // Actualizar los metadatos del usuario en Supabase
   Future<void> _updateUserMetadata(Map<String, dynamic> data) async {
@@ -118,6 +124,16 @@ class EditProfile with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('avatar_path', path);
     avatarPath = path;
+  }
+
+  String traducirError(String mensajeOriginal) {
+    if (mensajeOriginal.contains('at least 6 characters')) {
+      return 'La contraseña debe tener al menos 6 caracteres.';
+    } else if (mensajeOriginal.contains('same_password')) {
+      return 'La nueva contraseña debe ser diferente a la anterior.';
+    } else {
+      return mensajeOriginal;
+    }
   }
 
 

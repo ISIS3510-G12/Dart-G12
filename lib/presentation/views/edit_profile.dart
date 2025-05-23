@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dart_g12/presentation/views/started_page.dart';
 import 'package:dart_g12/presentation/widgets/bottom_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -182,13 +183,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: () async {
-                          await _profile.updateProfile(
-                            nameController.text,
-                            lastNameController.text,
-                          );
+                      onPressed: () async {
+                        await _profile.updateProfile(
+                          nameController.text,
+                          lastNameController.text,
+                        );
 
-                          if (passwordController.text.isNotEmpty) {
+                        if (passwordController.text.isNotEmpty) {
+                          try {
                             await _profile.changePassword(passwordController.text);
 
                             if (context.mounted) {
@@ -202,8 +204,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   actions: [
                                     TextButton(
                                       onPressed: () {
-                                        Navigator.of(context).pop();
-                                        Navigator.of(context).maybePop();
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => const WelcomePage(),
+                                          ),
+                                        );
                                       },
                                       child: const Text('OK'),
                                     ),
@@ -213,13 +219,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             }
 
                             return;
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    _profile.traducirError(e.toString()),
+                                  ),
+                                ),
+                              );
+                            }
                           }
+                        }
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Profile updated")),
-                          );
-                        },
-                        
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Profile updated")),
+                        );
+                      },
                         child: const Text('Save changes'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.pinkAccent,

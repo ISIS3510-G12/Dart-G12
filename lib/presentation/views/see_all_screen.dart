@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import '../view_models/see_all_view_model.dart';
 import '../widgets/ovals_painter_home.dart';
@@ -45,8 +43,9 @@ class SeeAllScreenState extends State<SeeAllScreen> {
       _viewModel.fetchLibraries();
     } else if (widget.contentType == "services") {
       _viewModel.fetchServices();
+    } else if (widget.contentType == "faculty") {
+      _viewModel.fetchFaculties();
     }
-
   }
 
   @override
@@ -90,7 +89,9 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                                                   ? "Libraries"
                                                 : widget.contentType == "services"
                                                     ? "Services"
-                                                    : "Unknown",
+                                                    : widget.contentType == "faculty"
+                                                        ? "Faculties"
+                                                        : "Unknown",
                       style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -259,6 +260,19 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                                                           DetailCard(
                                                         id: item['service_id'],
                                                         type: CardType.services,
+                                                      ),
+                                                    ),
+                                                  );
+                                                } else if (widget.contentType ==
+                                                    "faculty" || (widget.contentType ==
+                                                    "favorite" && (item['type'] ?? '') == 'faculty') ) {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          DetailCard(
+                                                        id: item['faculty_id'],
+                                                        type: CardType.faculty,
                                                       ),
                                                     ),
                                                   );
