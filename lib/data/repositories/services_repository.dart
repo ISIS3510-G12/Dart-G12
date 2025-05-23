@@ -28,7 +28,7 @@ class ServicesRepository {
       try {
         final response = await supabase
             .from('services')
-            .select('service_id, name, service_type_id');
+            .select('service_id, name, service_type_id,image_url');
         final parsed = await compute(_parseList, response as List<dynamic>);
         await _cache.save(cacheKey, parsed);
         return parsed;
@@ -46,7 +46,7 @@ class ServicesRepository {
     try {
       final response = await supabase
           .from('services')
-          .select('service_id, name, service_type_id');
+          .select('service_id, name, service_type_id, image_url');
       final parsed = await compute(_parseList, response as List<dynamic>);
       await _cache.save(cacheKey, parsed);
     } catch (e) {
@@ -174,7 +174,7 @@ class ServicesRepository {
     try {
       final response = await supabase
           .from('services')
-          .select('service_id, name, service_type_id, service_types(name)')
+          .select('service_id, name, service_type_id, image_url, service_types(name)')
           .eq('service_id', serviceId)
           .maybeSingle();
 
