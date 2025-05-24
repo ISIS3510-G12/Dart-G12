@@ -74,10 +74,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 Row(
                   children: [
                     Expanded(child: dropdownFrom),
-                    IconButton(
-                      icon: const Icon(Icons.more_vert, color: Colors.black),
-                      onPressed: onMoreOptions,
-                    ),
                   ],
                 ),
                 const SizedBox(height: 8),

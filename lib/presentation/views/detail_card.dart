@@ -7,7 +7,7 @@ import 'package:dart_g12/presentation/widgets/bottom_navbar.dart';
 import 'package:dart_g12/presentation/widgets/place_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-enum CardType { event, building, laboratories, access, auditorium, library }
+enum CardType { event, building, laboratories, access, auditorium, library, services, faculty }
 
 class DetailCard extends StatefulWidget {
   final int id;
@@ -49,6 +49,12 @@ class _DetailCardState extends State<DetailCard> {
         break;
       case CardType.library:
         await viewModel.fetchLibraryDetails(widget.id);
+        break;
+      case CardType.services:
+        await viewModel.fetchServicesDetails(widget.id);
+        break;
+      case CardType.faculty:
+        await viewModel.fetchFacultyDetails(widget.id);
         break;
     }
     isFavorite = await viewModel.isFavorite(widget.id.toString());
@@ -120,6 +126,25 @@ class _DetailCardState extends State<DetailCard> {
           'name': lib['name'] ?? '',
           'image': lib['image_url'],
           'block': lib['locations']?['block'],
+        };
+      case CardType.services:
+        final s = viewModel.services.isNotEmpty ? viewModel.services[0] : {};
+        return {
+          ...s,
+          'type': 'services',
+          'service_id': widget.id,
+          'name': s['name'] ?? '',
+          'image': s['image_url'],
+          'block': s['locations']?['block'],
+        };
+      case CardType.faculty:
+        final f = viewModel.faculties.isNotEmpty ? viewModel.faculties[0] : {};
+        return {
+          ...f,
+          'type': 'faculty',
+          'faculty_id': widget.id,
+          'name': f['name'] ?? '',
+          'image': f['image_url'],
         };
     }
   }
@@ -205,6 +230,18 @@ class _DetailCardState extends State<DetailCard> {
         return {
           'image': lib?['image_url'],
           'title': lib?['name'] ?? '',
+        };
+      case CardType.services:
+        final s = viewModel.services.isNotEmpty ? viewModel.services[0] : null;
+        return {
+          'image': s?['image_url'],
+          'title': s?['name'] ?? '',
+        };
+      case CardType.faculty:
+        final f = viewModel.faculties.isNotEmpty ? viewModel.faculties[0] : null;
+        return {
+          'image': f?['image_url'],
+          'title': f?['name'] ?? '',
         };
     }
   }
@@ -311,13 +348,17 @@ class ContentSection extends StatelessWidget {
     final access = viewModel.access;
     final auditorium = viewModel.autorium;
     final library = viewModel.library;
+    final servic = viewModel.services;
+    final faculties = viewModel.faculties;
 
     if ((type == CardType.event && event == null) ||
         (type == CardType.building && building == null) ||
         (type == CardType.laboratories && labs.isEmpty) ||
         (type == CardType.access && access.isEmpty) ||
         (type == CardType.auditorium && auditorium.isEmpty) ||
-        (type == CardType.library && library.isEmpty)) {
+        (type == CardType.library && library.isEmpty) ||
+        (type == CardType.services && servic.isEmpty) ||
+        (type == CardType.faculty && faculties.isEmpty)) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -331,10 +372,15 @@ class ContentSection extends StatelessWidget {
                     ? access.first
                     : type == CardType.auditorium
                         ? auditorium.first
-                        : library.first;
+                        : type == CardType.library
+                            ? library.first
+                            : type == CardType.services
+                                ? servic.first
+                                : faculties.first;
 
     final Map<String, dynamic>? location = data?['locations'];
     final Map<String, dynamic>? department = data?['departments'];
+
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -511,6 +557,34 @@ class ContentSection extends StatelessWidget {
             ),
           ),
         ],
+        if (faculties.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _buildTextBlock('Departaments:', ''),
+          SizedBox(
+            height: 180,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              // Tomo los programas de la primera facultad, puedes ajustar según la lógica que quieras
+              itemCount: faculties[0]['programs']?.length ?? 0,
+              itemBuilder: (context, index) {
+                final program = faculties[0]['programs'][index];
+                return GestureDetector(
+                  onTap: () {
+
+                  },
+                  child: PlaceCard(
+                    imagePath: program['image_url'] ?? 'assets/images/default_image.jpg',
+                    title: program['name'] ?? 'Unknown Program',
+                    subtitle: program['name'] ?? 'Unknown Program',
+                    block: '',
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+
+
       ]), // End of Column
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dart_g12/presentation/views/started_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -36,9 +38,8 @@ class ProfilePage extends StatelessWidget {
                           CircleAvatar(
                             radius: 24,
                             backgroundImage: viewModel.avatarUrl != null
-                                ? NetworkImage(viewModel.avatarUrl!)
-                                : const AssetImage('assets/images/profile.jpg')
-                                    as ImageProvider,
+                              ? FileImage(File(viewModel.avatarUrl!))
+                              : const AssetImage('assets/profile.jpg') as ImageProvider,
                           ),
                           const SizedBox(width: 15),
                           Column(

@@ -1,7 +1,12 @@
+import 'dart:io';
+
+import 'package:dart_g12/presentation/views/started_page.dart';
 import 'package:flutter/material.dart';
 import 'package:dart_g12/data/services/supabase_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:dart_g12/presentation/views/main_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class EditProfile with ChangeNotifier {
   final _supabase = SupabaseService().client;
@@ -11,13 +16,13 @@ class EditProfile with ChangeNotifier {
   String _email = '';
   String _avatarUrl = '';
   int _selectedIndex = 4;
-  
-  
+
   int get selectedIndex => _selectedIndex;
   String get name => _name;
   String get lastName => _lastName;
   String get email => _email;
   String get avatarUrl => _avatarUrl;
+  String avatarPath = '';
 
   // Cargar los datos del usuario desde la metadata
   Future<void> loadUserData() async {
@@ -27,9 +32,15 @@ class EditProfile with ChangeNotifier {
       _name = (metadata['display_name'] ?? '').split(' ').first;
       _lastName = (metadata['display_name'] ?? '').split(' ').last;
       _avatarUrl = metadata['avatar_url'] ?? '';
+      final prefs = await SharedPreferences.getInstance();
+      avatarPath = prefs.getString('avatar_path') ?? '';
       _email = user.email ?? '';
       notifyListeners();
     }
+  }
+
+  set avatarUrl(String url) {
+    _avatarUrl = url;
   }
 
   // Actualizar el perfil con el nombre y apellido
@@ -47,24 +58,84 @@ class EditProfile with ChangeNotifier {
         UserAttributes(password: newPassword),
       );
 
-      // Comprobar si el usuario es null para detectar errores
+      // Si no retorna usuario, algo falló
       if (response.user == null) {
         throw Exception('No se pudo cambiar la contraseña.');
       }
 
-      // (Opcional) Cierra sesión si quieres forzar re-login
+      // (Opcional) Cierra sesión para forzar re-login
       await _supabase.auth.signOut();
       notifyListeners();
+    } on AuthException catch (e) {
+      // Errores específicos de Supabase
+      String mensaje = traducirError(e.message);
+      throw Exception(mensaje);
     } catch (e) {
-      print('Error al cambiar la contraseña: $e');
-      rethrow; // para propagar el error si es necesario
+      // Cualquier otro error inesperado
+      throw Exception('Ocurrió un error: $e');
     }
   }
 
+
   // Actualizar los metadatos del usuario en Supabase
   Future<void> _updateUserMetadata(Map<String, dynamic> data) async {
-    await _supabase.auth.updateUser(UserAttributes(data: data));
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult != ConnectivityResult.none) {
+      await _supabase.auth.updateUser(UserAttributes(data: data));
+    } else {
+      // Opcional: puedes manejar el caso sin internet aquí
+      print('No hay conexión a Internet. No se actualizó el usuario.');
+    }
   }
+
+  Future<void> updateAvatarUrl(String newAvatarUrl) async {
+    await _updateUserMetadata({'avatar_url': newAvatarUrl});
+    _avatarUrl = newAvatarUrl;
+    notifyListeners();
+  }
+
+    Future<String?> uploadAvatarImage(File imageFile) async {
+    final supabase = Supabase.instance.client;
+    final userId = supabase.auth.currentUser?.id;
+
+    if (userId == null) return null;
+
+    final fileExt = imageFile.path.split('.').last;
+    final filePath = 'avatars/$userId/avatar.$fileExt';
+
+    try {
+      final storageResponse = await supabase.storage.from('avatars').upload(
+            filePath,
+            imageFile,
+            fileOptions: const FileOptions(upsert: true),
+          );
+
+      final publicUrl =
+          supabase.storage.from('avatars').getPublicUrl(filePath);
+      return publicUrl;
+    } catch (e) {
+      print('Error uploading avatar: $e');
+      return null;
+    }
+  }
+
+
+  Future<void> saveAvatarPath(String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('avatar_path', path);
+    avatarPath = path;
+  }
+
+  String traducirError(String mensajeOriginal) {
+    if (mensajeOriginal.contains('at least 6 characters')) {
+      return 'La contraseña debe tener al menos 6 caracteres.';
+    } else if (mensajeOriginal.contains('same_password')) {
+      return 'La nueva contraseña debe ser diferente a la anterior.';
+    } else {
+      return mensajeOriginal;
+    }
+  }
+
 
   void onItemTapped(BuildContext context, int index) {
     _selectedIndex = index;

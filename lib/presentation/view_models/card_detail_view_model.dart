@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:dart_g12/data/repositories/faculties_repository.dart';
+import 'package:dart_g12/data/repositories/services_repository.dart';
 import 'package:flutter/material.dart';
 import '../../data/repositories/event_repository.dart';
 import '../../data/repositories/location_repository.dart';
@@ -19,6 +21,8 @@ class CardDetailViewModel extends ChangeNotifier {
   final FavoriteRepository favoriteRepository = FavoriteRepository();
   final AuditoriumRepository auditoriumRepository = AuditoriumRepository();
   final LibraryRepository libraryRepository = LibraryRepository();
+  final ServicesRepository servicesRepository = ServicesRepository();
+  final FacultyRepository facultiesRepository = FacultyRepository();
 
   List<Map<String, dynamic>> _events = [];
   Map<String, dynamic>? _event;
@@ -27,6 +31,8 @@ class CardDetailViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> _access = [];
   List<Map<String, dynamic>> _auditorium = [];
   List<Map<String, dynamic>> _library = [];
+  List<Map<String, dynamic>> _services = [];
+  List<Map<String, dynamic>> _faculties = [];
   bool _isLoading = false;
   String? _error;
   int _selectedIndex = 0;
@@ -42,6 +48,8 @@ class CardDetailViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> get access => _access;
   List<Map<String, dynamic>> get autorium => _auditorium;
   List<Map<String, dynamic>> get library => _library;
+  List<Map<String, dynamic>> get services => _services;
+  List<Map<String, dynamic>> get faculties => _faculties;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -183,6 +191,31 @@ class CardDetailViewModel extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
+  
+
+Future<void> fetchServicesDetails(int serviceId) async {
+  _isLoading = true;
+  _error = null;
+  notifyListeners();
+
+  try {
+    _services = await servicesRepository.fetchServiceDetail(serviceId);
+
+    await AnalyticsService.logCustomAction(
+      type: 'services',
+      enterp: serviceId.toString(),
+    );
+
+    await AnalyticsService.logFeatureInteraction(feature: "view_details");
+    await AnalyticsService.logConsultService(name: _services[0]["name"]);
+  } catch (e) {
+    _error = e.toString();
+  }
+
+  _isLoading = false;
+  notifyListeners();
+}
+
 
 Future<void> fetchAuditoriumDetails(int auditoriumId) async {
   _isLoading = true;
@@ -210,6 +243,31 @@ Future<void> fetchAuditoriumDetails(int auditoriumId) async {
   notifyListeners();
 }
 
+
+  Future<void> fetchFacultyDetails(int facultyId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final facList = await facultiesRepository.fetchFacultyById(facultyId);
+      if (facList.isNotEmpty) {
+        _faculties = facList;
+      } else {
+        throw Exception('Facultad no encontrada.');
+      }
+    } catch (e) {
+      _error = e.toString();
+    }
+
+    await AnalyticsService.logCustomAction(
+      type: 'faculty',
+      enterp: facultyId.toString(),
+    );
+
+    _isLoading = false;
+    notifyListeners();
+  }
 
 
   Future<void> fetchAccessDetails(int accessId) async {

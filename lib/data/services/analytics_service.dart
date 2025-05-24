@@ -112,6 +112,42 @@ class AnalyticsService {
     }
   }
 
+  static Future<void> logConsultSeeAll({
+    required String content_Type,
+  }) async {
+    try {
+      await Posthog().capture(
+        eventName: 'open_see_all',
+        properties: {
+          'content_type': content_Type,
+          'created_at': DateTime.now().toIso8601String(),
+        },
+      );
+
+      print('Enter see all registered: $content_Type');
+    } catch (error) {
+      print('Error registering enter see all: $error');
+    }
+  }
+
+  static Future<void> logConsultService({
+    required String name,
+  }) async {
+    try {
+      await Posthog().capture(
+        eventName: 'consult_service',
+        properties: {
+          'name': name,
+          'created_at': DateTime.now().toIso8601String(),
+        },
+      );
+
+      print('Enter see all service: $name');
+    } catch (error) {
+      print('Error registering enter see all service: $error');
+    }
+  }
+
   static Future<void> logCustomAction({
     String? type, // Nuevo campo para 'type'
     String? enterp, // Nuevo campo para 'enterp'

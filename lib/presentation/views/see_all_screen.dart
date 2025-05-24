@@ -1,11 +1,16 @@
+import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import '../view_models/see_all_view_model.dart';
 import '../widgets/ovals_painter_home.dart';
 import '../widgets/place_card.dart';
 import '../widgets/bottom_navbar.dart';
+import '../../data/services/analytics_service.dart';
 import 'detail_card.dart';
+import 'filter_page.dart';
 
 class SeeAllScreen extends StatefulWidget {
   final int initialIndex;
@@ -21,6 +26,7 @@ class SeeAllScreen extends StatefulWidget {
 class SeeAllScreenState extends State<SeeAllScreen> {
   late SeeAllViewModel _viewModel;
   final TextEditingController _searchCtrl = TextEditingController();
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -28,6 +34,8 @@ class SeeAllScreenState extends State<SeeAllScreen> {
     _viewModel = SeeAllViewModel();
     _viewModel.contentType = widget.contentType;
     _viewModel.addListener(_updateState);
+
+    AnalyticsService.logConsultSeeAll(content_Type: widget.contentType);
 
     if (widget.contentType == "building") {
       _viewModel.fetchBuildings();
@@ -43,15 +51,26 @@ class SeeAllScreenState extends State<SeeAllScreen> {
       _viewModel.fetchAuditoriums();
     } else if (widget.contentType == "library") {
       _viewModel.fetchLibraries();
-    } 
-
+    } else if (widget.contentType == "services") {
+      _viewModel.fetchServices();
+    } else if (widget.contentType == "faculty") {
+      _viewModel.fetchFaculties();
+    }
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _viewModel.removeListener(_updateState);
     _searchCtrl.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      _viewModel.filterItems(value);
+    });
   }
 
   void _updateState() {
@@ -86,7 +105,11 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                                               ? "Auditoriums"
                                               : widget.contentType == "library"
                                                   ? "Libraries"
-                                                  : "Unknown",
+                                                : widget.contentType == "services"
+                                                    ? "Services"
+                                                    : widget.contentType == "faculty"
+                                                        ? "Faculties"
+                                                        : "Unknown",
                       style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -95,13 +118,38 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  TextField(
+                  if (widget.contentType != "favorite")
+                    TextField(
                     controller: _searchCtrl,
-                    onChanged: _viewModel.filterItems,
+                    onChanged: _onSearchChanged,
+                    maxLength: 20,
                     decoration: InputDecoration(
                       hintText: "Where to go?",
                       filled: true,
                       fillColor: Colors.white,
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchCtrl.text.isEmpty
+                          ? IconButton(
+                            icon: const Icon(Icons.filter_alt_outlined),
+                            onPressed: () {
+                              FocusScope.of(context).unfocus();
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                builder: (_) => ChangeNotifierProvider.value(
+                                value: _viewModel,
+                                child: FilterScreen(contentType: widget.contentType),
+                                ),
+                                );
+                              },
+                          )
+                          : IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchCtrl.clear();
+                                _viewModel.filterItems('');
+                              },
+                            ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25),
                         borderSide: BorderSide.none,
@@ -245,7 +293,33 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                                                       ),
                                                     ),
                                                   );
-                                                } 
+                                                } else if (widget.contentType ==
+                                                    "services" || (widget.contentType ==
+                                                    "favorite" && (item['type'] ?? '') == 'services') ) {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          DetailCard(
+                                                        id: item['service_id'],
+                                                        type: CardType.services,
+                                                      ),
+                                                    ),
+                                                  );
+                                                } else if (widget.contentType ==
+                                                    "faculty" || (widget.contentType ==
+                                                    "favorite" && (item['type'] ?? '') == 'faculty') ) {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          DetailCard(
+                                                        id: item['faculty_id'],
+                                                        type: CardType.faculty,
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
                                               },
                                             );
                                           }).toList(),
