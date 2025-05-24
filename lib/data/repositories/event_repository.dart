@@ -113,7 +113,7 @@ class EventRepository {
     try {
       final response = await supabase
           .from('events')
-          .select('event_id, name, description, image_url, location_id, start_time, end_time, created_at, locations (name, block), departments(name)')
+          .select('event_id, name, description, image_url, location_id, start_time, end_time, created_at, locations (name, block)')
           .eq('event_id', id)
           .maybeSingle();
       if (response != null) {
@@ -130,7 +130,7 @@ class EventRepository {
     try {
       final response = await supabase
           .from('events')
-          .select('event_id, name, description, image_url, location_id, start_time, end_time, created_at, locations (name, block), departments(name)')
+          .select('event_id, name, description, image_url, location_id, start_time, end_time, created_at, locations (name, block)')
           .eq('event_id', id)
           .maybeSingle();
       if (response != null) {
