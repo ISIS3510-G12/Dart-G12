@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
@@ -25,6 +26,7 @@ class SeeAllScreen extends StatefulWidget {
 class SeeAllScreenState extends State<SeeAllScreen> {
   late SeeAllViewModel _viewModel;
   final TextEditingController _searchCtrl = TextEditingController();
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -58,9 +60,17 @@ class SeeAllScreenState extends State<SeeAllScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _viewModel.removeListener(_updateState);
     _searchCtrl.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      _viewModel.filterItems(value);
+    });
   }
 
   void _updateState() {
@@ -111,7 +121,7 @@ class SeeAllScreenState extends State<SeeAllScreen> {
                   if (widget.contentType != "favorite")
                     TextField(
                     controller: _searchCtrl,
-                    onChanged: _viewModel.filterItems,
+                    onChanged: _onSearchChanged,
                     maxLength: 20,
                     decoration: InputDecoration(
                       hintText: "Where to go?",
