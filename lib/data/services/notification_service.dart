@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart'; // 👈 nuevo import
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
+  bool _isRequestingPermission = false;
 
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -23,6 +25,25 @@ class NotificationService {
         InitializationSettings(android: initializationSettingsAndroid);
 
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    await _requestPermissionIfNeeded(); 
+  }
+
+  
+  Future<void> _requestPermissionIfNeeded() async {
+    if (_isRequestingPermission) return;
+      _isRequestingPermission = true;
+
+      try {
+        final status = await Permission.notification.status;
+
+        if (status.isDenied || status.isRestricted) {
+          await Permission.notification.request();
+        }
+      } catch (e) {
+        debugPrint('Error solicitando permiso: $e');
+      } finally {
+        _isRequestingPermission = false;
+      }
   }
 
   Future<void> scheduleNotification({
@@ -31,19 +52,18 @@ class NotificationService {
     required String eventName,
     required DateTime scheduledDate,
   }) async {
+    await _requestPermissionIfNeeded(); // 👈 pedir permiso antes de notificar
+
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
     final tz.TZDateTime eventDate = tz.TZDateTime.from(scheduledDate, tz.local);
-    final tz.TZDateTime notifyDate =
-        eventDate.subtract(const Duration(days: 1));
+    final tz.TZDateTime notifyDate = eventDate.subtract(const Duration(days: 1));
 
-    // Formatear la fecha y hora: ej. "23/05/2025 a las 18:30"
     final String formattedDate =
         '${eventDate.day.toString().padLeft(2, '0')}/${eventDate.month.toString().padLeft(2, '0')}/${eventDate.year} a las '
         '${eventDate.hour.toString().padLeft(2, '0')}:${eventDate.minute.toString().padLeft(2, '0')}';
 
     try {
       if (eventDate.isBefore(now)) {
-        // Mensaje para evento que ya pasó
         final String bodyPassed =
             'Lo lamentamos, pero el evento "$eventName" ya se realizó el $formattedDate.';
 
@@ -64,7 +84,6 @@ class NotificationService {
           ),
         );
       } else {
-        // Mensaje para evento futuro
         final String bodyFuture =
             'Recuerda que "$eventName" empieza el $formattedDate.';
 
