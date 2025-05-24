@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:dart_g12/presentation/views/started_page.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
+import 'package:dart_g12/data/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService().init();
   await Supabase.initialize(
     url: 'https://cdvdebibeggycjaeypck.supabase.co',
     anonKey:
