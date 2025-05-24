@@ -4,9 +4,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:dart_g12/presentation/views/started_page.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
 import 'package:dart_g12/data/services/notification_service.dart';
+import 'package:flutter/services.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Bloquear orientación horizontal
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
+
   await NotificationService().init();
   await Supabase.initialize(
     url: 'https://cdvdebibeggycjaeypck.supabase.co',
@@ -19,6 +26,7 @@ void main() async {
   config.captureApplicationLifecycleEvents = true;
   config.host = 'https://us.i.posthog.com';
   await Posthog().setup(config);
+
   runApp(const MyApp());
 }
 
